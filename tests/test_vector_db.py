@@ -2,7 +2,7 @@ import numpy as np
 import vector_db
 
 dim = 5
-index = vector_db.BruteForceIndex(dim)
+index = vector_db.IndexFlat(dim)
 
 # Add random vectors
 np.random.seed(42)

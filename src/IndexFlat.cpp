@@ -1,18 +1,18 @@
-#include "vector_db/brute_force_index.h"
+#include "index/IndexFlat.h"
 #include <stdexcept>
 #include <algorithm>
 #include <limits>
 
 using namespace vector_db;
 
-BruteForceIndex::BruteForceIndex(int dim) : dim(dim) {}
+IndexFlat::IndexFlat(int dim) : dim(dim) {}
 
-void BruteForceIndex::add(const Eigen::VectorXf& vec) {
+void IndexFlat::add(const Eigen::VectorXf& vec) {
     if (vec.size() != dim) throw std::runtime_error("Dimension mismatch");
     vectors.push_back(vec);
 }
 
-std::vector<int> BruteForceIndex::search(const Eigen::VectorXf& query, int k) const {
+std::vector<int> IndexFlat::search(const Eigen::VectorXf& query, int k) const {
     if (query.size() != dim) throw std::runtime_error("Query dimension mismatch");
 
     std::vector<std::pair<float, int>> distances;
@@ -30,15 +30,15 @@ std::vector<int> BruteForceIndex::search(const Eigen::VectorXf& query, int k) co
     return result;
 }
 
-int BruteForceIndex::dimension() const {
+int IndexFlat::dimension() const {
     return dim;
 }
 
-std::vector<Eigen::VectorXf> BruteForceIndex::get_all() const {
+std::vector<Eigen::VectorXf> IndexFlat::get_all() const {
     return vectors;
 }
 
-Eigen::VectorXf BruteForceIndex::get_vector(int index) const {
+Eigen::VectorXf IndexFlat::get_vector(int index) const {
     if (index < 0 || index >= vectors.size()) {
         throw std::out_of_range("Index out of range");
     }

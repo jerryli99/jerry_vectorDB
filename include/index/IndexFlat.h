@@ -1,13 +1,13 @@
 #pragma once
 
-#include "index.h"
+#include "Index.h"
 #include <vector>
 
 namespace vector_db {
 
-class BruteForceIndex : public Index {
+class IndexFlat : public Index {
 public:
-    explicit BruteForceIndex(int dim);
+    explicit IndexFlat(int dim);
     void add(const Eigen::VectorXf& vec) override;
     std::vector<int> search(const Eigen::VectorXf& query, int k) const override;
     int dimension() const override;

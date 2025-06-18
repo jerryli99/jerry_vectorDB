@@ -1,0 +1,2 @@
+sparse vector use inverted index
+dense vector use hnsw

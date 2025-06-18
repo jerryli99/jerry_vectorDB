@@ -23,7 +23,7 @@ include_directories(include)
 # Build Python module
 pybind11_add_module(vector_db
     bindings/pybind_wrapper.cpp
-    src/brute_force_index.cpp
+    src/IndexFlat.cpp
 )
 
 target_link_libraries(vector_db PRIVATE Eigen3::Eigen)
