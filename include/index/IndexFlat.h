@@ -3,7 +3,7 @@
 #include "Index.h"
 #include <vector>
 
-namespace vector_db {
+namespace vectordb {
 
 class IndexFlat : public Index {
 public:
@@ -20,4 +20,4 @@ private:
     std::vector<Eigen::VectorXf> vectors;
 };
 
-}
+};

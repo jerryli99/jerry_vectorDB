@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <limits>
 
-using namespace vector_db;
+using namespace vectordb;
 
 IndexFlat::IndexFlat(int dim) : dim(dim) {}
 
