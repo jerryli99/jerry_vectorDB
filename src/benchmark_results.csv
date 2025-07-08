@@ -1,0 +1,7 @@
+Vector Count,HNSW Insert (ms),HNSW Search (ms),Plain Insert (ms),Plain Search (ms)
+10,2,0,0,0
+100,25,0,0,0
+1000,355,0,0,0
+10000,4708,0,1,5
+50000,28235,0,9,29
+100000,58574,0,23,64

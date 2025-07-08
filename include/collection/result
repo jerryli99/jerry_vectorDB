@@ -1,0 +1,2006 @@
+Single-thread heap contents: [ 1 2 3 5 4 ]
+✅ Single-thread test passed.
+[Producer 0] pushed 1
+[Producer 0] pushed 2
+[Producer 0] pushed 3
+[Producer 0] pushed 4
+[Producer 0] pushed 5
+[Producer 0] pushed 6
+[Producer 0] pushed 7
+[Producer 0] pushed 8
+[Producer 0] pushed 9
+[Producer 0] pushed 10
+[Producer 0] pushed 11
+[Producer 0] pushed 12
+[Producer 0] pushed 13
+[Producer 0] pushed 14
+[Producer 0] pushed 15
+[Producer 0] pushed 16
+[Producer 0] pushed 17
+[Producer 0] pushed 18
+[Producer 0] pushed 19
+[Producer 0] pushed 20
+[Producer 0] pushed 21
+[Producer 0] pushed 22
+[Producer 0] pushed 23
+[Producer 0] pushed 24
+[Producer 0] pushed 25
+[Producer 0] pushed 26
+[Producer 0] pushed 27
+[Producer 0] pushed 28
+[Producer 0] pushed 29
+[Producer 0] pushed 30
+[Producer 0] pushed 31
+[Producer 0] pushed 32
+[Producer 0] pushed 33
+[Producer 0] pushed 34
+[Producer 0] pushed 35
+[Producer 0] pushed 36
+[Producer 0] pushed 37
+[Producer 0] pushed 38
+[Producer 0] pushed 39
+[Producer 0] pushed 40
+[Producer 0] pushed 41
+[Producer 0] pushed 42
+[Producer 0] pushed 43
+[Producer 0] pushed 44
+[Producer 0] pushed 45
+[Producer 0] pushed 46
+[Producer 0] pushed 47
+[Producer 0] pushed 48
+[Producer 0] pushed 49
+[Producer 0] pushed 50
+[Producer 0] pushed 51
+[Producer 0] pushed 52
+[Producer 0] pushed 53
+[Producer 0] pushed 54
+[Producer 0] pushed 55
+[Producer 0] pushed 56
+[Producer 0] pushed 57
+[Producer 0] pushed 58
+[Producer 0] pushed 59
+[Producer 0] pushed 60
+[Producer 0] pushed 61
+[Producer 0] pushed 62
+[Producer 0] pushed 63
+[Producer 0] pushed 64
+[Producer 0] pushed 65
+[Producer 0] pushed 66
+[Producer 0] pushed 67
+[Producer 0] pushed 68
+[Producer 0] pushed 69
+[Producer 0] pushed 70
+[Producer 0] pushed 71
+[Producer 0] pushed 72
+[Producer 0] pushed 73
+[Producer [Producer 0] pushed 74
+[Producer 0] pushed 75
+[Producer 0] pushed 76
+[Producer 10] pushed ] pushed 25177
+
+[Producer 1[Producer 0] pushed ] pushed 78
+252
+[Producer [Producer 01] pushed 79
+] pushed 253[Producer 
+0] pushed 80
+[Producer 1[Producer ] pushed 0254] pushed 
+81[Producer 
+1] pushed 255
+[Producer 0] pushed 82
+[Producer [Producer 0] pushed 183] pushed 
+256[Producer 0
+] pushed 84[Producer 
+1] pushed 257
+[Producer 0] pushed [Producer 851
+] pushed 258
+[Producer [Producer 01] pushed ] pushed 259
+86
+[Producer 1[Producer ] pushed 0260] pushed 
+87[Producer 
+1] pushed 261
+[Producer [Producer 01] pushed ] pushed 26288
+
+[Producer [Producer 0] pushed 189] pushed 263
+
+[Producer [Producer 0] pushed 90
+1[Producer 0] pushed ] pushed 264
+91
+[Producer 1[Producer ] pushed 0265] pushed 
+92
+[Producer 1] pushed [Producer 266
+0[Producer ] pushed 193
+] pushed 267[Producer 
+0] pushed 94[Producer 
+1[Producer 0] pushed 95] pushed 
+268
+[Producer 1] pushed [Producer 2690
+] pushed 96
+[Producer [Producer 0] pushed 197
+] pushed [Producer 0270] pushed 98
+
+[Producer 0] pushed [Producer 99
+1[Producer 0] pushed 100
+] pushed [Producer 2710] pushed 101
+
+[Producer 1] pushed [Producer 2720
+] pushed [Producer 1021] pushed 
+273[Producer 0
+] pushed [Producer 103
+1] pushed [Producer 274
+2] pushed 501
+[Producer 0] pushed 104
+[Producer 0] pushed 105
+[Producer 0] pushed 106
+[Producer 0] pushed 107
+[Producer 0] pushed 108
+[Producer 0] pushed 109
+[Producer 0] pushed 110
+[Producer 0] pushed 111
+[Producer 0] pushed 112
+[Producer 0] pushed 113
+[Producer 0] pushed 114
+[ 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 251 70 71 72 73 74 75 76 77 252 78 79 253 80 254 81 255 82 256 83 84 257 85 258 86 259 260 87 261 88 262 263 89 264 90 91 265 92 266 93 267 94 268 95 269 96 270 97 98 99 271 100 101 272 102 273 103 274 501 104 105 106 107 108 109 110 111 112 113 114 ]
+[Producer 1] pushed 275
+[Producer 1] pushed 276
+[Producer 1] pushed 277
+[Producer 1] pushed 278
+[Producer 1] pushed 279
+[Producer 1] pushed 280
+[Producer 1] pushed 281
+[Producer 1] pushed 282
+[Producer 1] pushed 283
+[Producer 1] pushed 284
+[Producer 1] pushed 285
+[Producer 1] pushed 286
+[Producer 1] pushed 287
+[Producer 1] pushed 288
+[Producer 1] pushed 289
+[Producer 1] pushed 290
+[Producer 1] pushed 291
+[Producer 1] pushed 292
+[Producer 1] pushed 293
+[Producer 1] pushed 294
+[Producer 1] pushed 295
+[Producer 1] pushed 296
+[Producer 1] pushed 297
+[Producer 1] pushed 298
+[Producer 1] pushed 299
+[Producer 1] pushed 300
+[Producer 1] pushed 301
+[Producer 1] pushed 302
+[Producer 1] pushed 303
+[Producer 1] pushed 304
+[Producer 1] pushed 305
+[Producer 1] pushed 306
+[Producer 1] pushed 307
+[Producer 1] pushed 308
+[Producer 1] pushed 309
+[Producer 1] pushed 310
+[Producer 1] pushed 311
+[Producer 1] pushed 312
+[Producer 1] pushed 313
+[Producer 2] pushed 502
+[Producer 2] pushed 503
+[Producer 2] pushed 504
+[Producer 2] pushed 505
+[Producer 2] pushed 506
+[Producer 2] pushed 507
+[Producer 2] pushed 508
+[Producer 2] pushed 509
+[Producer 2] pushed 510
+[Producer 2] pushed 511
+[Producer 2] pushed 512
+[Producer 2] pushed 513
+[Producer 2] pushed 514
+[Producer 2] pushed 515
+[Producer 2] pushed 516
+[Producer 2] pushed 517
+[Producer 2] pushed 518
+[Producer 2] pushed 519
+[Producer 2] pushed 520
+[Producer 2] pushed 521
+[Producer 2] pushed 522
+[Producer 2] pushed 523
+[Producer 2] pushed 524
+[Producer 2] pushed 525
+[Producer 2] pushed 526
+[Producer 2] pushed 527
+[Producer 2] pushed 528
+[Producer 2] pushed 529
+[Producer 2] pushed 530
+[Producer 2] pushed 531
+[Producer 2] pushed 532
+[Producer 2] pushed 533
+[Producer 2] pushed 534
+[Producer 2] pushed 535
+[Producer 2] pushed 536
+[Producer 2] pushed 537
+[Producer 2] pushed 538
+[Producer 2] pushed 539
+[Producer 2] pushed 540
+[Producer 2] pushed 541
+[Producer 2] pushed 542
+[Producer 2] pushed 543
+[Producer 2] pushed 544
+[Producer 2] pushed 545
+[Producer 2] pushed 546
+[Producer 2] pushed 547
+[Producer 2] pushed 548
+[Producer 2] pushed 549
+[Producer 2] pushed 550
+[Producer 2] pushed 551
+[Producer 2] pushed 552
+[Producer 2] pushed 553
+[Producer 2] pushed 554
+[Producer 2] pushed 555
+[Producer 2] pushed 556
+[Producer 2] pushed 557
+[Producer 2] pushed 558
+[Producer 2] pushed 559
+[Producer 2] pushed 560
+[Producer 2] pushed 561
+  [Consumer [Producer [Producer 1] pushed 3140
+] pushed 115
+[Producer [Producer 1] pushed 3152
+] pushed 562[Producer [Producer 1] pushed 
+0316] pushed 
+[Producer 116
+[Producer 2[Producer ] pushed 0563] pushed 117
+
+1[Producer ] pushed [Producer 3172
+0] pushed [Producer ] pushed 564118
+
+1[Producer 0] pushed [Producer 2] pushed 565
+119
+] pushed [Producer [Producer 3180
+2] pushed [Producer 120] pushed 
+566
+1] pushed [Producer 319
+2[Producer ] pushed 0567
+] pushed 121
+[Producer 1] pushed 320
+0] popped 1
+[Producer 2] pushed 568
+[Producer 2] pushed 569
+[Producer 2] pushed 570
+[Producer 2] pushed 571
+[Producer 2] pushed 572
+[Producer 2] pushed 573
+[Producer 2] pushed 574
+[Producer 2] pushed 575
+[Producer 2] pushed 576
+[Producer 2] pushed 577
+[Producer 2] pushed 578
+[Producer 2] pushed 579
+[Producer 2] pushed 580
+[Producer 2] pushed 581
+[Producer 2] pushed 582
+[Producer 2] pushed 583
+[Producer 2] pushed 584
+[Producer 2] pushed 585
+[Producer 2] pushed 586
+[Producer 2] pushed 587
+[Producer 2] pushed 588
+[Producer 2] pushed 589
+[Producer 2] pushed 590
+[Producer 2] pushed 591
+[Producer 2] pushed 592
+[Producer 2] pushed 593
+[Producer 2] pushed 594
+[Producer 2] pushed 595
+[Producer 2] pushed 596
+[Producer 2] pushed 597
+[Producer 2] pushed 598
+[Producer 2] pushed 599
+[Producer 2] pushed 600
+[Producer 2] pushed 601
+[Producer 2] pushed 602
+[Producer 2] pushed 603
+[Producer 2] pushed 604
+[Producer 2] pushed 605
+[Producer 2] pushed 606
+[Producer 2] pushed 607
+[Producer 2] pushed 608
+[Producer 2] pushed 609
+  [Consumer 1] popped 2
+[Producer [Producer 0] pushed 3122] pushed 
+751
+[Producer 3] pushed 752
+[Producer [Producer 30] pushed ] pushed 753123
+
+[Producer 3] pushed 754
+[Producer 0] pushed [Producer 124
+3] pushed 755
+[Producer 0] pushed 125
+[Producer [Producer [Producer 30] pushed 1] pushed ] pushed 321
+756126
+
+[Producer [Producer [Producer 31] pushed 322
+0] pushed ] pushed [Producer 127
+7571[Producer ] pushed 0] pushed 323
+[Producer 128
+
+1] pushed [Producer 3[Producer ] pushed 758
+0] pushed [Producer 129
+[Producer 0324] pushed 130
+
+[Producer 0] pushed 131
+[Producer 0] pushed 132
+[Producer 0] pushed 133
+[Producer 0] pushed 134
+[Producer 0] pushed 135
+[Producer 0] pushed 136
+[Producer 0] pushed 137
+[Producer 0] pushed 138
+[Producer 0] pushed 139
+[Producer 0] pushed 140
+[Producer 0] pushed 141
+[Producer 0] pushed 142
+[Producer 0] pushed 143
+[Producer 0] pushed 144
+[Producer 0] pushed 145
+[Producer 0] pushed 146
+[Producer 0] pushed 147
+[Producer 0] pushed 148
+[Producer 0] pushed 149
+[Producer 0] pushed 150
+[Producer 0] pushed 151
+[Producer 0] pushed 152
+[Producer 0] pushed 153
+[Producer 0] pushed 154
+[Producer 0] pushed 155
+[Producer 0] pushed 156
+[Producer 1] pushed 325
+[Producer 1] pushed 326
+[Producer 1] pushed 327
+[Producer 1] pushed 328
+[Producer 1] pushed 329
+[Producer 1] pushed 330
+[Producer 1] pushed 331
+[Producer 1] pushed 332
+[Producer 1] pushed 333
+[Producer 1] pushed 334
+[Producer 1] pushed 335
+[Producer 1] pushed 336
+[Producer 1] pushed 337
+[Producer 1] pushed 338
+[Producer 1] pushed 339
+[Producer 1] pushed 340
+[Producer 1] pushed 341
+[Producer 1] pushed 342
+[Producer 1] pushed 343
+[Producer 1] pushed 344
+[Producer 1] pushed 345
+[Producer 1] pushed 346
+[Producer 1] pushed 347
+[Producer 1] pushed 348
+[Producer 1] pushed 349
+[Producer 1] pushed 350
+[Producer 1] pushed 351
+[Producer 1] pushed 352
+[Producer 1] pushed 353
+[Producer 1] pushed 354  [Consumer 
+2] popped 3
+[Producer 1] pushed 355
+[Producer 1] pushed 356
+[Producer 1] pushed 357
+[Producer 2] pushed 610
+  [Consumer 1[Producer ] popped 24] pushed 
+611
+[Producer 2] pushed 612
+[Producer 23] pushed ] pushed 613
+759
+[Producer 3] pushed 760
+[Producer 3] pushed 761
+[Producer 3] pushed 762
+[Producer 3] pushed 763
+[Producer 2] pushed [Producer 614[Producer 
+31[Producer ] pushed 2358
+[Producer ] pushed ] pushed 615
+764
+[Producer 02] pushed 157
+[Producer ] pushed 616
+3] pushed 765
+[Producer 0] pushed [Producer 158[Producer 3] pushed 766
+[Producer 3] pushed 767
+[Producer 3] pushed 768
+[Producer 3] pushed 769
+[Producer 3] pushed 770
+[Producer 3] pushed 771
+2[Producer 3] pushed ] pushed 772
+617
+[Producer 3] pushed [Producer 7732
+] pushed 618
+[Producer [Producer 23] pushed ] pushed 774
+619
+[Producer 3] pushed [Producer 7752
+
+[Producer ] pushed 3] pushed 620776
+
+[Producer 0] pushed 159
+[Producer [Producer 30] pushed 160] pushed 
+777
+[Producer 0] pushed [Producer 2] pushed 161621
+
+[Producer 2] pushed 622
+[Producer 0[Producer ] pushed 2162
+] pushed [Producer 6230
+  [Consumer ] pushed [Producer 2] pushed 163624
+1
+] popped 7
+[Producer [Producer 0] pushed 1642
+] pushed 625
+[Producer 3] pushed 778
+[Producer 2] pushed 626
+[Producer 0] pushed 165
+[Producer 0] pushed 166
+  [Consumer 2] popped 6
+[Producer 2] pushed 627
+[Producer 2] pushed 628
+[Producer 2] pushed 629
+[Producer 2] pushed 630
+[Producer 2] pushed 631
+[Producer   [Consumer [Producer 3] pushed 11] popped 7798] pushed 
+359
+  [Consumer 
+1] popped 9
+  [Consumer 0] popped 5
+[Producer [Producer 1] pushed 360[Producer 2
+] pushed 0632
+] pushed [Producer 167  [Consumer [Producer 0
+] popped 12
+21] pushed 633
+] pushed [Producer 0] pushed 168361
+
+[Producer 0] pushed 169
+[Producer 1] pushed 362[Producer 
+0] pushed 170
+[Producer 1] pushed   [Consumer [Producer 0] pushed 1710] popped 
+13
+363
+[Producer 0] pushed 172
+[Producer 0] pushed 173
+[Producer 0] pushed 174
+[Producer 0[Producer ] pushed 1175
+] pushed 364
+[Producer 0] pushed [Producer 1761
+] pushed 365
+[Producer 2] pushed 634
+  [Consumer 1] popped [Producer 112
+] pushed 635
+[Producer 2] pushed 636
+[Producer 2] pushed 637
+[Producer 2] pushed 638
+[Producer 0] pushed 177
+[Producer 0] pushed [Producer 1783] pushed 780
+
+[Producer 3] pushed 781
+[Producer [Producer 03] pushed 782] pushed 
+[Producer 3] pushed 179783
+
+[Producer 3] pushed 784[Producer 
+2] pushed 639
+[Producer 3] pushed 785
+[Producer 2] pushed [Producer 6403
+] pushed 786
+[Producer 2] pushed [Producer 6413
+] pushed 787
+[Producer 2] pushed 642
+[Producer [Producer 3] pushed 788
+2] pushed [Producer 6433
+] pushed 789
+[Producer 1[Producer 3[Producer ] pushed ] pushed 366
+790[Producer 2  [Consumer 11] pushed ] popped 36715
+
+[Producer 1] pushed 368
+  [Consumer 0] popped ] pushed 644
+[Producer 2] pushed 645
+[Producer 2] pushed 646
+[Producer 2] pushed 647
+[Producer 2] pushed 648
+[Producer 2] pushed 649
+[Producer 2] pushed 650
+[Producer 2] pushed 651
+[Producer 2] pushed 652
+[Producer 2] pushed 653
+[Producer 2] pushed 654
+[Producer 2] pushed 655
+[Producer 2] pushed 656
+[Producer 2] pushed 657
+[Producer 2] pushed 658
+[Producer 2] pushed 659
+[Producer 2] pushed 660
+[Producer 2] pushed 661
+[Producer 2] pushed 662
+[Producer 2] pushed 663
+[Producer 2] pushed 664
+[Producer 2] pushed 665
+[Producer 2] pushed 666
+[Producer 2] pushed 667
+[Producer 2] pushed 668
+[Producer 2] pushed 66914
+[Producer 2] pushed 670
+[Producer 2] pushed 671
+[Producer 2] pushed 672
+[Producer 2] pushed 673
+[Producer 2] pushed 674
+[Producer 2] pushed 675
+[Producer 2] pushed 676
+[Producer 2] pushed 677
+[Producer 2] pushed 678
+[Producer 2] pushed 679
+[Producer 2] pushed 680
+[Producer 2] pushed 681
+[Producer 2] pushed 682
+[Producer 2] pushed 683
+[Producer 2] pushed 684
+[Producer 2] pushed 685
+[Producer 2] pushed 686
+[Producer 2] pushed 687
+[Producer 2] pushed 688
+[Producer 2] pushed 689
+[Producer 2] pushed 690
+[Producer 2] pushed 691
+[Producer 2] pushed 692
+[Producer 2] pushed 693
+[Producer 2] pushed 694
+[Producer 2] pushed 695
+[Producer 2] pushed 696
+[Producer 2] pushed 697
+[Producer 2
+] pushed 698
+[Producer 2] pushed 699
+[Producer 2] pushed 700
+[Producer 2] pushed 701
+[Producer 2] pushed 702
+[Producer 2] pushed 703
+[Producer 2] pushed 704
+[Producer 2] pushed 705
+[Producer 2] pushed 706
+[Producer 2] pushed 707
+[Producer 0] pushed 180
+
+[Producer [Producer 0] pushed 181  [Consumer 3] pushed 0791
+] popped 
+17
+[Producer 0] pushed 182
+[Producer 3] pushed [Producer   [Consumer 79200] popped ] pushed 18
+  [Consumer [Producer 0] popped 2] pushed 70819
+
+183
+
+[Producer [Producer 3  [Consumer 1] pushed 1369
+] popped [Producer 1] pushed 37016
+
+[Producer 1] pushed 371
+[Producer 1] pushed 372
+[Producer 2[Producer ] pushed 1709
+] pushed 373
+[Producer 2] pushed 710] pushed 793
+  [Consumer 1[Producer ] popped 3[Producer ] pushed 0] pushed 184
+794
+21[Producer 
+3] pushed 795
+
+[Producer   [Consumer 12] popped ] pushed 10
+374
+[Producer 1] pushed 375
+[Producer 1] pushed 376
+[Producer 1] pushed 377
+[Producer 1] pushed 378
+[Producer 1] pushed 379
+[Producer 1] pushed 380
+[Producer 1] pushed 381
+[Producer 1] pushed 382
+[Producer 1] pushed 383
+[Producer 1] pushed 384
+[Producer 1] pushed 385
+[Producer 1] pushed 386
+[Producer 1] pushed 387
+[Producer 1] pushed 388
+[Producer 1] pushed 389
+[Producer 1] pushed 390
+[Producer 1] pushed 391
+[Producer 1] pushed 392
+[Producer 1] pushed 393
+[Producer 0] pushed 185
+[Producer 0] pushed 186
+[Producer 0] pushed 187
+[Producer 0] pushed 188
+[Producer 0] pushed 189
+[Producer 0] pushed 190
+[Producer 0] pushed 191
+[Producer 0] pushed 192
+[Producer 0] pushed 193
+[Producer 0] pushed 194
+[Producer 0] pushed 195
+  [Consumer 2] popped 23
+  [Consumer 2] popped 24
+  [Consumer 2] popped 25
+  [Consumer 2] popped 26
+  [Consumer 0] popped 20
+  [Consumer 0] popped 28
+  [Consumer 0] popped 29
+  [Consumer 0] popped 30
+  [Consumer 0] popped 31
+[Producer 0] pushed 196
+[Producer 0] pushed 197
+  [Consumer 0] popped [Producer 32[Producer 2
+] pushed 711
+0] pushed 198
+[Producer   [Consumer 30] pushed ] popped 79633
+
+[Producer 2] pushed 712
+[Producer 2] pushed 713
+  [Consumer [Producer 21] pushed 714
+] popped [Producer 22[Producer 
+3] pushed 797[Producer 
+[Producer 3] pushed 798
+[Producer 3] pushed 799
+[Producer 3] pushed 800
+2] pushed 715
+[Producer 2] pushed 716
+[Producer [Producer 32] pushed ] pushed 801717
+
+[Producer 2] pushed 718
+[Producer 3] pushed [Producer 8022] pushed 719
+1[Producer 3] pushed 803
+[Producer [Producer 30] pushed ] pushed 804199
+
+  [Consumer 2] popped 27
+] pushed 394  [Consumer 0
+[Producer 0] popped [Producer 1] pushed 395
+[Producer 1] pushed 39634
+
+] pushed 200
+[Producer 0] pushed 201
+[Producer 0] pushed 202
+[Producer 0] pushed 203
+
+  [Consumer 0] popped 36
+[Producer   [Consumer 12] popped 35] pushed 
+397
+[Producer [Producer 13] pushed 398
+[Producer 1] pushed 399
+[Producer 1] pushed 400
+[Producer 1] pushed 401
+[Producer 0[Producer 1] pushed 402
+[Producer 1] pushed 403
+[Producer 1] pushed 404
+[Producer 1] pushed 405
+[Producer 1] pushed 406
+[Producer 1] pushed 407
+[Producer 1] pushed 408
+[Producer 1] pushed 409
+[Producer 1] pushed 410
+[Producer 1] pushed 411
+[Producer 1] pushed 412
+[Producer 1] pushed 413
+[Producer 1] pushed 414
+[Producer 1] pushed 415
+[Producer 1] pushed 416
+[Producer 1] pushed 417
+[Producer 1] pushed 418
+[Producer 1] pushed 419
+[Producer 1] pushed 420
+[Producer 1] pushed 204
+[Producer 0] pushed 205
+[Producer 0] pushed 206
+[Producer 0] pushed 207
+[Producer 0] pushed 208
+[Producer 0] pushed 209
+[Producer 0] pushed 210
+[Producer 0] pushed 211
+[Producer 0] pushed 212
+[Producer 0] pushed 213
+[Producer 0] pushed 214
+[Producer 0] pushed 215
+[Producer 0] pushed 216
+[Producer 0] pushed 217
+[Producer 0] pushed 218
+[Producer 0] pushed 219
+[Producer 0] pushed 220
+[Producer 0] pushed 221
+[Producer 0] pushed 222
+[Producer 0] pushed 223
+[Producer 0] pushed 224
+[Producer 0] pushed 225
+[Producer 0] pushed 226
+[Producer 0] pushed 227
+[Producer 0] pushed 228
+[Producer 0] pushed 229
+[Producer 0] pushed 230
+[Producer 0] pushed 231
+[Producer 0] pushed 232
+[Producer 0] pushed 233
+[Producer 0] pushed 234
+[Producer 0] pushed 235
+[Producer 0] pushed ] pushed 236
+[Producer 0] pushed 237
+[Producer 0] pushed 238
+[Producer 0] pushed 239
+[Producer 0] pushed 240
+421[Producer 0
+] pushed 241
+[Producer 0] pushed 242
+[Producer [Producer 01] pushed ] pushed 422
+243[Producer 
+1] pushed 423[Producer 
+0[Producer ] pushed 1] pushed 244
+424
+[Producer ] pushed 0[Producer 2805] pushed 
+720
+] pushed 245
+[Producer 0] pushed 246
+[Producer 0] pushed 247
+[Producer   [Consumer [Producer 3[Producer 01] popped ] pushed 42537
+
+[Producer 1] pushed 426
+[Producer 1] pushed 427
+] pushed [Producer 8061] pushed 428
+
+[Producer 3] pushed 807
+0[Producer 3] pushed ] pushed 808248
+
+  [Consumer 0] popped 40
+[Producer 0] pushed 249
+[Producer 3] pushed 809
+[Producer 0] pushed [Producer 2503] pushed 810
+
+[Producer 3] pushed 811
+[Producer 3] pushed 812
+[Producer 3] pushed 813
+[Producer 3] pushed   [Consumer 814
+0] popped 41[Producer 
+3] pushed 815
+[Producer 3] pushed 816
+  [Consumer 2] popped 38
+  [Consumer 0] popped 42
+  [Consumer 0] popped 43
+[Producer 3] pushed 817
+[Producer 3] pushed 818
+[Producer [Producer 2  [Consumer ] pushed 23] popped 44
+] pushed 721819
+
+  [Consumer 2[Producer [Producer 2] pushed 3] popped ] pushed 45722820
+
+
+[Producer 3] pushed 821
+[Producer 2] pushed 723
+[Producer 3] pushed 822
+[Producer 3] pushed 823
+[Producer 3] pushed 824
+[Producer 3] pushed 825
+[Producer 2] pushed 724
+[Producer 2] pushed 725
+[Producer 2] pushed 726
+[Producer 2] pushed 727
+[Producer 2] pushed 728
+[Producer 2] pushed 729
+[Producer 2] pushed 730
+[Producer [Producer 12] pushed ] pushed 731
+  [Consumer 429[Producer 
+2[Producer 10] pushed 732
+] popped ] pushed 46
+[Producer 4302  [Consumer 
+] pushed [Producer 01733
+] popped ] pushed [Producer 474312
+] pushed 734
+[Producer 2] pushed 735
+[Producer 2] pushed 736
+[Producer 2] pushed 737
+[Producer 2] pushed 738
+[Producer 2] pushed 739
+[Producer 2] pushed 740
+[Producer 2] pushed 741
+[Producer 2] pushed 742
+[Producer 2] pushed 743
+[Producer 2] pushed 744
+[Producer 2] pushed 745
+[Producer 2] pushed 746
+
+[Producer 2] pushed 747
+[Producer 1] pushed 432
+[Producer 2] pushed 748
+[Producer 1] pushed 433
+[Producer 1] pushed 434
+[Producer 1] pushed 435
+[Producer 1] pushed 436
+[Producer 1] pushed 437
+  [Consumer 0] popped 48
+  [Consumer 1] popped 39
+  [Consumer 2] popped 49
+[Producer 3] pushed 826
+[Producer 3] pushed 827
+[Producer 3] pushed 828
+[Producer 2] pushed 749
+[Producer 3] pushed [Producer 8292
+[Producer 3] pushed 830
+[Producer 3] pushed 831
+[Producer 3] pushed 832
+[Producer 3] pushed 833
+  [Consumer [Producer 3] pushed 1] popped 83450
+
+[Producer 1] pushed 438
+[Producer 1] pushed 439
+  [Consumer [Producer 21] popped ] pushed 51
+440
+  [Consumer 2] popped 52
+[Producer 1] pushed 441
+[Producer 1] pushed 442
+[Producer   [Consumer 2] popped 53
+3] pushed 835
+  [Consumer 1] popped 54
+  [Consumer 2] popped 55
+  [Consumer 1] popped 57
+] pushed 750
+[Producer 3] pushed 836
+[Producer 3] pushed 837
+[Producer 3] pushed 838
+[Producer 3] pushed 839
+[Producer 3] pushed 840
+[Producer 3] pushed 841
+[Producer 3] pushed 842
+[Producer 3] pushed 843
+[Producer 3] pushed 844
+[Producer 3] pushed 845
+[Producer 3] pushed 846
+[Producer 3] pushed 847
+[Producer 3] pushed 848
+[Producer 3] pushed 849
+[Producer 3] pushed 850
+[Producer 3] pushed 851
+[Producer 3] pushed 852
+[Producer 3] pushed 853
+[Producer 3] pushed 854
+[Producer 3] pushed 855
+[Producer 3] pushed 856
+[Producer 3] pushed 857
+[Producer 3] pushed 858
+[Producer 3] pushed 859
+[Producer 3] pushed 860
+[Producer 3] pushed 861
+[Producer 3] pushed 862
+[Producer 3] pushed 863
+[Producer 3] pushed 864
+[Producer 3] pushed 865
+[Producer 3] pushed 866
+[Producer 3] pushed 867
+[Producer 3] pushed 868
+[Producer 3] pushed 869
+[Producer 3] pushed 870
+[Producer 3] pushed 871
+[Producer 3] pushed 872
+[Producer 3] pushed 873
+[Producer 3] pushed 874
+[Producer 3] pushed 875
+[Producer 3] pushed 876
+[Producer 3] pushed 877
+[Producer 3] pushed 878
+[Producer 3] pushed 879
+[Producer 3] pushed 880
+[Producer 3] pushed 881
+[Producer 3] pushed 882
+[Producer 3] pushed 883
+[Producer 3] pushed 884
+[Producer 3  [Consumer 1] popped 58
+] pushed 885
+[Producer 3] pushed 886
+[Producer 3] pushed 887
+[Producer 3] pushed 888
+[Producer 3] pushed 889
+[Producer 3] pushed 890
+[Producer 3] pushed 891
+[Producer 3] pushed 892
+[Producer 3] pushed 893
+[Producer 3] pushed 894
+[Producer 3] pushed 895
+[Producer 3] pushed 896
+[Producer 3] pushed 897
+[Producer 3] pushed 898
+[Producer 3] pushed 899
+[Producer 3] pushed 900
+[Producer [Producer 3] pushed 1901] pushed 443
+
+[Producer 1] pushed 444
+[Producer 1] pushed 445
+[Producer 1] pushed 446
+[Producer 1] pushed 447
+[Producer 1] pushed 448
+[Producer 1] pushed 449
+[Producer 1] pushed 450
+[Producer 3] pushed 902
+[Producer 1] pushed [Producer 451
+3] pushed [Producer 9031
+] pushed 452
+[Producer 3] pushed 904
+[Producer 1] pushed [Producer 453
+3] pushed 905
+[Producer [Producer 13] pushed 454] pushed 906
+
+[Producer 1] pushed 455
+[Producer 1] pushed 456
+[Producer 1] pushed 457
+[Producer 1] pushed 458
+[Producer 1] pushed 459
+  [Consumer 1] popped 60
+[Producer 3] pushed 907
+[Producer 3] pushed 908
+[Producer 3] pushed 909
+[Producer 3] pushed 910
+[Producer 3] pushed 911
+  [Consumer 1] popped 61
+[Producer 1] pushed 460
+[Producer 1] pushed 461
+[Producer 1] pushed 462
+  [Consumer 1] popped 62
+[Producer 1] pushed 463
+[Producer 1] pushed 464
+[Producer 1] pushed 465
+[Producer 1] pushed 466
+[Producer 1] pushed 467
+[Producer 1] pushed 468
+[Producer 1] pushed 469
+[Producer 1] pushed 470
+[Producer 1] pushed 471
+[Producer 1] pushed 472
+[Producer 1] pushed 473
+[Producer 1] pushed 474
+[Producer 1] pushed 475
+[Producer 1] pushed 476
+[Producer 1] pushed 477
+[Producer 1] pushed 478
+[Producer 1] pushed 479
+[Producer 1] pushed 480
+[Producer 1] pushed 481
+[Producer 1] pushed 482
+[Producer 1] pushed 483
+[Producer 1] pushed 484
+[Producer 1] pushed 485
+[Producer 1] pushed 486
+[Producer 1] pushed 487
+[Producer 1] pushed 488
+[Producer 1] pushed 489
+[Producer 1] pushed 490
+[Producer 1] pushed 491
+[Producer 1] pushed 492
+[Producer 1] pushed 493
+[Producer 1] pushed 494
+[Producer 1] pushed 495
+[Producer 1] pushed 496
+[Producer 1] pushed 497
+[Producer 1] pushed 498
+[Producer 1] pushed 499
+[Producer 1] pushed 500
+  [Consumer 1] popped 63
+  [Consumer 1] popped 64
+  [Consumer 1] popped 65
+  [Consumer 1] popped 66
+  [Consumer 1] popped 67
+[Producer 3  [Consumer ] pushed 912
+1] popped [Producer 683] pushed 913
+
+  [Consumer 1] popped 69
+  [Consumer 2] popped 59
+[Producer 3] pushed 914
+[Producer 3] pushed 915
+[Producer 3] pushed 916
+[Producer 3] pushed 917
+[Producer 3] pushed 918
+  [Consumer [Producer 03] pushed ] popped 91956
+
+[Producer 3] pushed 920
+[Producer 3] pushed 921
+[Producer 3] pushed 922
+[Producer 3] pushed 923
+[Producer 3] pushed 924
+[Producer 3] pushed 925
+[Producer 3] pushed 926
+  [Consumer 1] popped 70
+  [Consumer 0] popped 71
+  [Consumer 0] popped 74
+  [Consumer 0] popped 75
+  [Consumer 0] popped 76
+  [Consumer 1] popped 73
+  [Consumer 1] popped 78
+  [Consumer 1] popped 79
+  [Consumer 1] popped 80
+  [Consumer 2] popped 72
+  [Consumer 1] popped 81
+  [Consumer 0] popped 77
+  [Consumer 0] popped 83
+  [Consumer 0] popped 84
+  [Consumer 0] popped 85
+  [Consumer 2] popped 82
+  [Consumer 0] popped 86
+[Producer 3] pushed 927
+[Producer 3] pushed 928
+[Producer 3] pushed 929
+  [Consumer 0] popped 88
+  [Consumer 1] popped 89
+[Producer 3] pushed 930
+[Producer   [Consumer 30] popped 90
+] pushed 931
+  [Consumer 0] popped 91
+  [Consumer 2] popped 87
+  [Consumer 1] popped 92
+  [Consumer 2] popped 93
+  [Consumer [Producer 3] pushed 932
+[Producer 03] popped ] pushed 933
+95
+[Producer 3] pushed 934
+[Producer 3] pushed 935
+[Producer 3] pushed 936
+[Producer 3] pushed 937
+[Producer 3] pushed 938
+[Producer 3] pushed 939
+[Producer 3] pushed 940
+[Producer 3] pushed 941
+[Producer 3] pushed 942
+[Producer 3] pushed 943
+[Producer 3] pushed 944
+[Producer 3] pushed 945
+[Producer 3] pushed 946
+[Producer 3] pushed 947
+[Producer 3] pushed 948
+[Producer 3] pushed 949
+[Producer 3] pushed 950
+[Producer 3] pushed 951
+[Producer 3] pushed 952
+[Producer 3] pushed 953
+[Producer 3] pushed 954
+[Producer 3] pushed 955
+[Producer 3] pushed 956
+[Producer 3] pushed 957
+[Producer 3] pushed 958
+[Producer 3] pushed 959
+[Producer 3] pushed 960
+[Producer 3] pushed 961
+[Producer 3] pushed 962
+[Producer 3] pushed 963
+[Producer 3] pushed 964
+[Producer 3] pushed 965
+[Producer 3] pushed 966
+[Producer 3] pushed 967
+[Producer 3] pushed 968
+[Producer 3] pushed 969
+[Producer 3] pushed 970
+[Producer 3] pushed 971
+[Producer 3] pushed 972
+[Producer 3] pushed 973
+[Producer 3] pushed 974
+[Producer 3] pushed 975
+  [Consumer 0] popped 97
+[Producer 3] pushed 976
+[Producer 3] pushed 977
+[Producer 3] pushed 978
+[Producer 3] pushed 979
+  [Consumer [Producer 23] popped ] pushed 96980
+
+[Producer 3] pushed 981
+[Producer 3] pushed 982
+[Producer 3] pushed 983
+  [Consumer 2] popped 98
+  [Consumer 2] popped 99
+  [Consumer 2] popped 100
+  [Consumer 2] popped 101
+  [Consumer 2] popped 102
+  [Consumer 2] popped 103
+  [Consumer 2] popped 104
+  [Consumer 2] popped 105
+  [Consumer 2] popped 106
+  [Consumer 2] popped 107
+  [Consumer 2] popped 108
+  [Consumer 2] popped 109
+[Producer   [Consumer 2] popped 110
+3] pushed 984
+  [Consumer 2] popped 111
+  [Consumer 2] popped 112
+  [Consumer 2] popped 113
+  [Consumer 1] popped 94
+  [Consumer 0] popped 115
+  [Consumer 2] popped 114
+  [Consumer 1] popped 116
+  [Consumer 1] popped 117
+[Producer 3] pushed 985
+[Producer 3] pushed 986
+  [Consumer [Producer 03] popped ] pushed 118
+987
+  [Consumer 0] popped 119
+  [Consumer 0] popped 121
+[Producer 3] pushed 988
+  [Consumer 1] popped 120
+  [Consumer 1] popped 123
+  [Consumer 1] popped 125
+  [Consumer 1] popped 126
+  [Consumer 1] popped 127
+  [Consumer 1] popped 128
+  [Consumer 1] popped 129
+  [Consumer 0] popped 122
+[Producer 3] pushed 989
+[Producer 3] pushed 990
+[Producer 3] pushed 991
+[Producer 3] pushed 992
+[Producer 3] pushed 993
+[Producer 3] pushed 994
+[Producer 3] pushed 995
+[Producer 3] pushed 996
+[Producer 3] pushed 997
+[Producer 3] pushed 998
+[Producer 3] pushed 999
+[Producer 3] pushed 1000
+  [Consumer 0] popped 131
+  [Consumer 0] popped 132
+  [Consumer 0] popped 133
+  [Consumer 0] popped 134
+  [Consumer 0] popped 135
+  [Consumer 0] popped 136
+  [Consumer 0] popped 137
+  [Consumer 0] popped 138
+  [Consumer 0] popped 139
+  [Consumer 0] popped 140
+  [Consumer 0] popped 141
+  [Consumer 0] popped 142
+  [Consumer 0] popped 143
+  [Consumer 0] popped 144
+  [Consumer 0] popped 145
+  [Consumer 0] popped 146
+  [Consumer 0] popped 147
+  [Consumer 0] popped 148
+  [Consumer 0] popped 149
+  [Consumer 0] popped 150
+  [Consumer 0] popped 151
+  [Consumer 0] popped 152
+  [Consumer 0] popped 153
+  [Consumer 0] popped 154
+  [Consumer 0] popped 155
+  [Consumer 0] popped 156
+  [Consumer 0] popped 157
+  [Consumer 0] popped 158
+  [Consumer 0] popped 159
+  [Consumer 0] popped 160
+  [Consumer 0] popped 161
+  [Consumer 0] popped 162
+  [Consumer 0] popped 163
+  [Consumer 0] popped 164
+  [Consumer 0] popped 165
+  [Consumer 0] popped 166
+  [Consumer 0] popped 167
+  [Consumer 0] popped 168
+  [Consumer 0] popped 169
+  [Consumer 0] popped 170
+  [Consumer 0] popped 171
+  [Consumer 0] popped 172
+  [Consumer 0] popped 173
+  [Consumer 0] popped 174
+  [Consumer 0] popped 175
+  [Consumer 0] popped 176
+  [Consumer 0] popped 177
+  [Consumer 0] popped 178
+  [Consumer 0] popped 179
+  [Consumer 0] popped 180
+  [Consumer 0] popped 181
+  [Consumer 0] popped 182
+  [Consumer 0] popped 183
+  [Consumer 0] popped 184
+  [Consumer 0] popped 185
+  [Consumer 0] popped 186
+  [Consumer 0] popped 187
+  [Consumer 0] popped 188
+  [Consumer 0] popped 189
+  [Consumer 0] popped 190
+  [Consumer 0] popped 191
+  [Consumer 0] popped 192
+  [Consumer 0] popped 193
+  [Consumer 0] popped 194
+  [Consumer 0] popped 195
+  [Consumer 0] popped 196
+  [Consumer 0] popped 197
+  [Consumer 0] popped 198
+  [Consumer 0] popped 199
+  [Consumer 0] popped 200
+  [Consumer 0] popped 201
+  [Consumer 0] popped 202
+  [Consumer 0] popped 203
+  [Consumer 0] popped 204
+  [Consumer 0] popped 205
+  [Consumer 0] popped 206
+  [Consumer 0] popped 207
+  [Consumer 0] popped 208
+  [Consumer 0] popped 209
+  [Consumer 0] popped 210
+  [Consumer 0] popped 211
+  [Consumer 0] popped 212
+  [Consumer 0] popped 213
+  [Consumer 0] popped 214
+  [Consumer 0] popped 215
+  [Consumer 0] popped 216
+  [Consumer 0] popped 217
+  [Consumer 0] popped 218
+  [Consumer 0] popped 219
+  [Consumer 0] popped 220
+  [Consumer 0] popped 221
+  [Consumer 0] popped 222
+  [Consumer 0] popped 223
+  [Consumer 0] popped 224
+  [Consumer 0] popped 225
+  [Consumer 0] popped 226
+  [Consumer 0] popped 227
+  [Consumer 0] popped 228
+  [Consumer 0] popped 229
+  [Consumer 0] popped 230
+  [Consumer 0] popped 231
+  [Consumer 0] popped 232
+  [Consumer 0] popped 233
+  [Consumer 0] popped 234
+  [Consumer 0] popped 235
+  [Consumer 0] popped 236
+  [Consumer 0] popped 237
+  [Consumer 0] popped 238
+  [Consumer 0] popped 239
+  [Consumer 0] popped 240
+  [Consumer 0] popped 241
+  [Consumer 0] popped 242
+  [Consumer 0] popped 243
+  [Consumer 0] popped 244
+  [Consumer 0] popped 245
+  [Consumer 0] popped 246
+  [Consumer 0] popped 247
+  [Consumer 0] popped 248
+  [Consumer 0] popped 249
+  [Consumer 0] popped 250
+  [Consumer 0] popped 251
+  [Consumer 0] popped 252
+  [Consumer 0] popped 253
+  [Consumer 0] popped 254
+  [Consumer 0] popped 255
+  [Consumer 0] popped 256
+  [Consumer 0] popped 257
+  [Consumer 0] popped 258
+  [Consumer 0] popped 259
+  [Consumer 0] popped 260
+  [Consumer 0] popped 261
+  [Consumer 0] popped 262
+  [Consumer 0] popped 263
+  [Consumer 0] popped 264
+  [Consumer 0] popped 265
+  [Consumer 0] popped 266
+  [Consumer 0] popped 267
+  [Consumer 0] popped 268
+  [Consumer 0] popped 269
+  [Consumer 0] popped 270
+  [Consumer 0] popped 271
+  [Consumer 0] popped 272
+  [Consumer 0] popped 273
+  [Consumer 0] popped 274
+  [Consumer 0] popped 275
+  [Consumer 0] popped 276
+  [Consumer 0] popped 277
+  [Consumer 0] popped 278
+  [Consumer 0] popped 279
+  [Consumer 0] popped 280
+  [Consumer 0] popped 281
+  [Consumer 0] popped 282
+  [Consumer 0] popped 283
+  [Consumer 0] popped 284
+  [Consumer 0] popped 285
+  [Consumer 0] popped 286
+  [Consumer 2] popped 124
+  [Consumer 2] popped 287
+  [Consumer 2] popped 288
+  [Consumer 2] popped 289
+  [Consumer 2] popped 290
+  [Consumer 2] popped 291
+  [Consumer 2] popped 292
+  [Consumer 2] popped 293
+  [Consumer 2] popped 294
+  [Consumer 2] popped 295
+  [Consumer 2] popped 296
+  [Consumer 2] popped 297
+  [Consumer 2] popped 298
+  [Consumer 2] popped 299
+  [Consumer 2] popped 300
+  [Consumer 2] popped 301
+  [Consumer 2] popped 302
+  [Consumer 0] popped 303
+  [Consumer 0] popped 304
+  [Consumer 0] popped 305
+  [Consumer 0] popped 306
+  [Consumer 0] popped 307
+  [Consumer 1] popped 130
+  [Consumer 2] popped 309
+  [Consumer 2] popped 310
+  [Consumer 2] popped 311
+  [Consumer 2] popped 312
+  [Consumer 2] popped 313
+  [Consumer 2] popped 314
+  [Consumer 2] popped 315
+  [Consumer 2] popped 316
+  [Consumer 2] popped 317
+  [Consumer 2] popped 318
+  [Consumer 2] popped 319
+  [Consumer 2] popped 320
+  [Consumer 2] popped 321
+  [Consumer 2] popped 322
+  [Consumer 2] popped 323
+  [Consumer 2] popped 324
+  [Consumer 2] popped 325
+  [Consumer 2] popped 326
+  [Consumer 2] popped 327
+  [Consumer 2] popped 329
+  [Consumer 2] popped 330
+  [Consumer 2] popped 331
+  [Consumer 2] popped 332
+  [Consumer 2] popped 333
+  [Consumer 2] popped 334
+  [Consumer 2] popped 335
+  [Consumer 2] popped 336
+  [Consumer 2] popped 337
+  [Consumer 2] popped 338
+  [Consumer 1] popped 328
+  [Consumer 1] popped 340
+  [Consumer 1] popped 341
+  [Consumer 1] popped 342
+  [Consumer 1] popped 343
+  [Consumer 1] popped 344
+  [Consumer 1] popped 345
+  [Consumer 1] popped 346
+  [Consumer 1] popped 347
+  [Consumer 1] popped 348
+  [Consumer 1] popped 349
+  [Consumer 0] popped 308
+  [Consumer 1] popped 350
+  [Consumer 0] popped 351
+  [Consumer 0] popped 352
+  [Consumer 0] popped 353
+  [Consumer 0] popped 354
+  [Consumer 0] popped 355
+  [Consumer 0] popped 356
+  [Consumer 0] popped 357
+  [Consumer 1] popped 358
+  [Consumer 1] popped 359
+  [Consumer 2] popped 339
+  [Consumer 1] popped 360
+  [Consumer 2] popped 361
+  [Consumer 0] popped 363
+  [Consumer 1] popped 362
+  [Consumer 2] popped 365
+  [Consumer 0] popped 364
+  [Consumer 2] popped 366
+  [Consumer 1] popped 368
+  [Consumer 0] popped 367
+  [Consumer 1] popped 369
+  [Consumer 0] popped 370
+  [Consumer 0] popped 371
+  [Consumer 0] popped 372
+  [Consumer 1] popped 374
+  [Consumer 1] popped 375
+  [Consumer 1] popped 376
+  [Consumer 1] popped 377
+  [Consumer 1] popped 378
+  [Consumer 1] popped 379
+  [Consumer 1] popped 380
+  [Consumer 1] popped 381
+  [Consumer 1] popped 382
+  [Consumer 1] popped 383
+  [Consumer 1] popped 384
+  [Consumer 1] popped 385
+  [Consumer 1] popped 386
+  [Consumer 1] popped 387
+  [Consumer 1] popped 388
+  [Consumer 2] popped 373
+  [Consumer 2] popped 390
+  [Consumer 2] popped 391
+  [Consumer 2] popped 392
+  [Consumer 1] popped 389
+  [Consumer 2] popped 393
+  [Consumer 1] popped 394
+  [Consumer 1] popped 395
+  [Consumer 1] popped 396
+  [Consumer 1] popped 397
+  [Consumer 1] popped 398
+  [Consumer 1] popped 399
+  [Consumer 1] popped 400
+  [Consumer 1] popped 401
+  [Consumer 1] popped 402
+  [Consumer 1] popped 403
+  [Consumer 1] popped 404
+  [Consumer 1] popped 405
+  [Consumer 1] popped 406
+  [Consumer 1] popped 407
+  [Consumer 1] popped 408
+  [Consumer 1] popped 409
+  [Consumer 1] popped 410
+  [Consumer 1] popped 411
+  [Consumer 1] popped 412
+  [Consumer 1] popped 413
+  [Consumer 1] popped 414
+  [Consumer 1] popped 415
+  [Consumer 1] popped 416
+  [Consumer 1] popped 417
+  [Consumer 1] popped 418
+  [Consumer 1] popped 419
+  [Consumer 1] popped 420
+  [Consumer 1] popped 421
+  [Consumer 1] popped 422
+  [Consumer 1] popped 423
+  [Consumer 1] popped 424
+  [Consumer 2] popped 425
+  [Consumer 2] popped 426
+  [Consumer 2] popped 427
+  [Consumer 1] popped 428
+  [Consumer 1] popped 429
+  [Consumer 0] popped 430
+  [Consumer 0] popped 431
+  [Consumer 0] popped 432
+  [Consumer 0] popped 433
+  [Consumer 0] popped 434
+  [Consumer 0] popped 435
+  [Consumer 0] popped 436
+  [Consumer 0] popped 437
+  [Consumer 0] popped 438
+  [Consumer 0] popped 439
+  [Consumer 0] popped 440
+  [Consumer 0] popped 441
+  [Consumer 2] popped 443
+  [Consumer 2] popped 444
+  [Consumer 2] popped 445
+  [Consumer 2] popped 446
+  [Consumer 2] popped 447
+  [Consumer 2] popped 448
+  [Consumer 2] popped 449
+  [Consumer 2] popped 450
+  [Consumer 2] popped 451
+  [Consumer 2] popped 452
+  [Consumer 2] popped 453
+  [Consumer 2] popped 454
+  [Consumer 2] popped 455
+  [Consumer 2] popped 456
+  [Consumer 2] popped 457
+  [Consumer 2] popped 458
+  [Consumer 2] popped 459
+  [Consumer 2] popped 460
+  [Consumer 2] popped 461
+  [Consumer 2] popped 462
+  [Consumer 2] popped 463
+  [Consumer 0] popped 442
+  [Consumer 0] popped 465
+  [Consumer 2] popped 464
+  [Consumer 0] popped 466
+  [Consumer 2] popped 467
+  [Consumer 2] popped 468
+  [Consumer 0] popped 469
+  [Consumer 2] popped 470
+  [Consumer 2] popped 471
+  [Consumer 2] popped 472
+  [Consumer 2] popped 473
+  [Consumer 0] popped 475
+  [Consumer 0] popped 476
+  [Consumer 0] popped 477
+  [Consumer 0] popped 478
+  [Consumer 0] popped 479
+  [Consumer 0] popped 480
+  [Consumer 0] popped 481
+  [Consumer 0] popped 482
+  [Consumer 0] popped 483
+  [Consumer 0] popped 484
+  [Consumer 0] popped 486
+  [Consumer 0] popped 487
+  [Consumer 0] popped 488
+  [Consumer 0] popped 489
+  [Consumer 0] popped 490
+  [Consumer 0] popped 491
+  [Consumer 0] popped 492
+  [Consumer 2] popped 474
+  [Consumer 2] popped 494
+  [Consumer 2] popped 495
+  [Consumer 2] popped 496
+  [Consumer 2] popped 497
+  [Consumer 2] popped 498
+  [Consumer 2] popped 499
+  [Consumer 2] popped 500
+  [Consumer 2] popped 501
+  [Consumer 2] popped 502
+  [Consumer 2] popped 503
+  [Consumer 1] popped 485
+  [Consumer 1] popped 505
+  [Consumer 1] popped 506
+  [Consumer 1] popped 507
+  [Consumer 1] popped 508
+  [Consumer 1] popped 509
+  [Consumer 0] popped 493
+  [Consumer 0] popped 510
+  [Consumer 0] popped 511
+  [Consumer 0] popped 512
+  [Consumer 0] popped 513
+  [Consumer 0] popped 514
+  [Consumer 0] popped 515
+  [Consumer 0] popped 516
+  [Consumer 0] popped 517
+  [Consumer 0] popped 518
+  [Consumer 0] popped 519
+  [Consumer 0] popped 520
+  [Consumer 0] popped 521
+  [Consumer 0] popped 522
+  [Consumer 1] popped 523
+  [Consumer 2] popped 504
+  [Consumer 0] popped 525
+  [Consumer 0] popped 526
+  [Consumer 0] popped 527
+  [Consumer 0] popped 528
+  [Consumer 0] popped 529
+  [Consumer 0] popped 530
+  [Consumer 0] popped 531
+  [Consumer 0] popped 532
+  [Consumer 0] popped 533
+  [Consumer 0] popped 534
+  [Consumer 0] popped 535
+  [Consumer 0] popped 536
+  [Consumer 0] popped 537
+  [Consumer 0] popped 538
+  [Consumer 0] popped 539
+  [Consumer 0] popped 540
+  [Consumer 0] popped 541
+  [Consumer 0] popped 542
+  [Consumer 0] popped 543
+  [Consumer 0] popped 544
+  [Consumer 0] popped 545
+  [Consumer 1] popped 524
+  [Consumer 2] popped 547
+  [Consumer 2] popped 548
+  [Consumer 2] popped 549
+  [Consumer 0] popped 546
+  [Consumer 0] popped 551
+  [Consumer 1] popped 550
+  [Consumer 2] popped 553
+  [Consumer 2] popped 554
+  [Consumer 2] popped 555
+  [Consumer 2] popped 556
+  [Consumer 2] popped 557
+  [Consumer 2] popped 558
+  [Consumer 2] popped 559
+  [Consumer 2] popped 560
+  [Consumer 2] popped 561
+  [Consumer 2] popped 562
+  [Consumer 2] popped 563
+  [Consumer 2] popped 564
+  [Consumer 2] popped 565
+  [Consumer 2] popped 566
+  [Consumer 1] popped 567
+  [Consumer 1] popped 568
+  [Consumer 1] popped 569
+  [Consumer 0] popped 552
+  [Consumer 1] popped 570
+  [Consumer 0] popped 571
+  [Consumer 0] popped 573
+  [Consumer 2] popped 572
+  [Consumer 0] popped 574
+  [Consumer 0] popped 576
+  [Consumer 1] popped 577
+  [Consumer 2] popped 575
+  [Consumer 2] popped 579
+  [Consumer 2] popped 580
+  [Consumer 0] popped 578
+  [Consumer 0] popped 582
+  [Consumer 1] popped 581
+  [Consumer 0] popped 583
+  [Consumer 2] popped 585
+  [Consumer 1] popped 584
+  [Consumer 2] popped 586
+  [Consumer 0] popped 588
+  [Consumer 0] popped 589
+  [Consumer 0] popped 590
+  [Consumer 0] popped 591
+  [Consumer 0] popped 592
+  [Consumer 1] popped 587
+  [Consumer 0] popped 593
+  [Consumer 1] popped 594
+  [Consumer 0] popped 595
+  [Consumer 1] popped 596
+  [Consumer 1] popped 597
+  [Consumer 1] popped 598
+  [Consumer 1] popped 599
+  [Consumer 1] popped 600
+  [Consumer 1] popped 601
+  [Consumer 1] popped 602
+  [Consumer 1] popped 603
+  [Consumer 1] popped 604
+  [Consumer 1] popped 605
+  [Consumer 1] popped 606
+  [Consumer 1] popped 607
+  [Consumer 1] popped 608
+  [Consumer 1] popped 609
+  [Consumer 1] popped 610
+  [Consumer 1] popped 611
+  [Consumer 2] popped 613
+  [Consumer 2] popped 614
+  [Consumer 2] popped 615
+  [Consumer 2] popped 616
+  [Consumer 2] popped 617
+  [Consumer 2] popped 618
+  [Consumer 2] popped 619
+  [Consumer 0] popped 612
+  [Consumer 0] popped 621
+  [Consumer 0] popped 622
+  [Consumer 0] popped 623
+  [Consumer 2] popped 620
+  [Consumer 2] popped 625
+  [Consumer 2] popped 626
+  [Consumer 0] popped 624
+  [Consumer 2] popped 627
+  [Consumer 0] popped 628
+  [Consumer 1] popped 629
+  [Consumer 1] popped 631
+  [Consumer 1] popped 632
+  [Consumer 1] popped 633
+  [Consumer 1] popped 634
+  [Consumer 1] popped 635
+  [Consumer 1] popped 636
+  [Consumer 1] popped 637
+  [Consumer 1] popped 638
+  [Consumer 1] popped 639
+  [Consumer 1] popped 640
+  [Consumer 1] popped 641
+  [Consumer 1] popped 642
+  [Consumer 1] popped 644
+  [Consumer 1] popped 645
+  [Consumer 1] popped 646
+  [Consumer 1] popped 647
+  [Consumer 1] popped 648
+  [Consumer 1] popped 649
+  [Consumer 1] popped 650
+  [Consumer 1] popped 651
+  [Consumer 1] popped 652
+  [Consumer 1] popped 653
+  [Consumer 0] popped 630
+  [Consumer 0] popped 655
+  [Consumer 0] popped 656
+  [Consumer 0] popped 657
+  [Consumer 0] popped 658
+  [Consumer 0] popped 659
+  [Consumer 0] popped 660
+  [Consumer 0] popped 661
+  [Consumer 0] popped 662
+  [Consumer 0] popped 663
+  [Consumer 0] popped 664
+  [Consumer 2] popped 643
+  [Consumer 0] popped 665
+  [Consumer 2] popped 666
+  [Consumer 2] popped 667
+  [Consumer 0] popped 668
+  [Consumer 0] popped 669
+  [Consumer 0] popped 670
+  [Consumer 0] popped 671
+  [Consumer 0] popped 672
+  [Consumer 0] popped 673
+  [Consumer 0] popped 674
+  [Consumer 0] popped 675
+  [Consumer 1] popped 654
+  [Consumer 2] popped 677
+  [Consumer 0] popped 676
+  [Consumer 0] popped 679
+  [Consumer 1] popped 678
+  [Consumer 1] popped 681
+  [Consumer 2] popped 680
+  [Consumer 2] popped 683
+  [Consumer 1] popped 682
+  [Consumer 1] popped 685
+  [Consumer 1] popped 686
+  [Consumer 0] popped 687
+  [Consumer 1] popped 688
+  [Consumer 1] popped 689
+  [Consumer 1] popped 690
+  [Consumer 2] popped 684
+  [Consumer 1] popped 691
+  [Consumer 2] popped 692
+  [Consumer 2] popped 693
+  [Consumer 2] popped 694
+  [Consumer 2] popped 695
+  [Consumer 2] popped 696
+  [Consumer 2] popped 697
+  [Consumer 2] popped 698
+  [Consumer 2] popped 699
+  [Consumer 2] popped 700
+  [Consumer 2] popped 701
+  [Consumer 2] popped 702
+  [Consumer 2] popped 703
+  [Consumer 2] popped 704
+  [Consumer 2] popped 705
+  [Consumer 2] popped 706
+  [Consumer 2] popped 707
+  [Consumer 2] popped 708
+  [Consumer 2] popped 709
+  [Consumer 2] popped 710
+  [Consumer 2] popped 711
+  [Consumer 2] popped 712
+  [Consumer 1] popped 714
+  [Consumer 1] popped 715
+  [Consumer 1] popped 716
+  [Consumer 1] popped 717
+  [Consumer 1] popped 718
+  [Consumer 1] popped 719
+  [Consumer 1] popped 720
+  [Consumer 1] popped 721
+  [Consumer 1] popped 722
+  [Consumer 1] popped 723
+  [Consumer 1] popped 724
+  [Consumer 1] popped 725
+  [Consumer 1] popped 726
+  [Consumer 1] popped 727
+  [Consumer 1] popped 728
+  [Consumer 1] popped 729
+  [Consumer 1] popped 730
+  [Consumer 1] popped 731
+  [Consumer 1] popped 732
+  [Consumer 1] popped 733
+  [Consumer 2] popped 713
+  [Consumer 2] popped 735
+  [Consumer 1] popped 734
+  [Consumer 2] popped 736
+  [Consumer 1] popped 737
+  [Consumer 2] popped 738
+  [Consumer 2] popped 739
+  [Consumer 1] popped 741
+  [Consumer 1] popped 742
+  [Consumer 1] popped 743
+  [Consumer 0] popped 740
+  [Consumer 2] popped 745
+  [Consumer 2] popped 746
+  [Consumer 2] popped 747
+  [Consumer 2] popped 748
+  [Consumer 2] popped 749
+  [Consumer 2] popped 750
+  [Consumer 2] popped 751
+  [Consumer 2] popped 752
+  [Consumer 2] popped 753
+  [Consumer 2] popped 754
+  [Consumer 2] popped 755
+  [Consumer 2] popped 756
+  [Consumer 2] popped 757
+  [Consumer 2] popped 758
+  [Consumer 2] popped 759
+  [Consumer 2] popped 760
+  [Consumer 2] popped 761
+  [Consumer 2] popped 762
+  [Consumer 2] popped 763
+  [Consumer 0] popped 764
+  [Consumer 0] popped 765
+  [Consumer 0] popped 766
+  [Consumer 1] popped 744
+  [Consumer 0] popped 767
+  [Consumer 1] popped 768
+  [Consumer 0] popped 769
+  [Consumer 2] popped 771
+  [Consumer 1] popped 770
+  [Consumer 0] popped 773
+  [Consumer 1] popped 774
+  [Consumer 0] popped 775
+  [Consumer 2] popped 772
+  [Consumer 1] popped 777
+  [Consumer 1] popped 778
+  [Consumer 1] popped 779
+  [Consumer 2] popped 780
+  [Consumer 2] popped 781
+  [Consumer 0] popped 776
+  [Consumer 2] popped 782
+  [Consumer 0] popped 783
+  [Consumer 0] popped 785
+  [Consumer 0] popped 786
+  [Consumer 0] popped 787
+  [Consumer 0] popped 788
+  [Consumer 0] popped 789
+  [Consumer 0] popped 790
+  [Consumer 0] popped 791
+  [Consumer 0] popped 792
+  [Consumer 0] popped 793
+  [Consumer 0] popped 794
+  [Consumer 0] popped 795
+  [Consumer 0] popped 796
+  [Consumer 0] popped 797
+  [Consumer 2] popped 784
+  [Consumer 2] popped 799
+  [Consumer 2] popped 801
+  [Consumer 2] popped 802
+  [Consumer 2] popped 803
+  [Consumer 2] popped 804
+  [Consumer 2] popped 805
+  [Consumer 2] popped 806
+  [Consumer 2] popped 807
+  [Consumer 0] popped 798
+  [Consumer 0] popped 809
+  [Consumer 0] popped 810
+  [Consumer 0] popped 811
+  [Consumer 0] popped 812
+  [Consumer 0] popped 813
+  [Consumer 0] popped 814
+  [Consumer 0] popped 815
+  [Consumer 0] popped 816
+  [Consumer 0] popped 817
+  [Consumer 0] popped 818
+  [Consumer 0] popped 819
+  [Consumer 0] popped 820
+  [Consumer 0] popped 821
+  [Consumer 0] popped 822
+  [Consumer 0] popped 823
+  [Consumer 0] popped 824
+  [Consumer 0] popped 825
+  [Consumer 0] popped 826
+  [Consumer 0] popped 827
+  [Consumer 0] popped 828
+  [Consumer 0] popped 829
+  [Consumer 0] popped 830
+  [Consumer 1] popped 800
+  [Consumer 1] popped 832
+  [Consumer 1] popped 833
+  [Consumer 1] popped 834
+  [Consumer 1] popped 835
+  [Consumer 2] popped 808
+  [Consumer 2] popped 836
+  [Consumer 2] popped 837
+  [Consumer 2] popped 838
+  [Consumer 2] popped 839
+  [Consumer 2] popped 840
+  [Consumer 2] popped 841
+  [Consumer 2] popped 842
+  [Consumer 2] popped 843
+  [Consumer 2] popped 844
+  [Consumer 2] popped 845
+  [Consumer 2] popped 846
+  [Consumer 2] popped 847
+  [Consumer 2] popped 848
+  [Consumer 2] popped 849
+  [Consumer 2] popped 850
+  [Consumer 2] popped 851
+  [Consumer 2] popped 852
+  [Consumer 2] popped 853
+  [Consumer 2] popped 854
+  [Consumer 2] popped 855
+  [Consumer 0] popped 831
+  [Consumer 0] popped 857
+  [Consumer 0] popped 858
+  [Consumer 0] popped 859
+  [Consumer 0] popped 860
+  [Consumer 1] popped 856
+  [Consumer 1] popped 862
+  [Consumer 0] popped 861
+  [Consumer 0] popped 864
+  [Consumer 0] popped 865
+  [Consumer 0] popped 866
+  [Consumer 1] popped 867
+  [Consumer 1] popped 868
+  [Consumer 1] popped 869
+  [Consumer 1] popped 870
+  [Consumer 1] popped 871
+  [Consumer 1] popped 872
+  [Consumer 1] popped 873
+  [Consumer 1] popped 874
+  [Consumer 0] popped 875
+  [Consumer 2] popped 863
+  [Consumer 1] popped 877
+  [Consumer 0] popped 876
+  [Consumer 1] popped 879
+  [Consumer 0] popped 880
+  [Consumer 0] popped 881
+  [Consumer 0] popped 882
+  [Consumer 0] popped 883
+  [Consumer 1] popped 884
+  [Consumer 1] popped 885
+  [Consumer 2] popped 878
+  [Consumer 0] popped 886
+  [Consumer 2] popped 887
+  [Consumer 0] popped 888
+  [Consumer 1] popped 890
+  [Consumer 2] popped 889
+  [Consumer 0] popped 892
+  [Consumer 0] popped 893
+  [Consumer 0] popped 894
+  [Consumer 0] popped 895
+  [Consumer 2] popped 896
+  [Consumer 2] popped 897
+  [Consumer 1] popped 891
+  [Consumer 1] popped 899
+  [Consumer 1] popped 900
+  [Consumer 1] popped 901
+  [Consumer 2] popped 898
+  [Consumer 1] popped 902
+  [Consumer 2] popped 903
+  [Consumer 0] popped 904
+  [Consumer 0] popped 905
+  [Consumer 0] popped 906
+  [Consumer 0] popped 907
+  [Consumer 0] popped 908
+  [Consumer 0] popped 909
+  [Consumer 0] popped 910
+  [Consumer 0] popped 911
+  [Consumer 0] popped 912
+  [Consumer 0] popped 913
+  [Consumer 0] popped 914
+  [Consumer 0] popped 915
+  [Consumer 0] popped 916
+  [Consumer 0] popped 917
+  [Consumer 0] popped 918
+  [Consumer 0] popped 919
+  [Consumer 0] popped 920
+  [Consumer 0] popped 921
+  [Consumer 0] popped 922
+  [Consumer 0] popped 923
+  [Consumer 0] popped 924
+  [Consumer 1] popped 925
+  [Consumer 1] popped 926
+  [Consumer 0] popped 928
+  [Consumer 1] popped 927
+  [Consumer 0] popped 929
+  [Consumer 2] popped 931
+  [Consumer 1] popped 930
+  [Consumer 2] popped 932
+  [Consumer 1] popped 933
+  [Consumer 1] popped 934
+  [Consumer 1] popped 935
+  [Consumer 1] popped 936
+  [Consumer 1] popped 937
+  [Consumer 0] popped 939
+  [Consumer 1] popped 938
+  [Consumer 0] popped 940
+  [Consumer 1] popped 941
+  [Consumer 1] popped 943
+  [Consumer 1] popped 944
+  [Consumer 0] popped 942
+  [Consumer 1] popped 945
+  [Consumer 0] popped 946
+  [Consumer 1] popped 947
+  [Consumer 1] popped 948
+  [Consumer 1] popped 949
+  [Consumer 2] popped 950
+  [Consumer 0] popped 952
+  [Consumer 0] popped 953
+  [Consumer 0] popped 954
+  [Consumer 0] popped 955
+  [Consumer 0] popped 956
+  [Consumer 0] popped 957
+  [Consumer 2] popped 958
+  [Consumer 2] popped 959
+  [Consumer 2] popped 960
+  [Consumer 2] popped 961
+  [Consumer 2] popped 962
+  [Consumer 2] popped 963
+  [Consumer 2] popped 964
+  [Consumer 2] popped 965
+  [Consumer 2] popped 966
+  [Consumer 2] popped 967
+  [Consumer 2] popped 968
+  [Consumer 2] popped 969
+  [Consumer 2] popped 970
+  [Consumer 2] popped 971
+  [Consumer 2] popped 972
+  [Consumer 2] popped 973
+  [Consumer 2] popped 974
+  [Consumer 2] popped 975
+  [Consumer 2] popped 976
+  [Consumer 2] popped 977
+  [Consumer 2] popped 978
+  [Consumer 1] popped 951
+  [Consumer 1] popped 980
+  [Consumer 1] popped 981
+  [Consumer 1] popped 982
+  [Consumer 1] popped 983
+  [Consumer 1] popped 984
+  [Consumer 1] popped 985
+  [Consumer 1] popped 986
+  [Consumer 1] popped 987
+  [Consumer 1] popped 988
+  [Consumer 1] popped 989
+  [Consumer 1] popped 990
+  [Consumer 1] popped 991
+  [Consumer 1] popped 992
+  [Consumer 1] popped 993
+  [Consumer 1] popped 994
+  [Consumer 1] popped 995
+  [Consumer 1] popped 996
+  [Consumer 1] popped 997
+  [Consumer 1] popped 998
+  [Consumer 1] popped 999
+  [Consumer 1] popped 1000
+  [Consumer 0] popped 979
+✅ Concurrent test finished. Extracted count: 1000
+[ ]
+✅ Extracted elements are in sorted order.

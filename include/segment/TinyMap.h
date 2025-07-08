@@ -25,19 +25,15 @@ namespace vectordb {
 
 template<typename K, typename V, std::size_t N>
 class TinyMap {
-private:
-    std::array<std::pair<K, V>, N> data_;
-    std::size_t size_ = 0;
-
 public:
     TinyMap() = default;
 
     std::size_t size() const {
-        return size_;
+        return m_size;
     }
 
     bool empty() const {
-        return (size_ == 0);
+        return (m_size == 0);
     }
 
     /**
@@ -51,9 +47,9 @@ public:
      *        }
      */
     std::optional<std::reference_wrapper<const V>> get(const K& key) const {
-        for (std::size_t i = 0; i < size_; ++i) {
-            if (data_[i].first == key) {
-                return std::cref(data_[i].second);  // wrap const reference
+        for (std::size_t i = 0; i < m_size; ++i) {
+            if (m_data[i].first == key) {
+                return std::cref(m_data[i].second);  // wrap const reference
             }
         }
         return std::nullopt;
@@ -68,18 +64,18 @@ public:
      * @brief users can update existing keys or add new keys
      */
     bool insert(const K& key, const V& value) {
-        for (std::size_t i = 0; i < size_; ++i) {
-            if (data_[i].first == key) {
-                data_[i].second = value;  // Update existing key
+        for (std::size_t i = 0; i < m_size; ++i) {
+            if (m_data[i].first == key) {
+                m_data[i].second = value;  // Update existing key
                 return true;
             }
         }
 
-        if (size_ >= N) {
+        if (m_size >= N) {
             return false;  // Map full
         }
 
-        data_[size_++] = std::make_pair(key, value);
+        m_data[m_size++] = std::make_pair(key, value);
         
         return true;
     }
@@ -87,8 +83,8 @@ public:
 
     bool erase(const K& key) {
         for (std::size_t i = 0; i < size_; ++i) {
-            if (data_[i].first == key) {
-                data_[i] = data_[--size_];  // Swap with last and shrink
+            if (m_data[i].first == key) {
+                m_data[i] = m_data[--m_size];  // Swap with last and shrink
                 return true;
             }
         }
@@ -97,7 +93,7 @@ public:
     }
 
     void clear() {
-        size_ = 0;
+        m_size = 0;
     }
 
     /*
@@ -109,12 +105,16 @@ public:
 
     */
     const std::pair<K, V>* begin() const { 
-        return data_.data(); 
+        return m_data.data(); 
     }
     
     const std::pair<K, V>* end() const { 
-        return data_.data() + size_; 
+        return m_data.data() + m_size; 
     }
+
+private:
+    std::array<std::pair<K, V>, N> m_data;
+    std::size_t m_size = 0;
 };
 
 }
