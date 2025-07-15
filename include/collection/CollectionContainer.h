@@ -1,6 +1,8 @@
 #pragma once
 
 #include "DataTypes.h"
+#include "Collection.h"
+#include "Point.h"
 
 /**
  * @brief CollectionContainer will be a hashmap for storing the collections. 
@@ -15,8 +17,12 @@
  *          Analogy: Like a library shelf that holds many books (collections).
  */
 namespace vectordb {
-    struct CollectionContainer {
-        CollectionId collection_id;
-    };
+
+class CollectionContainer {
+public:
+    std::unordered_map<CollectionId, std::shared_ptr<Collection>> collections_;
+
+    void insertTo(const CollectionId& collection_name, const Point& pt);
+};
 
 };

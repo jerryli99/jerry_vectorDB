@@ -1,6 +1,5 @@
 #include "DataTypes.h"
 #include "NamedVectors.h"
-#include "Payload.h"
 
 namespace vectordb {
     struct Point {

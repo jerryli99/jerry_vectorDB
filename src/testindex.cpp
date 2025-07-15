@@ -12,7 +12,7 @@ using namespace std;
 using namespace std::chrono;
 
 // Configuration
-const size_t DIM = 8;                   // Vector dimension
+const size_t DIM = 1000;                   // Vector dimension
 const DistanceMetric METRIC = DistanceMetric::L2; // L2 or IP
 const vector<size_t> TEST_SIZES = {10, 100, 1000, 10000, 50000, 100000};
 const int TOP_K = 10;                   // Number of neighbors to search

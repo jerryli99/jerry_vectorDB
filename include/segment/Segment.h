@@ -1,79 +1,93 @@
 #pragma once
 
 #include "DataTypes.h"
-#include "Point.h"
-#include "index/IndexHNSW.h"
-
-#include <unordered_map>
-#include <vector>
-#include <stdexcept>
+#include "IdTracker.h"
 
 namespace vectordb {
 
-    struct Segment {
-        SegmentIdType segment_id;
-        virtual void addPoint(const Point& point) = 0;
-        virtual bool isAppendable() const = 0;
-        virtual void flush() = 0;
-        virtual ~Segment() {}
-    };
+class Segment {
+public:
+    virtual ~Segment() = default;
 
-    struct AppendableSegment : Segment {
-        std::unordered_map<PointIdType, size_t> external_to_internal;
-        std::vector<PointIdType> internal_to_external;
+    virtual bool isAppendable() const = 0;
 
-        std::vector<DenseVector> vectors;
-        std::vector<Payload> payloads;
+    virtual void insertPoint(PointIdType id, const DenseVector& vec) = 0;
 
-        void addPoint(const Point& point) override {
-            // if (external_to_internal.count(point.point_id)) {
-            //     // Overwrite existing
-            //     size_t internal_id = external_to_internal[point.point_id];
-            //     vectors[internal_id] = point.vector;
-            //     payloads[internal_id] = point.payload;
-            // } else {
-            //     size_t internal_id = vectors.size();
-            //     external_to_internal[point.point_id] = internal_id;
-            //     internal_to_external.push_back(point.point_id);
-            //     vectors.push_back(point.vector);
-            //     payloads.push_back(point.payload);
-            // }
-        }
+    virtual void insertBatch(const std::vector<std::pair<PointIdType, DenseVector>>& points) = 0;
+    
+    virtual std::vector<std::pair<size_t, float>> search(const DenseVector& query, int top_k) const = 0;
 
-        bool isAppendable() const override { return true; }
+    virtual std::shared_ptr<IdTracker> getIdTracker() const = 0;
+};
 
-        void flush() override {
-            // TODO: persist to disk (binary or mmap), or convert to ReadOnlySegment
-        }
-    };
+} // namespace vectordb
 
-    struct ReadOnlySegment : Segment {
-        IndexHNSW hnsw;
+/*
+Add deletePoint and updatePoint to the Segment interface.
 
-        std::unordered_map<PointIdType, size_t> external_to_internal;
-        std::vector<PointIdType> internal_to_external;
+Expose segment flushing or conversion functions (Appendable → Immutable).
 
-        std::vector<DenseVector> vectors;
-        std::vector<Payload> payloads;
+Parallel search in segments using std::async or thread pool.
+*/
 
-        std::vector<PointIdType> search(const std::string& vector_name, const DenseVector& query, int top_k) const {
-            // auto internal_ids = hnsw.search(query, top_k);
-            // std::vector<PointId> result;
-            // for (auto internal_id : internal_ids) {
-            //     result.push_back(internal_to_external[internal_id]);
-            // }
-            // return result;
-        }
+// #include "DataTypes.h"
+// #include "Point.h"
+// #include "index/IndexHNSW.h"
 
-        void addPoint(const Point&) override {
-            throw std::runtime_error("ReadOnlySegment does not support insert.");
-        }
+// #include <unordered_map>
+// #include <vector>
+// #include <stdexcept>
 
-        bool isAppendable() const override { return false; }
+// namespace vectordb {
 
-        void flush() override {
-            // Already read-only — maybe noop or index compaction
-        }
-    };
+//     struct Segment {
+//         SegmentIdType segment_id;
+//         virtual void addPoint(const Point& point) = 0;
+//         virtual bool isAppendable() const = 0;
+//         virtual void flush_to_immutable_segment() = 0;
+//         virtual ~Segment() {}
+//     };
 
-}
+//     struct AppendableSegment : Segment {
+//         std::unordered_map<PointIdType, size_t> external_to_internal;
+//         std::vector<PointIdType> internal_to_external;
+
+//         std::vector<DenseVector> vectors;
+//         std::vector<Payload> payloads;
+
+//         void addPoint(const Point& point) override {
+
+//         }
+
+//         bool isAppendable() const override { return true; }
+
+//         void flush() override {
+//             // TODO: persist to disk (binary or mmap), or convert to ReadOnlySegment
+//         }
+//     };
+
+//     struct ReadOnlySegment : Segment {
+//         IndexHNSW hnsw;
+
+//         std::unordered_map<PointIdType, size_t> external_to_internal;
+//         std::vector<PointIdType> internal_to_external;
+
+//         std::vector<DenseVector> vectors;
+//         std::vector<Payload> payloads;
+
+//         std::vector<PointIdType> search(const std::string& vector_name, const DenseVector& query, int top_k) const {
+
+//         }
+
+//         void addPoint(const Point&) override {
+//             throw std::runtime_error("ReadOnlySegment does not support insert.");
+//         }
+
+//         bool isAppendable() const override { return false; }
+
+//         void flush() override {
+//             // Already read-only — maybe noop or index compaction
+//         }
+//     };
+
+// }
