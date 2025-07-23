@@ -7,7 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <variant>
-
+#include <cstdint>
 
 /**
  * Currently, I only consider the dense vector implementation
@@ -20,11 +20,15 @@ namespace vectordb {
     using VectorName = std::string;
 
     // Dense vector
+    //note: when using Faiss lib, do .data() to convert to float*
     using DenseVector = Eigen::VectorXf;
 
     // Point ID (unique vector identifier) add UUID later
     using PointIdType = std::variant<std::string, uint64_t>;
     
+    //{point_id, distance}
+    using SearchResult = std::pair<PointIdType, float>;
+
     // Segment ID add UUID later
     using SegmentIdType = uint64_t;
     
@@ -47,10 +51,10 @@ namespace vectordb {
     };
 
     enum class CollectionStatus {
-        //no idea yet
-        Green,   // Ready
-        Yellow,  // Degraded / partially loaded
-        Red      // Loading or unavailable
+        // //no idea yet
+        // Green,   // Ready
+        // Yellow,  // Degraded / partially loaded
+        // Red      // Loading or unavailable
     };
 
     enum class SegmentType {

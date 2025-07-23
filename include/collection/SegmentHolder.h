@@ -24,7 +24,6 @@ namespace vectordb {
 class SegmentHolder {
 public:
     void addSegment(SegmentIdType id, std::shared_ptr<Segment> segment) {
-        std::unique_lock lock(mutex_);
         SegmentType type = segment->isAppendable()
                            ? SegmentType::Appendable
                            : SegmentType::Immutable;
@@ -32,13 +31,12 @@ public:
     }
 
     std::shared_ptr<Segment> getSegment(SegmentIdType id) const {
-        std::shared_lock lock(mutex_);//uhmmm
         auto it = segments_.find(id);
         return it != segments_.end() ? it->second.segment : nullptr;
     }
 
+    //??? UHm maybe not this guy...
     std::shared_ptr<Segment> getFirstAppendableSegment() const {
-        std::shared_lock lock(mutex_);
         for (const auto& [id, entry] : segments_) {
             if (entry.type == SegmentType::Appendable)
                 return entry.segment;
@@ -47,12 +45,10 @@ public:
     }
 
     std::unordered_map<SegmentIdType, SegmentEntry> getAllSegments() const {
-        std::shared_lock lock(mutex_);
         return segments_;
     }
 
 private:
-    mutable std::shared_mutex mutex_;
     std::unordered_map<SegmentIdType, SegmentEntry> segments_;
 };
 

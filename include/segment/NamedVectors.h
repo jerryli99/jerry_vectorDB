@@ -29,14 +29,13 @@
 namespace vectordb {
 
     struct NamedVectors {
-    //add tinymap here
-    //method preprocess();
+
     /**
      * @brief The magic number here is hardcoded. Max expected for named vectors in one point is 8.
      */
     TinyMap<VectorName, DenseVector, MAX_ENTRIES_TINYMAP> tinymap;
     
-    void preprocess();  // Optional: normalize vectors, etc.
+    void preprocess();  // Optional: quantize vectors, etc. Meh.. thrug
 
     };
 }

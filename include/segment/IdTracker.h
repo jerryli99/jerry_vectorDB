@@ -8,6 +8,10 @@
 #include <cstddef>
 #include <stack>
 
+/*
+Used for hnsw indexing
+*/
+
 namespace vectordb {
 
 class IdTracker {
@@ -25,7 +29,7 @@ public:
     bool empty() const;
 
 private:
-    std::unordered_map<PointIdType, PointOffSetType> point_id_to_offset_;
+    std::map<PointIdType, PointOffSetType> point_id_to_offset_;
     std::vector<std::optional<PointIdType>> offset_to_point_id_;
     std::stack<PointOffSetType> free_slots_;
 };

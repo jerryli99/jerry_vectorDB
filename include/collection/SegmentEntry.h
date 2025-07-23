@@ -10,7 +10,7 @@
 namespace vectordb {
 
     struct SegmentEntry {
-        std::shared_ptr<Segment> segment;
+        std::shared_ptr<Segment> segment;//?
         SegmentType type;
     };
 

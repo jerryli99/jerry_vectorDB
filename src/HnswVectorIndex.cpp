@@ -5,17 +5,27 @@
 
 namespace vectordb {
 
-HnswVectorIndex::HnswVectorIndex(size_t dim, DistanceMetric metric, size_t max_elements,
-                                 size_t M, size_t ef_construction)
-    : dim_(dim), metric_(metric) {
+HnswVectorIndex::HnswVectorIndex(size_t dim, 
+                                 DistanceMetric metric, 
+                                 size_t max_elements,
+                                 size_t M, 
+                                 size_t ef_construction)
+    : dim_{dim}, metric_{metric} {
+
     // Create the appropriate space based on the distance metric
     switch (metric) {
         case DistanceMetric::L2:
+            normalize_ = false;
             space_ = std::make_unique<hnswlib::L2Space>(dim);
             break;
         case DistanceMetric::DOT:
+            normalize_ = false;
             space_ = std::make_unique<hnswlib::InnerProductSpace>(dim);
             break;
+        case DistanceMetric::COSINE:
+            normalize_ = true;
+            space_ = std::make_unique<hnswlib::InnerProductSpace>(dim);
+            break; 
         default:
             throw std::runtime_error("Unsupported distance metric");
     }
@@ -25,20 +35,24 @@ HnswVectorIndex::HnswVectorIndex(size_t dim, DistanceMetric metric, size_t max_e
         space_.get(), max_elements, M, ef_construction);
 }
 
-void HnswVectorIndex::addPoint(const Eigen::VectorXf& vec, size_t id) {
+DenseVector normalize(const DenseVector& vec) {
+    return (vec / vec.norm());
+}
+
+void HnswVectorIndex::addPoints(const Eigen::VectorXf& vec, size_t id) {
     if (vec.size() != dim_) {
         throw std::runtime_error("Vector dimension mismatch");
     }
+    
+    DenseVector copied_vec = vec;
+
+    if (normalize_ == true) {
+        copied_vec = normalize(vec);
+    }
 
     // Convert Eigen vector to raw float array
-    const float* data = vec.data();
+    const float* data = copied_vec.data();
     index_->addPoint(data, static_cast<hnswlib::labeltype>(id));
-}
-
-void HnswVectorIndex::addBatch(const std::vector<std::pair<size_t, Eigen::VectorXf>>& points) {
-    for (const auto& point : points) {
-        addPoint(point.second, point.first);
-    }
 }
 
 std::vector<std::pair<size_t, float>> HnswVectorIndex::search(const Eigen::VectorXf& query, int top_k) const {
@@ -61,18 +75,6 @@ std::vector<std::pair<size_t, float>> HnswVectorIndex::search(const Eigen::Vecto
 
     // Reverse to get descending order (highest similarity / lowest distance first)
     std::reverse(results.begin(), results.end());
-    return results;
-}
-
-std::vector<std::vector<std::pair<size_t, float>>> HnswVectorIndex::searchBatch(
-    const std::vector<Eigen::VectorXf>& queries, int top_k) const {
-    std::vector<std::vector<std::pair<size_t, float>>> results;
-    results.reserve(queries.size());
-
-    for (const auto& query : queries) {
-        results.push_back(search(query, top_k));
-    }
-
     return results;
 }
 

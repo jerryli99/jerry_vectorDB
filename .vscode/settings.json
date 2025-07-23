@@ -75,6 +75,10 @@
         "variant": "cpp",
         "any": "cpp",
         "core": "cpp",
-        "specialfunctions": "cpp"
+        "specialfunctions": "cpp",
+        "shared_mutex": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp",
+        "future": "cpp"
     }
 }

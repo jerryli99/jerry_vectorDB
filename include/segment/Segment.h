@@ -5,22 +5,36 @@
 
 namespace vectordb {
 
-class Segment {
-public:
-    virtual ~Segment() = default;
-
-    virtual bool isAppendable() const = 0;
-
-    virtual void insertPoint(PointIdType id, const DenseVector& vec) = 0;
-
-    virtual void insertBatch(const std::vector<std::pair<PointIdType, DenseVector>>& points) = 0;
     
-    virtual std::vector<std::pair<size_t, float>> search(const DenseVector& query, int top_k) const = 0;
+}
 
-    virtual std::shared_ptr<IdTracker> getIdTracker() const = 0;
-};
 
-} // namespace vectordb
+
+
+
+
+
+
+
+
+// namespace vectordb {
+
+// class Segment {
+// public:
+//     virtual ~Segment() = default;
+
+//     virtual bool isAppendable() const = 0;
+
+//     virtual void insertPoint(PointIdType id, const DenseVector& vec) = 0;
+
+//     virtual void insertBatch(const std::vector<std::pair<PointIdType, DenseVector>>& points) = 0;
+    
+//     virtual std::vector<std::pair<size_t, float>> search(const DenseVector& query, int top_k) const = 0;
+
+//     virtual std::shared_ptr<IdTracker> getIdTracker() const = 0;
+// };
+
+// } // namespace vectordb
 
 /*
 Add deletePoint and updatePoint to the Segment interface.
