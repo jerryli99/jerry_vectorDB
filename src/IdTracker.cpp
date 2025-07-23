@@ -1,5 +1,6 @@
 #include "../include/segment/IdTracker.h"
-namespace vectordb {
+namespace vectordb 
+{
 
 //if i added the delete operation, (soft delete) then I will need to add code to skip the marked id.
 std::optional<PointOffSetType> IdTracker::get_internal_id(PointIdType point_id) const {

@@ -3,12 +3,37 @@
 #include "DataTypes.h"
 #include "IdTracker.h"
 
-namespace vectordb {
 
-    
+/*
+Each segment has vectors, payloads stored.
+
+*/
+
+namespace vectordb 
+{
+
+class Segment 
+{
+public:
+
+
+
+};
+
 }
 
+/*
+Notes:
 
+There could be VectorStorageType::InMemory, Mmap, ChunkedMmap
+https://github.com/qdrant/qdrant/blob/master/lib/segment/src/segment_constructor/segment_constructor_base.rs
+
+Mmap on disk, not appendable
+Chunked mmap on disk, appendable
+
+However, now the focus is just inMemory so i will disreguard these.
+
+*/
 
 
 

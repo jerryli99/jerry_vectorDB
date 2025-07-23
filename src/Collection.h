@@ -3,7 +3,7 @@
 #include "DataTypes.h"
 #include "CollectionInfo.h"
 #include "SegmentRegistry.h"
-#include "Point.h" //not sure about this here...
+// #include "Point.h" //not sure about this here...
 
 namespace vectordb {
 

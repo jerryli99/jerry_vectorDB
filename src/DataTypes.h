@@ -13,7 +13,8 @@
  * Currently, I only consider the dense vector implementation
  */
 
-namespace vectordb {
+namespace vectordb 
+{
 
     using CollectionId = std::string;
 
@@ -21,7 +22,8 @@ namespace vectordb {
 
     // Dense vector
     //note: when using Faiss lib, do .data() to convert to float*
-    using DenseVector = Eigen::VectorXf;
+    // using DenseVector = Eigen::VectorXf;
+    using DenseVector = std::vector<float>;
 
     // Point ID (unique vector identifier) add UUID later
     using PointIdType = std::variant<std::string, uint64_t>;
@@ -59,7 +61,13 @@ namespace vectordb {
 
     enum class SegmentType {
         Appendable,
-        Immutable
+        Immutable,
     };
 
+    enum class SegmentStatus {
+        Empty,
+        Active,
+        Full,
+        NotFound,
+    };
  }

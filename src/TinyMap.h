@@ -82,7 +82,7 @@ public:
 
 
     bool erase(const K& key) {
-        for (std::size_t i = 0; i < size_; ++i) {
+        for (std::size_t i = 0; i < m_size; ++i) {
             if (m_data[i].first == key) {
                 m_data[i] = m_data[--m_size];  // Swap with last and shrink
                 return true;
