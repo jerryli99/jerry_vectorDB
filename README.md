@@ -1,5 +1,5 @@
 # jerry_vectorDB
-<!-- 
+
 //source: https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&linux-install=apt
 
 sudo apt update
@@ -37,4 +37,4 @@ probably use gRPC: so i write a c++ server, and then have clients in Go, Python,
 
 For configuration, maybe use TOML files just include the toml.hpp header..?
 
--->
+
