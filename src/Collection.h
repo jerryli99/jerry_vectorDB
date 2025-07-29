@@ -13,7 +13,7 @@ public:
     std::unique_ptr<SegmentRegistry> segment_register_;  // Or ShardMap in future
 
     void insert(...);
-    std::vector<Point> search(...);
+    // std::vector<Point> search(...);
 };
 
 }

@@ -4,3 +4,4 @@
 *.so
 random
 build
+rocksdb_benchmark

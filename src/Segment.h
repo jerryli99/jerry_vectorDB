@@ -2,21 +2,28 @@
 
 #include "DataTypes.h"
 #include "IdTracker.h"
-
+#include "Point.h"
 
 /*
 Each segment has vectors, payloads stored.
-
 */
 
-namespace vectordb 
-{
+namespace vectordb {
 
-class Segment 
-{
+class Segment {
 public:
+//Each segment will have their own id tracker. At the end, 
+//when searching, return the pointid and vector name.
+IdTracker id_tracker; 
+
+Segment();
+
+~Segment();
 
 
+
+//markVectorDelete()
+//FlushToDisk()
 
 };
 

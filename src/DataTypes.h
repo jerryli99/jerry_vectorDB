@@ -8,55 +8,53 @@
 #include <string>
 #include <variant>
 #include <cstdint>
+#include <filesystem>
 
 /**
- * Currently, I only consider the dense vector implementation
+ * Currently, I only consider the dense vector implementation, sparse vectors later
  */
 
-namespace vectordb 
-{
+namespace vectordb {
 
     using CollectionId = std::string;
 
     using VectorName = std::string;
 
     // Dense vector
-    //note: when using Faiss lib, do .data() to convert to float*
-    // using DenseVector = Eigen::VectorXf;
     using DenseVector = std::vector<float>;
 
     // Point ID (unique vector identifier) add UUID later
-    using PointIdType = std::variant<std::string, uint64_t>;
+    using PointIdType = std::string; //i will use uuid later. //std::variant<std::string, uint64_t>;
     
     //{point_id, distance}
-    using SearchResult = std::pair<PointIdType, float>;
+    using SearchResult = std::pair<PointIdType, float>;//?
 
     // Segment ID add UUID later
-    using SegmentIdType = uint64_t;
+    using SegmentIdType = std::string;
     
     using PointOffSetType = size_t;
 
-    // JSON-based metadata payload
     using Payload = nlohmann::json;
 
-    constexpr std::size_t MAX_SEGMENT_SIZE_KB = 100000;  // 100 MB
+    // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
 
-    const size_t FLUSH_THRESHOLD = 10000;  // configurable threshold??
+    const size_t INDEX_THRESHOLD_SIZE_BYTES = 1024 * 1024;  // configurable threshold??
+
+    //move these 2 later in config part...
+    const size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
+    const std::filesystem::path PAYLAOD_DIR = "./VectorDB_Payload";
 
     //max tinymap entries
     constexpr std::size_t MAX_ENTRIES_TINYMAP = 3;
 
-    enum class DistanceMetric {
-        L2,
-        DOT,
-        COSINE
-    };
+    // enum class DistanceMetric {
+    //     L2,
+    //     DOT,
+    //     COSINE
+    // };
 
     enum class CollectionStatus {
-        // //no idea yet
-        // Green,   // Ready
-        // Yellow,  // Degraded / partially loaded
-        // Red      // Loading or unavailable
+        //?
     };
 
     enum class SegmentType {
@@ -68,6 +66,24 @@ namespace vectordb
         Empty,
         Active,
         Full,
-        NotFound,
+        NewMerged,
+        None,
     };
  }
+
+
+     // using PayloadValue = std::variant<
+    //     int64_t,
+    //     double,
+    //     bool,
+    //     std::string,
+    //     std::vector<int64_t>,
+    //     std::vector<double>,
+    //     std::vector<bool>,
+    //     std::vector<std::string>,
+    // >; //skipped geo points here...
+    // using PayloadIDType = std::string;
+
+    // //intent: payload is stored per point not per named vector
+    // //this is more like a placeholder, we store payload in rocksdb
+    // using Payload = std::unordered_map<PayloadIDType, PayloadValue>;

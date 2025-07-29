@@ -31,7 +31,7 @@ namespace vectordb {
     struct NamedVectors {
 
     /**
-     * @brief The magic number here is hardcoded. Max expected for named vectors in one point is 8.
+     * @brief The magic number here is hardcoded. Max expected entries will depend on how many models you try to update.
      */
     TinyMap<VectorName, DenseVector, MAX_ENTRIES_TINYMAP> tinymap;
     

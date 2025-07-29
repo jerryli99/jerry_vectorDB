@@ -10,8 +10,6 @@ searching in parallel?
 
 #include "DataTypes.h"
 #include "SegmentHolder.h"
-#include "AppendableSegment.h"
-#include "ImmutableSegment.h"
 // // #include "SegmentUtils.h"
 #include <memory>
 #include <vector>
@@ -25,7 +23,7 @@ namespace vectordb
     public:
         void register_segment(const SegmentInfo& info);
         std::optional<SegmentInfo> get_segment_info(const std::string& id);
-        std::vector<SegmentInfo> list_all();
+        const std::vector<SegmentInfo> list_all();
         void mark_deleted(const std::string& id);
         void update_status(const std::string& id, SegmentStatus new_status);
 
