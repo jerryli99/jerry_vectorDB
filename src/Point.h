@@ -14,6 +14,7 @@ namespace vectordb {
     struct Point {
         PointIdType point_id;
         NamedVectors named_vecs;
-        //std::vector<std::pair<creationtime, std::string version>> point_info; ??
+        //in DataTypes.h have using Version = std::string;
+        //std::vector<std::pair<Version, NamedVectors>> vectors;
     };
 }

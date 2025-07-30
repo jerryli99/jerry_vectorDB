@@ -21,7 +21,7 @@ namespace vectordb {
     using VectorName = std::string;
 
     // Dense vector
-    using DenseVector = std::vector<float>;
+    using DenseVector = Eigen::VectorXf;
 
     // Point ID (unique vector identifier) add UUID later
     using PointIdType = std::string; //i will use uuid later. //std::variant<std::string, uint64_t>;
@@ -36,6 +36,7 @@ namespace vectordb {
 
     using Payload = nlohmann::json;
 
+    using AppendableStorage = std::vector<DenseVector>;
     // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
 
     const size_t INDEX_THRESHOLD_SIZE_BYTES = 1024 * 1024;  // configurable threshold??

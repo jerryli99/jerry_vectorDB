@@ -1,8 +1,8 @@
 #pragma once
 
-#include "/DataTypes.h"
+#include "DataTypes.h"
 
-#include <Eigen/Dense>
+// #include <Eigen/Dense> //no longer using this lib?
 #include <memory>
 #include <vector>
 #include <utility>
@@ -11,38 +11,18 @@
 
 /*
 In the future i will implement my own i guess...
+I just use faiss hnsw lib for prototyping...
 */
 
 // namespace vectordb {
 
-// class HnswVectorIndex {
-// public:
-//     HnswVectorIndex(size_t dim, 
-//                     DistanceMetric metric, 
-//                     size_t max_elements,
-//                     size_t M = 32, 
-//                     size_t ef_construction = 512);
+// class HNSWIndex {
 
-//     void addPoints(const DenseVector& vec, size_t id);
+//     public:
 
-//     std::vector<std::pair<size_t, float>> search(const DenseVector& query, int top_k) const;
 
-//     //update
+//     private:
 
-//     //delete
-//     //use bitmap or bitset?
-
-//     // Before adding/querying vectors, normalize them:
-//     DenseVector normalize(const DenseVector& vec);
-
-//     void setEf(size_t ef);
-
-// private:
-//     size_t dim_;
-//     DistanceMetric metric_;
-//     bool normalize_;
-//     std::unique_ptr<hnswlib::SpaceInterface<float>> space_;
-//     std::unique_ptr<hnswlib::HierarchicalNSW<float>> index_;
 // };
 
 // }

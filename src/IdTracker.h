@@ -9,13 +9,18 @@
 #include <stack>
 
 /*
-Used for hnsw indexing
+Used for converting external index (PointIDType) to internal index (sequential) hnsw indexing
+
+If we have 1000 segment objects, we have 1000 IdTracker objects
 */
 
 namespace vectordb {
 
 class IdTracker {
 public:
+    IdTracker() = default;
+    ~IdTracker();
+
     std::optional<PointOffSetType> get_internal_id(PointIdType point_id) const;
     std::optional<PointIdType> get_external_id(PointOffSetType offset) const;
 

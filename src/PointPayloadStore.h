@@ -31,7 +31,7 @@ public:
     std::vector<Payload> filterWithPayload(const std::string& metadata_field, const Payload& condition); //?
 
 private:
-    Payload metadata;
+    // Payload vec_metadata_;
     rocksdb::DB* db_;
     std::filesystem::path db_path_;
 };

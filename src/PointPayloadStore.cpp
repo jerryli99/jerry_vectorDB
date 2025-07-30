@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 namespace vectordb {
-    
+
 PointPayloadStore::PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb)
     : db_path_{db_path} {
     
@@ -56,11 +56,8 @@ std::optional<Payload> PointPayloadStore::getPayload(const PointIdType& id) {
     }
 
     try {
-        auto record = Payload::parse(value);
-        return Payload{
-            record["vector"].get<std::vector<float>>(),
-            record["metadata"]
-        };
+        auto metadata = Payload::parse(value);
+        return metadata;
     } catch (const Payload::exception& e) {
         throw std::runtime_error("Payload parse error: " + std::string(e.what()));
     }
@@ -73,33 +70,29 @@ void PointPayloadStore::deletePayload(const PointIdType& id) {
     }
 }
 
-std::vector<Payload> PointPayloadStore::filterWithPayload(
-    const std::string& metadata_field, const Payload& condition) {
+// std::vector<Payload> PointPayloadStore::filterWithPayload(
+//     const std::string& metadata_field, const Payload& condition) {
     
-    std::vector<Payload> results;
-    rocksdb::Iterator* it = db_->NewIterator(rocksdb::ReadOptions());
+//     std::vector<Payload> results;
+//     rocksdb::Iterator* it = db_->NewIterator(rocksdb::ReadOptions());
     
-    for (it->SeekToFirst(); it->Valid(); it->Next()) {
-        try {
-            auto record = Payload::parse(it->value().ToString());
-            const auto& metadata = record["metadata"];
+//     for (it->SeekToFirst(); it->Valid(); it->Next()) {
+//         try {
+//             auto metadata = Payload::parse(it->value().ToString());
             
-            if (metadata.contains(metadata_field)) {
-                if (metadata[metadata_field] == condition) {
-                    results.push_back({
-                        record["vector"].get<std::vector<float>>(),
-                        metadata
-                    });
-                }
-            }
-        } catch (const Payload::exception&) {
-            // Skip malformed entries
-            continue;
-        }
-    }
+//             if (metadata.contains(metadata_field)) {
+//                 if (metadata[metadata_field] == condition) {
+//                     results.push_back(metadata);
+//                 }
+//             }
+//         } catch (const Payload::exception&) {
+//             // Skip malformed entries
+//             continue;
+//         }
+//     }
     
-    delete it;
-    return results;
-}
+//     delete it;
+//     return results;
+// }
 
 }

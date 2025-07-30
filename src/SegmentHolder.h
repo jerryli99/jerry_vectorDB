@@ -23,23 +23,25 @@ namespace vectordb {
 
 class SegmentHolder {
 public:
-    uint64_t generate_new_key() {
+    //this function is temporary, i will use uuid lib later
+    std::string generate_new_key() {
         //generate key, and if key exists in the holder, regenerate. I will do this later
         next_id_ = next_id_ + 1;
-        return next_id_;
+        return ("seg_" + std::to_string(next_id_));
     }
 
     //The segment gets assigned a new unique ID.
-    void addSegment(SegmentEntry segment_entry) {
+    void addSegment(std::shared_ptr<Segment> segment, SegmentType segment_type) {
         //generate new segment id, add segment to the holder
-        uint64_t segment_id = generate_new_key();
-        m_segments[segment_id] = segment_entry;//potential overwrite if segment id is messed up?
+        SegmentEntry segment_entry {.segment_=segment, .type_=segment_type};
+        SegmentIdType segment_id = generate_new_key();
+        m_segments[segment_id] = segment_entry; //potential overwrite if segment id is messed up? or do i want to allow that?
     }
 
     std::optional<std::shared_ptr<Segment>> getSegment(SegmentIdType id) const {
         auto it = m_segments.find(id);
         if (it != m_segments.end()) {
-            return it->second.segment;
+            return it->second.segment_;
         } else {
             return std::nullopt;
         }
@@ -60,3 +62,10 @@ private:
 };
 
 } // namespace vectordb
+
+/*
+SegmentHolder seg_holder(...);
+seg_holder.addSegment(..);
+
+
+*/
