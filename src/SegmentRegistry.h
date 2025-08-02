@@ -5,6 +5,13 @@ where to insert,
 when to flush, 
 when to create or replace segments, 
 searching in parallel?
+
+Deciding where to insert new points.
+Tracking memory usage of segments.
+Triggering flushes (persist to disk) or segment compactions/merging.
+Initiating indexing on full segments.
+Coordinating searches across multiple segments in parallel.
+
 */
 #pragma once
 
@@ -16,20 +23,32 @@ searching in parallel?
 #include <utility>
 #include <atomic>
 
+/*
+Maybe do this later... I will just get the basics down for now.
+*/
 namespace vectordb 
 {
-
+    //monitors 
     class SegmentRegister {
     public:
-        void register_segment(const SegmentInfo& info);
-        std::optional<SegmentInfo> get_segment_info(const std::string& id);
-        const std::vector<SegmentInfo> list_all();
-        void mark_deleted(const std::string& id);
-        void update_status(const std::string& id, SegmentStatus new_status);
+
+        //adds segment segmentholder.addSegment()
+        void registerSegment();
+        
+        //calculate only the (vector dim) * (# of vectors) in segment
+        //maybe use lambda functions in future?
+        //if bytesize meets index threshold, call toImmutable()
+        const uint64_t calculateSegmentSizeBytes();
+        
+        void buildSegmentVectorIndex();
+        // void markDelete(const std::string& id);
+        
+        // void updateStatus(const std::string& id, SegmentStatus new_status);
 
     private:
-        std::unordered_map<std::string, SegmentInfo> registry;
+        SegmentHolder m_segment_holder;
         std::mutex mutex;
+        size_t vector_dim;
     };
 
 }

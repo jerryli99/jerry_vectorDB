@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <Eigen/Dense>
 #include <cstdint>
 #include <string>
@@ -20,8 +21,8 @@ namespace vectordb {
 
     using VectorName = std::string;
 
-    // Dense vector
-    using DenseVector = Eigen::VectorXf;
+    // Dense vector, since faiss uses row major order, i will have to do this.
+    using DenseVector = Eigen::Matrix<float, 1, Eigen::Dynamic, Eigen::RowMajor>;;
 
     // Point ID (unique vector identifier) add UUID later
     using PointIdType = std::string; //i will use uuid later. //std::variant<std::string, uint64_t>;
@@ -36,23 +37,23 @@ namespace vectordb {
 
     using Payload = nlohmann::json;
 
-    using AppendableStorage = std::vector<DenseVector>;
+    using AppendableStorage = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>; // std::vector<DenseVector>;
     // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
 
     const size_t INDEX_THRESHOLD_SIZE_BYTES = 1024 * 1024;  // configurable threshold??
 
     //move these 2 later in config part...
     const size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
-    const std::filesystem::path PAYLAOD_DIR = "./VectorDB_Payload";
+    const std::filesystem::path PAYLAOD_DIR = "./VectorDB/Payload";
 
     //max tinymap entries
-    constexpr std::size_t MAX_ENTRIES_TINYMAP = 3;
+    const size_t MAX_ENTRIES_TINYMAP = 3;
 
-    // enum class DistanceMetric {
-    //     L2,
-    //     DOT,
-    //     COSINE
-    // };
+    enum class DistanceMetric {
+        L2,
+        DOT,
+        COSINE
+    };
 
     enum class CollectionStatus {
         //?

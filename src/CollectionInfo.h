@@ -11,6 +11,8 @@ struct CollectionInfo {
     DistanceMetric metric;
     bool is_sharded;
     CollectionStatus status;  // e.g., Loaded, Unloaded, Building
+    //creation time
+    //memory or disk usage;
 };
 
 }

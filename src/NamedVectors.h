@@ -27,14 +27,26 @@
  *         note: for prototyping, this vector db only considers dense vector impl for now!! 
  */
 namespace vectordb {
-
+    /*
+    
+    */
     struct NamedVectors {
 
     /**
      * @brief The magic number here is hardcoded. Max expected entries will depend on how many models you try to update.
+     * But ideally less than 8
      */
     TinyMap<VectorName, DenseVector, MAX_ENTRIES_TINYMAP> tinymap;
     
+    /*
+    The issue is if User decides to apply different embedded models on the same data like 100 times,1000 times, 
+    etc.. than just N times where N is the number [1, 8] for some reason, then we will have to maintain this either
+    redesign a new DB internals or simply upload the old embedded vectors to cloud storage if we want. Hence this function.
+    
+    So this will eventually slow down insert and search time for sure. 
+    If distribute instead, then sharding collection obj, and then shard further the NamedVector obj?
+    */
+    void backupToS3Bucket(); //or make it distributed perhaps? void distributeNamedVectors();
     void preprocess();  // Optional: quantize vectors, etc. Meh.. thrug
 
     };

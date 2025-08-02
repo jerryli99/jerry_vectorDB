@@ -1,5 +1,11 @@
 # jerry_vectorDB
 
+Hello,
+
+This is my first time writing a DB, to be specific, a vector database that AI agents or future robots can possibily use some kind of DB like this. Just by thinking about this future is already exciting. I am still a C++ noob, but I feel like I should give it a try even though it could be hard, pointless, or feeling void. But even void has a pointer (void*), so I am heading to some direction.  
+
+
+```
 //source: https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&linux-install=apt
 
 sudo apt update
@@ -33,8 +39,23 @@ cmake -B build -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF .
 make -C build -j faiss
 sudo make -C build install
 
+//install grpc, just follow instructions from website
+
+
+//install protobuf, git clone lastest, 
+//cd in project, mkdir build && cd build
+//then cmake -Dprotobuf_BUILD_TESTS=OFF .. because there is some weird test error in their cmakefile
+//then do "make"
+//then either sudo make install or make install
+
+
+The library for C++ standards https://github.com/abseil/abseil-cpp/tree/master is quite interesting to study the fundamentals in C++17
+
+i have not tried to use the boost lib yet, so we will see how it goes.
+
 probably use gRPC: so i write a c++ server, and then have clients in Go, Python, Rust, Java etc... 
 
 For configuration, maybe use TOML files just include the toml.hpp header..?
 
+```
 

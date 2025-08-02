@@ -8,7 +8,7 @@
 
 namespace vectordb {
 
-PointPayloadStore::PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb)
+PointPayloadStore::PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb=0)
     : db_path_{db_path} {
     
     rocksdb::Options options;
@@ -69,30 +69,5 @@ void PointPayloadStore::deletePayload(const PointIdType& id) {
         throw std::runtime_error("Delete failed: " + status.ToString());
     }
 }
-
-// std::vector<Payload> PointPayloadStore::filterWithPayload(
-//     const std::string& metadata_field, const Payload& condition) {
-    
-//     std::vector<Payload> results;
-//     rocksdb::Iterator* it = db_->NewIterator(rocksdb::ReadOptions());
-    
-//     for (it->SeekToFirst(); it->Valid(); it->Next()) {
-//         try {
-//             auto metadata = Payload::parse(it->value().ToString());
-            
-//             if (metadata.contains(metadata_field)) {
-//                 if (metadata[metadata_field] == condition) {
-//                     results.push_back(metadata);
-//                 }
-//             }
-//         } catch (const Payload::exception&) {
-//             // Skip malformed entries
-//             continue;
-//         }
-//     }
-    
-//     delete it;
-//     return results;
-// }
 
 }

@@ -20,9 +20,13 @@ namespace vectordb {
 
 class CollectionContainer {
 public:
-    std::unordered_map<CollectionId, std::shared_ptr<Collection>> collections_;
+    void addCollection(const CollectionId& collection_name, Collection& collection);
+    void RemoveCollection(const CollectionId& collection_name);
+    void lookupCollection(const CollectionId& collection_name); //if exist print info
+    // void listAllCollectionInfo();
 
-    void insertTo(const CollectionId& collection_name, const Point& pt);
+private:
+    std::unordered_map<CollectionId, std::shared_ptr<Collection>> m_collections;
 };
 
-};
+}
