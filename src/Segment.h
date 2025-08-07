@@ -39,7 +39,15 @@ void searchTopK(size_t topK);
 void searchPoint(PointIdType pointid);
 
 
+/*
+Given a set of point ID's associated with vector name,
+iterate the whole DB? to mark the vector using bit?
+however, since deletion can involve rebuilding the whole segment or like merge
+new segments, I feel like this will 
+*/
 //markVectorDelete()
+
+
 //FlushToDisk()
 
 private:

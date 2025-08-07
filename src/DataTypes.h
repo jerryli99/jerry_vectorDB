@@ -40,14 +40,20 @@ namespace vectordb {
     using AppendableStorage = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>; // std::vector<DenseVector>;
     // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
 
-    const size_t INDEX_THRESHOLD_SIZE_BYTES = 1024 * 1024;  // configurable threshold??
+    /*
+    constexpr ensures compile-time evaluation (no runtime overhead).
+    inline prevents "multiple definition" errors when included in headers.
+    */
+    inline constexpr size_t INDEX_THRESHOLD_SIZE_BYTES = 1024 * 1024;  // configurable threshold??
 
     //move these 2 later in config part...
-    const size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
+    inline constexpr size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
     const std::filesystem::path PAYLAOD_DIR = "./VectorDB/Payload";
 
     //max tinymap entries
-    const size_t MAX_ENTRIES_TINYMAP = 3;
+    inline constexpr size_t MAX_ENTRIES_TINYMAP = 3;
+
+    inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024;
 
     enum class DistanceMetric {
         L2,

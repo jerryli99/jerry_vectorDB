@@ -22,6 +22,7 @@ public:
     ~Collection();
 
     //need to figure out the params here to interact with seg_holder.
+    //maybe pass in segment object
     void addSegments(...);
     void searchSegments(...);
     void printInfo();

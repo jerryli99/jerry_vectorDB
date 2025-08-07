@@ -2,7 +2,11 @@
 
 namespace vectordb {
 
-    void upsert(const std::vector<Point>& points) {
+    /*
+    So perhaps it is fine to add point ids to id tracker in appendable phase?
+    Because once we added our data to 
+    */
+    void upsert(const VectorName& vec_name, const DenseVector& dense_vec) {
         
     }
     /*

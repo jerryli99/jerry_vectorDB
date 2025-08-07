@@ -80,6 +80,7 @@
         "bitset": "cpp",
         "regex": "cpp",
         "future": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "csignal": "cpp"
     }
 }

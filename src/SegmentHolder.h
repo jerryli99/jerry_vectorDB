@@ -28,16 +28,25 @@ public:
 
     std::string generate_new_key();
     void addSegment(std::shared_ptr<Segment> segment);
-    std::optional<std::shared_ptr<Segment>> getSegment(SegmentIdType id) const;
-    const std::unordered_map<SegmentIdType, SegmentEntry> getAllSegments() const;
+    // std::optional<std::shared_ptr<Segment>> getSegment(SegmentIdType id) const;
+    void searchSegmentsTopK(...);
+    const std::vector<std::pair<SegmentIdType, SegmentEntry>> getAllSegments() const;
 
-    //delete segment
+    //delete segment?
 
     //merge segment: find the least amount of vectors among the segments, and then merge them together to a new one
 
+    
 private:
     mutable std::shared_mutex map_mutex_;//use this later i guess for now ignore this.
-    std::unordered_map<SegmentIdType, SegmentEntry> m_segments;//not thread safe yet or perhaps do object pool?
+
+    //I was going to use a hashmap for this, but then thought space might be not efficient because
+    //I will need to search through each segment though. Of course, if my indexing method changed, this will change..
+    std::vector<std::pair<SegmentIdType, SegmentEntry>> m_segments;//not thread safe yet
+    
+    //uhmm, if i want to lookup the segment id in the future, I could try to maintain a hashtable 
+    //where the segment id is the key and the value is the index of std::vector where the segment is located 
+    
     std::atomic<uint64_t> next_id_{0};//mayeb uuid is better for segment id?
 };
 
