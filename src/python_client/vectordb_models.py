@@ -1,10 +1,34 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Literal
 
 """
 OK, so for now I only supoprt ids of string type, no integer type.
 I can always add it later.
 """
+
+@dataclass
+class VectorParams:
+    size: int
+    distance: Literal["Cosine", "Euclidean", "Dot"]
+    on_disk: Optional[bool] = False
+
+    def to_dict(self):
+        return {
+            "size": self.size,
+            "distance": self.distance,
+            "on_disk": self.on_disk
+        }
+
+@dataclass
+class CreateCollectionRequest:
+    vectors: Union[VectorParams, Dict[str, VectorParams]]
+
+    def to_dict(self):
+        if isinstance(self.vectors, dict):
+            return {"vectors": {k: v.to_dict() for k, v in self.vectors.items()}}
+        return {"vectors": self.vectors.to_dict()}
+    
+
 
 @dataclass
 class PointStruct:

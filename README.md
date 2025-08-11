@@ -39,23 +39,26 @@ cmake -B build -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF .
 make -C build -j faiss
 sudo make -C build install
 
-//install grpc, just follow instructions from website
+//installing grpc is just not working for me because protobuf versions mismatch, even though 
+//I followed every instruction and watching old youtube videos or trying chatgpt stuff, spending
+//3 days and a lot of cmake build hours, still not working, so i have to move one to other alternatives.
 
-
+//----Yeah, ignore protobuf now---------
 //install protobuf, git clone lastest, 
 //cd in project, mkdir build && cd build
 //then cmake -Dprotobuf_BUILD_TESTS=OFF .. because there is some weird test error in their cmakefile
 //then do "make"
 //then either sudo make install or make install
+//-------------------------------------
 
 
 The library for C++ standards https://github.com/abseil/abseil-cpp/tree/master is quite interesting to study the fundamentals in C++17
 
-i have not tried to use the boost lib yet, so we will see how it goes.
+i have not tried to use the boost lib yet
 
-probably use gRPC: so i write a c++ server, and then have clients in Go, Python, Rust, Java etc... 
+https://capnproto.org/install.html for installing Cap'n Proto, better than protobuf
 
-For configuration, maybe use TOML files just include the toml.hpp header..?
 
+For configuration, uhm
 ```
 
