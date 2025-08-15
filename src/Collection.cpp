@@ -4,7 +4,8 @@ namespace vectordb {
 
     void Collection::addSegments(...) {
         //todo
-        m_seg_holder[]
+        //create segment obj
+             
     }
 
     void Collection::searchSegments(...) {

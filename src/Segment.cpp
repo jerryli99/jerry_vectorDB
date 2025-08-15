@@ -7,7 +7,8 @@ namespace vectordb {
     Because once we added our data to 
     */
     void upsert(const VectorName& vec_name, const DenseVector& dense_vec) {
-        
+        //warning, if we keep adding vectors, make sure once threshold is met, 
+        //create another segment for the rest remaining vectors?
     }
     /*
     Add all the vectors from appendable storage to building hnsw index with faisslib

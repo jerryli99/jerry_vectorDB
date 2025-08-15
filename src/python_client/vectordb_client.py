@@ -11,6 +11,16 @@ class VectorDBClient:
         url = f"{self.host}/collections/{name}"
         return self._put(url, config.to_dict())
 
+    def list_collections(self) -> Optional[dict]:
+        url = f"{self.host}/collections"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            print(f"[ERROR] {e}")
+            return None
+    
     def delete_collection(self, name: str) -> Optional[dict]:
         url = f"{self.host}/collections/{name}"
         return self._delete(url)

@@ -58,7 +58,7 @@ namespace vectordb {
     enum class DistanceMetric {
         L2,
         DOT,
-        COSINE
+        COSINE,
     };
 
     enum class CollectionStatus {
@@ -76,6 +76,11 @@ namespace vectordb {
         Full,
         NewMerged,
         None,
+    };
+
+    enum class WalTruncateMode {
+        FULL,
+        KEEP_LAST_N,
     };
  }
 

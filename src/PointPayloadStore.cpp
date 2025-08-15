@@ -9,7 +9,7 @@
 namespace vectordb {
 
 PointPayloadStore::PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb=0)
-    : db_path_{db_path} {
+    : m_rkdb_path{db_path} {
     
     rocksdb::Options options;
     options.create_if_missing = true;
@@ -25,18 +25,18 @@ PointPayloadStore::PointPayloadStore(const std::filesystem::path& db_path, size_
         options.table_factory.reset(rocksdb::NewBlockBasedTableFactory(table_options));
     }
 
-    rocksdb::Status status = rocksdb::DB::Open(options, db_path.string(), &db_);
+    rocksdb::Status status = rocksdb::DB::Open(options, db_path.string(), &m_rkdb);
     if (!status.ok()) {
         throw std::runtime_error("Failed to open RocksDB: " + status.ToString());
     }
 }
 
 PointPayloadStore::~PointPayloadStore() {
-    delete db_;
+    delete m_rkdb;
 }
 
 void PointPayloadStore::putPayload(const PointIdType& id, const Payload& data) {
-    rocksdb::Status status = db_->Put(
+    rocksdb::Status status = m_rkdb->Put(
         rocksdb::WriteOptions(), 
         id, 
         data.dump()
@@ -49,7 +49,7 @@ void PointPayloadStore::putPayload(const PointIdType& id, const Payload& data) {
 
 std::optional<Payload> PointPayloadStore::getPayload(const PointIdType& id) {
     std::string value;
-    rocksdb::Status status = db_->Get(rocksdb::ReadOptions(), id, &value);
+    rocksdb::Status status = m_rkdb->Get(rocksdb::ReadOptions(), id, &value);
     
     if (!status.ok()) {
         return std::nullopt;
@@ -64,7 +64,7 @@ std::optional<Payload> PointPayloadStore::getPayload(const PointIdType& id) {
 }
 
 void PointPayloadStore::deletePayload(const PointIdType& id) {
-    rocksdb::Status status = db_->Delete(rocksdb::WriteOptions(), id);
+    rocksdb::Status status = m_rkdb->Delete(rocksdb::WriteOptions(), id);
     if (!status.ok()) {
         throw std::runtime_error("Delete failed: " + status.ToString());
     }

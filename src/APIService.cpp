@@ -55,6 +55,28 @@ int main() {
         }
     });
 
+    // List Collections
+    svr.Get("/collections", [&](const httplib::Request& req, httplib::Response& res) {
+        try {
+            json result = json::array();
+            for (const auto& kv : collections) {
+                json entry;
+                entry["name"] = kv.first;
+                entry["config"] = kv.second.config;
+                result.push_back(entry);
+            }
+
+            res.set_content(json{
+                {"status", "ok"},
+                {"collections", result}
+            }.dump(), "application/json");
+
+        } catch (const std::exception &e) {
+            send_error(res, 500, std::string("Internal server error: ") + e.what());
+        } catch (...) {
+            send_error(res, 500, "Unknown error");
+        }
+    });
     // Delete Collection
     svr.Delete(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Response& res) {
         try {

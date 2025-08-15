@@ -1,8 +1,6 @@
 #pragma once
 
 #include "DataTypes.h"
-
-#include <filesystem>
 #include <rocksdb/db.h>
 // #include <rocksdb/options.h>
 
@@ -32,8 +30,8 @@ public:
 
 private:
     // Payload vec_metadata_;
-    rocksdb::DB* db_;
-    std::filesystem::path db_path_;
+    rocksdb::DB* m_rkdb;
+    std::filesystem::path m_rkdb_path;
 };
 
 }
