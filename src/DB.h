@@ -6,6 +6,8 @@
 namespace vectordb{
     class DB {
         public:
+            DB() = default;
+            ~DB() = default;
             //config collection obj
             void createCollection(...);
             void listCollections(...);

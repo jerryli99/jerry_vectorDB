@@ -20,6 +20,8 @@ namespace vectordb {
 
 class CollectionContainer {
 public:
+    CollectionContainer() = default;
+    ~CollectionContainer() = default;
     void addCollection(const CollectionId& collection_name, Collection& collection);
     void RemoveCollection(const CollectionId& collection_name);
     void lookupCollection(const CollectionId& collection_name); //if exist print info
