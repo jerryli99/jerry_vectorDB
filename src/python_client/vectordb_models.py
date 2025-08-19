@@ -9,7 +9,7 @@ I can always add it later.
 @dataclass
 class VectorParams:
     size: int
-    distance: Literal["Cosine", "Euclidean", "Dot"]
+    distance: Literal["Cosine", "L2", "Dot"]
     on_disk: Optional[bool] = False
 
     def to_dict(self):

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <Eigen/Dense>
+// #include <Eigen/Dense> //ahh, this eigen thing is really annoying
 #include <cstdint>
 #include <string>
 #include <optional>
@@ -22,7 +22,7 @@ namespace vectordb {
     using VectorName = std::string;
 
     // Dense vector, since faiss uses row major order, i will have to do this.
-    using DenseVector = Eigen::Matrix<float, 1, Eigen::Dynamic, Eigen::RowMajor>;;
+    using DenseVector = std::vector<float>; //Eigen::Matrix<float, 1, Eigen::Dynamic, Eigen::RowMajor>;
 
     // Point ID (unique vector identifier) add UUID later
     using PointIdType = std::string; //i will use uuid later. //std::variant<std::string, uint64_t>;
@@ -37,7 +37,7 @@ namespace vectordb {
 
     using Payload = nlohmann::json;
 
-    using AppendableStorage = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>; // std::vector<DenseVector>;
+    using AppendableStorage = std::vector<DenseVector>;//Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
     // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
 
     /*

@@ -17,8 +17,9 @@ def run_tests():
     # Create collection with multiple named vectors
     multi_config = models.CreateCollectionRequest(
         vectors={
-            "image": models.VectorParams(size=4, distance="Dot"),
+            "image": models.VectorParams(size=4, distance="Dot", on_disk=True),
             "text": models.VectorParams(size=5, distance="Cosine"),
+            "audio": models.VectorParams(size=3, distance="L2")
         }
     )
     print("Test 2: Create multi-vector collection")
@@ -46,8 +47,8 @@ def run_tests():
     print(client.upsert("multi_collection", batch))
 
     # # Delete collections
-    # print("Test 5: Delete single_collection")
-    # print(client.delete_collection("single_collection"))
+    print("Test 5: Delete single_collection")
+    print(client.delete_collection("single_collection"))
 
     # print("Test 6: Delete multi_collection")
     # print(client.delete_collection("multi_collection"))
