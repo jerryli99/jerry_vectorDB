@@ -35,6 +35,9 @@ namespace vectordb {
     
     using PointOffSetType = size_t;
 
+    using json = nlohmann::json;
+
+    //use this name for better type identification
     using Payload = nlohmann::json;
 
     using AppendableStorage = std::vector<DenseVector>;//Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -48,10 +51,12 @@ namespace vectordb {
 
     //move these 2 later in config part...
     inline constexpr size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
+
+    //could be adjusted, uhm, yeah i am thinking about just to have a config file here..but whatever, get the job done first.
     const std::filesystem::path PAYLAOD_DIR = "./VectorDB/Payload";
 
     //max tinymap entries
-    inline constexpr size_t MAX_ENTRIES_TINYMAP = 3;
+    inline constexpr size_t MAX_ENTRIES_TINYMAP = 4;
 
     inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024;
 
@@ -63,6 +68,14 @@ namespace vectordb {
 
     enum class CollectionStatus {
         //?
+    };
+
+    //i mean obiviously there are more types of error,
+    //but i am lazy now to add more
+    enum class APIErrorType {
+        UserInput,
+        Server,
+        Connection
     };
 
     enum class SegmentType {
@@ -83,20 +96,3 @@ namespace vectordb {
         KEEP_LAST_N,
     };
  }
-
-
-     // using PayloadValue = std::variant<
-    //     int64_t,
-    //     double,
-    //     bool,
-    //     std::string,
-    //     std::vector<int64_t>,
-    //     std::vector<double>,
-    //     std::vector<bool>,
-    //     std::vector<std::string>,
-    // >; //skipped geo points here...
-    // using PayloadIDType = std::string;
-
-    // //intent: payload is stored per point not per named vector
-    // //this is more like a placeholder, we store payload in rocksdb
-    // using Payload = std::unordered_map<PayloadIDType, PayloadValue>;

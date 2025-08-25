@@ -8,6 +8,9 @@
 Perhaps each Point has a version, so perhaps different payload versions. 
 Well this is too much work, so I might update the code for handling this
 if i ever have time.
+
+Note:
+I am trying to make Payload per Point storage not per named vector here, so yeah.
 */
 
 namespace vectordb {

@@ -64,6 +64,11 @@ class VectorDBClient:
             response = requests.post(url, json=data)
             response.raise_for_status()
             return response.json()
+        except requests.HTTPError:
+            try:
+                return response.json()
+            except ValueError:
+                return {"status": "error", "message": response.text}
         except requests.RequestException as e:
             print(f"[ERROR] {e}")
             return None
@@ -73,6 +78,11 @@ class VectorDBClient:
             response = requests.put(url, json=data)
             response.raise_for_status()
             return response.json()
+        except requests.HTTPError:
+            try:
+                return response.json()
+            except ValueError:
+                return {"status": "error", "message": response.text}
         except requests.RequestException as e:
             print(f"[ERROR] {e}")
             return None
@@ -82,6 +92,11 @@ class VectorDBClient:
             response = requests.delete(url)
             response.raise_for_status()
             return response.json()
+        except requests.HTTPError:
+            try:
+                return response.json()
+            except ValueError:
+                return {"status": "error", "message": response.text}
         except requests.RequestException as e:
             print(f"[ERROR] {e}")
             return None

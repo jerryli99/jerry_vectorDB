@@ -1,0 +1,109 @@
+Server listening on http://127.0.0.1:8989
+Create collection: single_collection
+{
+    "vectors": {
+        "distance": "Cosine",
+        "on_disk": false,
+        "size": 4
+    }
+}
+  Vector name: default
+    distance: Cosine
+    size: 4
+    on_disk: false
+Create collection: multi_collection
+{
+    "vectors": {
+        "audio": {
+            "distance": "L2",
+            "on_disk": false,
+            "size": 3
+        },
+        "image": {
+            "distance": "Dot",
+            "on_disk": true,
+            "size": 4
+        },
+        "text": {
+            "distance": "Cosine",
+            "on_disk": false,
+            "size": 5
+        }
+    }
+}
+Multi named vector collection detected:
+  Vector name: audio
+    distance: L2
+    size: 3
+    on_disk: false
+  Vector name: image
+    distance: Dot
+    size: 4
+    on_disk: true
+  Vector name: text
+    distance: Cosine
+    size: 5
+    on_disk: false
+Received /upsert request:
+{
+    "collection_name": "single_collection",
+    "points": [
+        {
+            "id": "22s3",
+            "payload": {
+                "label": "cat"
+            },
+            "vector": [
+                0.1,
+                0.2,
+                0.3,
+                0.4
+            ]
+        },
+        {
+            "id": "12wer",
+            "payload": {
+                "label": "dog"
+            },
+            "vector": [
+                0.5,
+                0.6,
+                0.7,
+                0.8
+            ]
+        }
+    ]
+}
+Received /upsert request:
+{
+    "collection_name": "multi_collection",
+    "points": {
+        "ids": [
+            "12",
+            "ew"
+        ],
+        "payloads": [
+            {
+                "label": "bird"
+            },
+            {
+                "label": "fish"
+            }
+        ],
+        "vectors": [
+            [
+                0.9,
+                1.0,
+                1.1,
+                1.2
+            ],
+            [
+                1.3,
+                1.4,
+                1.5,
+                1.6
+            ]
+        ]
+    }
+}
+Delete collection: single_collection

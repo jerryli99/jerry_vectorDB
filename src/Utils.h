@@ -44,4 +44,30 @@ std::string to_string(DistanceMetric m) {
     }
 }
 
+//APIErrorType defined in DataTypes,
+//the purpose of having it is for type safety? perhaps.
+//not sure how people in the industry like to handle this kind of stuff.
+std::string to_string(APIErrorType type) {
+    switch (type) {
+        case APIErrorType::UserInput: return "user_input_error";
+        case APIErrorType::Server: return "server_error";
+        case APIErrorType::Connection: return "connection_error";
+    }
+    return "error";
+}
+
+//yes, a more generatic api send_error method here;
+//by default error type, it is server side error.
+void api_send_error(httplib::Response &res,
+                    int status_code,
+                    const std::string &message,
+                    APIErrorType type = APIErrorType::Server) {
+    res.status = status_code;
+    res.set_content(json{
+        {"status", to_string(type)},
+        {"message", message}
+    }.dump(), "application/json");
+}
+
+
 }

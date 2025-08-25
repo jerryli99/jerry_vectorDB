@@ -2,9 +2,12 @@
 
 namespace vectordb {
 
+    Collection::Collection(const CollectionId& id, const CollectionInfo& info) : m_collectionid {id}, m_collection_info {info} {}
+
     void Collection::addSegments(...) {
         //todo
         //create segment obj
+        
              
     }
 

@@ -7,12 +7,12 @@ namespace vectordb{
 class DB {
     public:
         DB() = default;
-        ~DB() = default;
+        ~DB() = default; //?? ehm, we will see about this part. 
         //config collection obj
-        void createCollection(...);
+        void addCollection(...);
         void listCollections(...);
         void deleteCollection(...);
-        void upsertToCollection(...);
+        void upsertPointToCollection(...);
 
         //size_t topK, collectioName
         void searchTopKInCollection(...);
