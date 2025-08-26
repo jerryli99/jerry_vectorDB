@@ -12,15 +12,15 @@ class DB {
         ~DB() = default; //?? ehm, we will see about this part. 
         //config collection obj
         Status addCollection(const CollectionId& collection_name, const json& config_json);
-        void listCollections(...);
-        void deleteCollection(...);
-        void upsertPointToCollection(...);
+        json listCollections();
+        Status deleteCollection(const CollectionId& collection_name);
+        Status upsertPointToCollection(const CollectionId& collection_name, ...);
 
         //size_t topK, collectioName
         void searchTopKInCollection(...);
 
     private:
-        CollectionContainer m_collection_container;
+        CollectionContainer container;
 };
 
 }

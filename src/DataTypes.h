@@ -56,7 +56,7 @@ namespace vectordb {
     const std::filesystem::path PAYLAOD_DIR = "./VectorDB/Payload";
 
     //max tinymap entries
-    inline constexpr size_t MAX_ENTRIES_TINYMAP = 2;
+    inline constexpr size_t MAX_ENTRIES_TINYMAP = 3;
 
     inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024;
 

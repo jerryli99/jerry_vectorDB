@@ -3,8 +3,15 @@
 
 namespace vectordb {
 Status DB::addCollection(const CollectionId& collection_name, const json& config_json) {
+
+    //just double checking here.
+    if (container.m_collections.find(collection_name) != container.m_collections.end()) {
+        return Status::Error("Collection already exists: " + collection_name);
+    }
+
     CollectionInfo collection_info;
     collection_info.name = collection_name;
+    
 
     // Case 1: multi named vectors
     bool is_multi = false;
@@ -45,7 +52,44 @@ Status DB::addCollection(const CollectionId& collection_name, const json& config
 
     auto collection = std::make_unique<Collection>(collection_name, collection_info);
 
+    CollectionEntry entry;
+    entry.collection = std::move(collection);
+    entry.config = config_json;
+
+    container.m_collections[collection_name] = std::move(entry);
+
     return Status::OK();
 }
 
+json DB::listCollections() {
+    json result = json::array();
+
+    for (const auto& [name, entry] : container.m_collections) {
+        json item = {
+            {"name", name},
+            {"config", entry.config}
+        };
+        result.push_back(item);
+    }
+
+    return {
+        {"status", "ok"},
+        {"collections", result}
+    };
 }
+
+Status DB::deleteCollection(const CollectionId& collection_name) {
+    auto it = container.m_collections.find(collection_name);
+    if (it == container.m_collections.end()) {
+        return Status::Error("Collection does not exist: " + collection_name);
+    } 
+    container.m_collections.erase(it); //
+    return Status::OK();
+}
+
+Status DB::upsertPointToCollection(const CollectionId& collection_name, ...) {
+
+    return Status::OK();
+}
+
+}// end of vectordb namespace

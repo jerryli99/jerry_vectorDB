@@ -18,18 +18,27 @@
  */
 namespace vectordb {
 
+struct CollectionEntry {
+    std::unique_ptr<Collection> collection;
+    json config;
+};
+
 class CollectionContainer {
 public:
     CollectionContainer() = default;
     ~CollectionContainer() = default;
-    void addCollection(const CollectionId& collection_name, std::unique_ptr<Collection> collection);
-    void RemoveCollection(const CollectionId& collection_name);
-    void lookupCollection(const CollectionId& collection_name); //if exist print info
-    // void listAllCollectionInfo();
-
-private:
-    std::unordered_map<CollectionId, std::unique_ptr<Collection>> m_collections;
-
+    //well since i am already using unordered_map, i think add, remove, lookup is handled?
+    std::unordered_map<CollectionId, CollectionEntry> m_collections;
+    //maybe have something else here...
 };
 
 }
+
+/*
+//     void addCollection(const CollectionId& collection_name, std::unique_ptr<Collection> collection);
+//     void RemoveCollection(const CollectionId& collection_name);
+//     void lookupCollection(const CollectionId& collection_name); //if exist print info
+//     // void listAllCollectionInfo();
+
+// private:
+*/
