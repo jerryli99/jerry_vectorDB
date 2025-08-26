@@ -1,11 +1,12 @@
 #include "CollectionContainer.h"
 
 namespace vectordb {
-    void CollectionContainer::addCollection(const CollectionId& collection_name, Collection& collection) {
+    void CollectionContainer::addCollection(const CollectionId& collection_name, std::unique_ptr<Collection> collection) {
         if (m_collections.find(collection_name) != m_collections.end()) {
             throw std::runtime_error("Collection \"" + collection_name + "\" already exists.");
         }
-        m_collections[collection_name] = std::make_shared<Collection>(collection);
+        m_collections[collection_name] = std::move(collection);//transfer ownership 
+
     }
 
     void CollectionContainer::RemoveCollection(const CollectionId& collection_name) {

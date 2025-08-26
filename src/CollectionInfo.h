@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataTypes.h"
+#include "TinyMap.h"
 
 namespace vectordb {
 
@@ -9,18 +10,18 @@ namespace vectordb {
 struct VectorSpec {
     size_t dim;
     DistanceMetric metric;
+    bool on_disk = false; 
+    //bool is_sharded = false;//Uhm, maybe use this after i got the first version of the db working
+    //shard_key...
+    //create_timestamp...
 };
 
 //The name CollectionInfo is vague here for sure, like is it a schema or something metadata?
 //well i am still learning DB implementations and terminologies, so i will figure it out later.
 struct CollectionInfo {
     CollectionId name;//i think i will still keep the name here just in case i need it for something else.
-    CollectionStatus status;  // e.g., Loaded, Unloaded, Building
+    // CollectionStatus status;  // e.g., Loaded, Unloaded, Building
     TinyMap<VectorName, VectorSpec, MAX_ENTRIES_TINYMAP> vec_specs; //vector specifications, lol not sure if this is a good name
-    bool is_sharded;//Uhm, maybe use this after i got the first version of the db working
-    bool on_disk; //ignore this for now, will do this later.
-    //creation time
-    //memory or disk usage;
 };
 
 }

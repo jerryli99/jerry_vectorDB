@@ -1,7 +1,9 @@
 #pragma once
 
 #include "DataTypes.h"
+#include "Collection.h"
 #include "CollectionContainer.h"
+#include "Status.h"
 
 namespace vectordb{
 class DB {
@@ -9,7 +11,7 @@ class DB {
         DB() = default;
         ~DB() = default; //?? ehm, we will see about this part. 
         //config collection obj
-        void addCollection(...);
+        Status addCollection(const CollectionId& collection_name, const json& config_json);
         void listCollections(...);
         void deleteCollection(...);
         void upsertPointToCollection(...);

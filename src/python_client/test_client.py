@@ -50,8 +50,8 @@ def run_tests():
     print("Test 5: Delete single_collection")
     print(client.delete_collection("single_collection"))
 
-    # print("Test 6: Delete multi_collection")
-    # print(client.delete_collection("multi_collection"))
+    print("Test 6: Delete multi_collection")
+    print(client.delete_collection("multi_collection"))
 
     # List after deletion
     print("Test 7: List collections after deletion")

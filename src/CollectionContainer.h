@@ -2,7 +2,7 @@
 
 #include "DataTypes.h"
 #include "Collection.h"
-#include "Point.h"
+// #include "Point.h"
 
 /**
  * @brief CollectionContainer will be a hashmap for storing the collections. 
@@ -22,13 +22,14 @@ class CollectionContainer {
 public:
     CollectionContainer() = default;
     ~CollectionContainer() = default;
-    void addCollection(const CollectionId& collection_name, Collection& collection);
+    void addCollection(const CollectionId& collection_name, std::unique_ptr<Collection> collection);
     void RemoveCollection(const CollectionId& collection_name);
     void lookupCollection(const CollectionId& collection_name); //if exist print info
     // void listAllCollectionInfo();
 
 private:
-    std::unordered_map<CollectionId, std::shared_ptr<Collection>> m_collections;
+    std::unordered_map<CollectionId, std::unique_ptr<Collection>> m_collections;
+
 };
 
 }

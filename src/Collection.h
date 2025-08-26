@@ -2,8 +2,8 @@
 
 #include "DataTypes.h"
 #include "CollectionInfo.h"
-#include "SegmentRegistry.h"
-#include "SegmentHolder.h"
+// #include "SegmentRegistry.h"//later add this
+// #include "SegmentHolder.h"
 
 // #include "Point.h" //not sure about this here...
 
@@ -15,7 +15,7 @@ namespace vectordb {
 class Collection {
 public:
     Collection(const CollectionId& id, const CollectionInfo& info);
-    ~Collection();
+    ~Collection() = default;
 
     //need to figure out the params here to interact with seg_holder.
     //maybe pass in segment object
@@ -29,7 +29,7 @@ private:
 
     //later use segment_registry, but for now just segmentholder
     //shouldn’t go into CollectionInfo because you don’t want metadata to depend on runtime memory objects.
-    SegmentHolder m_seg_holder;
+    // SegmentHolder m_seg_holder;
 };
 
 }
