@@ -20,7 +20,12 @@ namespace vectordb {
 
 struct CollectionEntry {
     std::unique_ptr<Collection> collection;
-    json config;
+    json config; //collection's json config
+
+    // Useful metadata
+    // size_t num_points = 0;
+    // Vector clock for causal reasoning and conflict resolution
+    // VectorClock version;
 };
 
 class CollectionContainer {
@@ -29,16 +34,16 @@ public:
     ~CollectionContainer() = default;
     //well since i am already using unordered_map, i think add, remove, lookup is handled?
     std::unordered_map<CollectionId, CollectionEntry> m_collections;
+    size_t size() const;
     //maybe have something else here...
+    // json get_stats() const 
+    // size_t estimate_memory_usage() const
+    // cleanup_expired_collections()
+    // bool can_create_more_collections() const
+    // void restore_from_snapshot(const json& snapshot)
+    // json snapshot() const //well this guy will be in snapshot class i think, i just put it here...
+    // bool update_collection_config(const CollectionId& id, const json& new_config, 
+    //                              const VectorClock& incoming_version)       
 };
 
 }
-
-/*
-//     void addCollection(const CollectionId& collection_name, std::unique_ptr<Collection> collection);
-//     void RemoveCollection(const CollectionId& collection_name);
-//     void lookupCollection(const CollectionId& collection_name); //if exist print info
-//     // void listAllCollectionInfo();
-
-// private:
-*/

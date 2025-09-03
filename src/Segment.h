@@ -12,6 +12,47 @@ Each segment has vectors, payloads stored.
 
 
 Uhm, still thinking about adding SegmentInfo struct.
+
+
+----------Data In-----\
+                      |
+                      |
+                      V
++----------------------------------------------------+
+|                   SEGMENT                          |
+|                                                    |
+|  +-------------------+                             |
+|  | Appendable buffer |                             |
+|  |   vector[]        |                             |
+|  |add batch to FAISS |                             |
+|  +-------------------+                             |
+|           |                                        |
+|           |                (notes: use bitmap?)    |
+|           v              (pre-filter, multitenant) |
+|  +-------------------+    +-------------------+    |
+|  |  Vector Index     |    |  Inverted Index   |    |
+|  |  (FAISS HNSW)     |    |  (per field map)  |    |
+|  |                   |    |                   |    |
+|  |  ID → vector[]    |    |user_id=42 → [1,7,9]    |
+|  |  HNSW graph       |    |user_id=99 → [2,5,8]    |
+|  |                   |    |category="img" → [5,9]  |
+|  +-------------------+    +-------------------+    |
+|             ^                         ^            |
+|             |                         |            |
+|             |                         |            |
+|        +--------------------------------------+    |
+|        |         Point Metadata Store         |    |
+|        |   ID → payload JSON (key/value)      |    |
+|        |   Example:                           |    |
+|        | 7 → { "user_id":42, "category":"txt"}|    |
+|        +--------------------------------------+    |
+|                                                    |
+|  +---------------------------------------------+   |
+|  |   ID Map                                    |   |
+|  |   external_id → internal_id (used by HNSW)  |   |
+|  +---------------------------------------------+   |
++----------------------------------------------------+
+
 */
 
 
