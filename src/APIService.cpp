@@ -45,7 +45,7 @@ svr.Put(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Respon
             return;
         }
 
-        vectordb::json config_json = json_body["vectors"];
+        vectordb::json& config_json = json_body["vectors"];
 
         if (config_json.is_object()) {
             auto status = vec_db->addCollection(collection_name, config_json);
@@ -160,13 +160,13 @@ svr.Post("/upsert", [&](const httplib::Request& req, httplib::Response& res) {
 
         auto points_json = json_body["points"];
 
-        auto status = vec_db->upsertPointToCollection(collection_name, points_json);
+        auto status = vec_db->upsertPointsToCollection(collection_name, points_json);
 
         if (!status.ok) {
             vectordb::api_send_error(res, 404, status.message, vectordb::APIErrorType::UserInput);
-        } else {
-            vectordb::api_send_error(res, 400, status.message, vectordb::APIErrorType::UserInput);
         }
+        
+        res.set_content(R"({"status":"ok"})", "application/json");
 
     } catch (const vectordb::json::parse_error &e) {
         vectordb::api_send_error(res, 400, std::string("Invalid JSON: ") + e.what(), vectordb::APIErrorType::UserInput);

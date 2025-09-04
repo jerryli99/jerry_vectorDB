@@ -18,7 +18,6 @@ namespace vectordb {
 
     void Collection::printInfo() {
         //print the m_collection_info here
-        std::cout << m_collectionid;
     }
 
 }

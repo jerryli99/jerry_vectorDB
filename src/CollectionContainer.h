@@ -2,6 +2,9 @@
 
 #include "DataTypes.h"
 #include "Collection.h"
+#include "Status.h"
+#include <shared_mutex>
+
 // #include "Point.h"
 
 /**
@@ -32,9 +35,22 @@ class CollectionContainer {
 public:
     CollectionContainer() = default;
     ~CollectionContainer() = default;
-    //well since i am already using unordered_map, i think add, remove, lookup is handled?
-    std::unordered_map<CollectionId, CollectionEntry> m_collections;
+
+    Status addCollection(const CollectionId& name, CollectionEntry entry);
+    
+    CollectionEntry* getCollection(const CollectionId& name);
+    const CollectionEntry* getCollection(const CollectionId& name) const;
+
+    std::vector<CollectionId> getCollectionNames() const;
+
+    bool contains(const CollectionId& name) const;
+    bool removeCollection(const CollectionId& name);
+
+    // Get a collection's specific mutex for fine-grained locking
+    std::shared_mutex& getCollectionMutex(const CollectionId& name);
+
     size_t size() const;
+    
     //maybe have something else here...
     // json get_stats() const 
     // size_t estimate_memory_usage() const
@@ -43,7 +59,12 @@ public:
     // void restore_from_snapshot(const json& snapshot)
     // json snapshot() const //well this guy will be in snapshot class i think, i just put it here...
     // bool update_collection_config(const CollectionId& id, const json& new_config, 
-    //                              const VectorClock& incoming_version)       
+    //                              const VectorClock& incoming_version)
+private:       
+    mutable std::shared_mutex m_mutex; //for read-write lock, multiple reads (shared lock), 1 write (unique lock),
+    mutable std::unordered_map<CollectionId, std::shared_mutex> m_collection_mutexes; //mutable allows const methods to lock
+    //well since i am already using unordered_map, i think add, remove, lookup is handled?
+    std::unordered_map<CollectionId, CollectionEntry> m_collections;
 };
 
 }

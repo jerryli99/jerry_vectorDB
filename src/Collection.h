@@ -23,7 +23,7 @@ public:
     void searchSegments(...);
     void printInfo();
 
-private:
+// private:
     CollectionId m_collectionid;
     CollectionInfo m_collection_info; //include collection_id in this struct
 

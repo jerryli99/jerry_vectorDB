@@ -22,7 +22,7 @@ inline auto parse_distance(const std::string& s) -> DistanceMetric {
     } else if (s_lower == "cosine") {
         return DistanceMetric::COSINE;
     } else {
-        throw std::invalid_argument("Unknown distance metric: " + s);
+        return DistanceMetric::UNKNOWN;
     }
 }
 

@@ -64,6 +64,7 @@ namespace vectordb {
         L2,
         DOT,
         COSINE,
+        UNKNOWN,
     };
 
     enum class CollectionStatus {

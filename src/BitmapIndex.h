@@ -20,6 +20,18 @@ bitmap:   0 1 1 0 0 0 1 0 0 0
 Intersection = bitwise AND:
 ID:       0 1 2 3 4 5 6 7 8 9
 result    0 1 0 0 0 0 1 0 0 0 = candidate IDs {1, 6}
+
+i might treat this bitmap like a matrix (but i use map keyword) for each segment.
+...or you call it bit matrix.
+
+pointid  0   1   2   3   4   5   6
+filter1 [1 , 0 , 0 , 0 , 0 , 0 , 0 , ...]
+filter2 [1 , 0 , 0 , 0 , 0 , 0 , 1 , ...]
+filter3 [1 , 0 , 0 , 0 , 1 , 0 , 0 , ...]
+
+Then i can just do matrix operations on this. 
+
+
 */
 
 namespace vectordb {

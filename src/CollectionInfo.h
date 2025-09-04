@@ -21,7 +21,8 @@ struct VectorSpec {
 struct CollectionInfo {
     CollectionId name;//i think i will still keep the name here just in case i need it for something else.
     // CollectionStatus status;  // e.g., Loaded, Unloaded, Building
-    TinyMap<VectorName, VectorSpec, MAX_ENTRIES_TINYMAP> vec_specs; //vector specifications, lol not sure if this is a good name
+    std::map<VectorName, VectorSpec> vec_specs; //vector specifications, lol not sure if this is a good name
+    
 };
 
 }
