@@ -4,6 +4,35 @@ Hello,
 
 This is my first time writing a DB, to be specific, a vector database that AI agents or future robots can possibily use some kind of DB like this. Just by thinking about this future is already exciting. I am still a C++ noob, but I feel like I should give it a try even though it could be hard, pointless, or feeling void. But even void has a pointer (void*), so I am heading to some direction.  
 
+API Schema
+
+upsert an array of this:
+```
+(single vector per point)
+{
+  "id": "22s3",
+  "vector": [0.1, 0.2, 0.3, 0.4],
+  "payload": { "label": "cat" }
+}
+```
+
+or upsert an array of this:
+```
+(multi vector per point)
+{
+  "id": "img_1",
+  "vector": {
+    "image": [0.1, 0.2, 0.3],
+    "text": [0.3, 0.6, 0.7],
+    ...
+  },
+  "payload": { "type": "image+text" }
+}
+```
+
+
+
+Below is just some libs i used for this project.
 
 ```
 //source: https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-download.html?operatingsystem=linux&linux-install=apt

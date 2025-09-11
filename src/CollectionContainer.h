@@ -22,7 +22,7 @@
 namespace vectordb {
 
 struct CollectionEntry {
-    std::unique_ptr<Collection> collection;
+    std::shared_ptr<Collection> collection;
     json config; //collection's json config
 
     // Useful metadata

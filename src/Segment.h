@@ -98,8 +98,8 @@ size_t m_vector_dim;
 IdTracker m_pointid_tracker; 
 SegmentIdType m_segmentid;
 PointPayloadStore m_payload_store;//can init this later in constructor
-SegmentType m_seg_type {SegmentType::Appendable}; //by default;
-AppendableStorage m_append_store;
+// SegmentType m_seg_type {SegmentType::Appendable}; //by default;
+// AppendableStorage m_append_store;
 size_t m_append_count{0};
 std::unique_ptr<faiss::IndexHNSWFlat> m_hnsw_index;
 

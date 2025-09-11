@@ -95,41 +95,6 @@ Status DB::deleteCollection(const CollectionId& collection_name) {
     return Status::Error("Collection does not exist: " + collection_name);
 }
 
-// Helper: validate and parse a single vector against spec
-StatusOr<DenseVector> validateVector(
-    const VectorName& name,
-    const json& jvec,
-    const CollectionInfo& collection_info)
-{
-    // Ensure it's an array
-    if (!jvec.is_array()) {
-        return Status::Error("Vector '" + name + "' must be an array of floats");
-    }
-
-    // Check schema
-    auto it_spec = collection_info.vec_specs.find(name);
-    if (it_spec == collection_info.vec_specs.end()) {
-        return Status::Error("Unknown vector name '" + name + "'");
-    }
-
-    // Validate elements
-    for (const auto& elem : jvec) {
-        if (!elem.is_number()) {
-            return Status::Error("Vector '" + name + "' must contain only numeric values");
-        }
-    }
-
-    // Parse and validate dimension
-    auto vec = jvec.get<DenseVector>();
-    if (vec.size() != it_spec->second.dim) {
-        return Status::Error("Dimension mismatch for '" + name +
-                             "': expected " + std::to_string(it_spec->second.dim) +
-                             ", got " + std::to_string(vec.size()));
-    }
-
-    return vec;
-}
-
 
 Status DB::upsertPointsToCollection(const CollectionId& collection_name, const json& points_json) {
     // First, check if collection exists (shared lock)
@@ -232,6 +197,7 @@ StatusOr<DenseVector> DB::validateVector(const VectorName& name,
 
     return vec;
 }
+
 
 //for single vector inserts, so just the default named vector, no multiple named vectors
 Status DB::upsertPoints(const CollectionId& collection_name, 

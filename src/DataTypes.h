@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <filesystem>
 
+#include "Point.h"
+
 /**
  * Currently, I only consider the dense vector implementation, sparse vectors later
  */
@@ -40,7 +42,10 @@ namespace vectordb {
     //use this name for better type identification
     using Payload = nlohmann::json;
 
-    using AppendableStorage = std::vector<DenseVector>;//Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    using AppendableStorage = std::vector<Point<MAX_ENTRIES_TINYMAP>>;
+    
+    //Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    
     // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
 
     /*
@@ -57,6 +62,8 @@ namespace vectordb {
 
     //max tinymap entries
     inline constexpr size_t MAX_ENTRIES_TINYMAP = 3;
+
+    inline constexpr size_t MIN_ENTRIES_TINYMAP = 1;
 
     inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024;
 
@@ -82,6 +89,7 @@ namespace vectordb {
     enum class SegmentType {
         Appendable,
         Immutable,
+        Merged,
     };
 
     enum class SegmentStatus {

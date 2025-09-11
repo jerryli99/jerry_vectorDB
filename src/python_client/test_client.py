@@ -45,7 +45,7 @@ def run_tests():
             id="img_1",
             vector={
                 "image": [0.1, 0.2, 0.3],
-                "text": [0.5, 0.6, 0.7],
+                "text": ["erwe", 0.6, 0.7],
             },
             payload={"type": "image+text"}
         ),
