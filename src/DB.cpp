@@ -36,7 +36,7 @@ Status DB::addCollection(const CollectionId& collection_name, const json& config
         auto collection = std::make_unique<Collection>(collection_name, collection_info);
         CollectionEntry entry;
         entry.collection = std::move(collection);
-        entry.config = std::move(config_json);
+        entry.config = config_json;
 
         // Thread-safe addition to container
         return container.addCollection(collection_name, std::move(entry));
@@ -69,13 +69,25 @@ std::pair<VectorSpec, Status> DB::parseVectorSpec(const std::string& name, const
 json DB::listCollections() {
     json result = json::array();
 
-    // Use thread-safe iteration
     auto collection_names = container.getCollectionNames();
     for (const auto& name : collection_names) {
-        if (const auto* entry = container.getCollection(name)) {
+        auto collection_ptr = container.getCollectionPtr(name);
+        if (collection_ptr) {
+            // Convert CollectionInfo to JSON manually
+            json vector_specs_json = json::object();
+            for (const auto& [vec_name, vec_spec] : collection_ptr->m_collection_info.vec_specs) {
+                vector_specs_json[vec_name] = {
+                    {"size", vec_spec.dim},
+                    {"distance", to_string(vec_spec.metric)}, // You'll need to implement this
+                    {"on_disk", vec_spec.on_disk}
+                };
+            }
+            
             json item = {
                 {"name", name},
-                {"config", entry->config}
+                {"config", {
+                    {"vectors", vector_specs_json}
+                }}
             };
             result.push_back(item);
         }
@@ -97,20 +109,14 @@ Status DB::deleteCollection(const CollectionId& collection_name) {
 
 
 Status DB::upsertPointsToCollection(const CollectionId& collection_name, const json& points_json) {
-    // First, check if collection exists (shared lock)
-    auto* entry = container.getCollection(collection_name);
-    if (!entry) {
+    // Use the new optional approach
+    auto access_opt = container.getCollectionForWrite(collection_name);
+    if (!access_opt) {
         return Status::Error("Collection '" + collection_name + "' does not exist");
     }
-
-    // Get collection-specific mutex for fine-grained locking
-    auto& collection_mutex = container.getCollectionMutex(collection_name);
     
-    // Use UNIQUE lock for writing operations (upserts modify data)
-    std::unique_lock lock(collection_mutex);
-
-    // Get collection info (safe now that we have the lock)
-    auto collection_info = entry->collection->m_collection_info;
+    auto& access = access_opt.value();
+    auto collection_info = access.first->collection->m_collection_info;
 
     if (!points_json.is_array()) {
         return Status::Error("Points must be an array");
@@ -183,7 +189,8 @@ StatusOr<DenseVector> DB::validateVector(const VectorName& name,
     // Validate all elements are numeric
     for (const auto& elem : jvec) {
         if (!elem.is_number()) {
-            return Status::Error("Vector '" + name + "' must contain only numeric values");
+            return Status::Error("Vector '" + name + 
+                "' must contain only numeric values. Retry upsert again.");
         }
     }
 

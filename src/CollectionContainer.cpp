@@ -8,16 +8,42 @@ namespace vectordb {
         return inserted ? Status::OK() : Status::Error("Collection exists");
     }
 
-    CollectionEntry* CollectionContainer::getCollection(const CollectionId& name) {
-        std::shared_lock lock(m_mutex);
+    std::optional<CollectionContainer::ReadAccess> 
+    CollectionContainer::getCollectionForRead(const CollectionId& name) const {
+        std::shared_lock read_lock(m_mutex);
         auto it = m_collections.find(name);
-        return (it != m_collections.end()) ? &it->second : nullptr;
+        if (it == m_collections.end()) {
+            return std::nullopt;
+        }
+        
+        // Create the lock first, then construct the pair
+        std::shared_lock<std::shared_mutex> collection_lock(it->second.mutex);
+        read_lock.unlock();
+        
+        return std::make_pair(&it->second, std::move(collection_lock));
     }
 
-    const CollectionEntry* CollectionContainer::getCollection(const CollectionId& name) const {
+    std::optional<CollectionContainer::WriteAccess> 
+    CollectionContainer::getCollectionForWrite(const CollectionId& name) {
+        std::shared_lock read_lock(m_mutex);
+        auto it = m_collections.find(name);
+        if (it == m_collections.end()) {
+            return std::nullopt;
+        }
+        
+        std::unique_lock<std::shared_mutex> collection_lock(it->second.mutex);
+        read_lock.unlock();
+        
+        return std::make_pair(&it->second, std::move(collection_lock));
+    }
+
+    std::shared_ptr<Collection> CollectionContainer::getCollectionPtr(const CollectionId& name) const {
         std::shared_lock lock(m_mutex);
         auto it = m_collections.find(name);
-        return (it != m_collections.end()) ? &it->second : nullptr;
+        if (it == m_collections.end()) {
+            return nullptr;
+        }
+        return it->second.collection;
     }
 
     std::vector<CollectionId> CollectionContainer::getCollectionNames() const {
@@ -38,29 +64,7 @@ namespace vectordb {
     bool CollectionContainer::removeCollection(const CollectionId& name) {
         std::unique_lock lock(m_mutex);
         bool removed = m_collections.erase(name) > 0;
-        if (removed) {
-            m_collection_mutexes.erase(name); // Clean up the mutex too
-        }
         return removed;
-    }
-    // Get a collection's specific mutex for fine-grained locking
-    std::shared_mutex& CollectionContainer::getCollectionMutex(const CollectionId& name) {
-        std::shared_lock read_lock(m_mutex);
-        auto it = m_collection_mutexes.find(name);
-        if (it != m_collection_mutexes.end()) {
-            return it->second;
-        }
-        
-        // Upgrade to write lock if mutex doesn't exist
-        read_lock.unlock();
-        std::unique_lock write_lock(m_mutex);
-        
-        // Check again after acquiring write lock (double-check pattern)
-        it = m_collection_mutexes.find(name);
-        if (it == m_collection_mutexes.end()) {
-            it = m_collection_mutexes.emplace(name, std::shared_mutex{}).first;
-        }
-        return it->second;
     }
 
     size_t CollectionContainer::size() const {

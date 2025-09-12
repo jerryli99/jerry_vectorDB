@@ -1,5 +1,7 @@
 #include "DataTypes.h"
 #include "Status.h"
+#include "Point.h"
+
 
 namespace vectordb {
 
@@ -22,13 +24,13 @@ public:
     // Multiple named vectors
     Status insertPoint(PointIdType point_id, const std::map<VectorName, DenseVector>& named_vectors);
 
-    const AppendableStorage& data() const;
+    // const AppendableStorage& data() const;
 
 private:
     //i simply put this seg_type here to distinguish the big buffer after merging 
     //multiple active_bufs which does not belong to any seg type.
     SegmentType seg_type{SegmentType::Appendable};
-    AppendableStorage active_buf;
+    std::vector<Point<MAX_ENTRIES_TINYMAP>> active_buf;
 };
 
 }

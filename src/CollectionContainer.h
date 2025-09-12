@@ -4,7 +4,7 @@
 #include "Collection.h"
 #include "Status.h"
 #include <shared_mutex>
-
+#include <mutex>
 // #include "Point.h"
 
 /**
@@ -23,23 +23,50 @@ namespace vectordb {
 
 struct CollectionEntry {
     std::shared_ptr<Collection> collection;
-    json config; //collection's json config
-
-    // Useful metadata
-    // size_t num_points = 0;
-    // Vector clock for causal reasoning and conflict resolution
-    // VectorClock version;
+    json config;
+    mutable std::shared_mutex mutex;
+    
+    // Delete copy operations
+    CollectionEntry(const CollectionEntry&) = delete;
+    CollectionEntry& operator=(const CollectionEntry&) = delete;
+    
+    // Custom move operations (don't try to move the mutex)
+    CollectionEntry(CollectionEntry&& other) noexcept
+        : collection(std::move(other.collection))
+        , config(std::move(other.config))
+        // mutex is not moved - it remains default-constructed
+    {}
+    
+    CollectionEntry& operator=(CollectionEntry&& other) noexcept {
+        if (this != &other) {
+            collection = std::move(other.collection);
+            config = std::move(other.config);
+            // mutex is not moved
+        }
+        return *this;
+    }
+    
+    CollectionEntry() = default;
 };
 
 class CollectionContainer {
 public:
+    using ReadAccess = std::pair<const CollectionEntry*, std::shared_lock<std::shared_mutex>>;
+    using WriteAccess = std::pair<CollectionEntry*, std::unique_lock<std::shared_mutex>>;
+
     CollectionContainer() = default;
     ~CollectionContainer() = default;
 
     Status addCollection(const CollectionId& name, CollectionEntry entry);
     
-    CollectionEntry* getCollection(const CollectionId& name);
-    const CollectionEntry* getCollection(const CollectionId& name) const;
+    std::optional<ReadAccess> getCollectionForRead(const CollectionId& name) const;
+    std::optional<WriteAccess> getCollectionForWrite(const CollectionId& name);
+    
+    // Helper to get just the collection with proper locking
+    std::shared_ptr<Collection> getCollectionPtr(const CollectionId& name) const;
+
+    // CollectionEntry* getCollection(const CollectionId& name);
+    // const CollectionEntry* getCollection(const CollectionId& name) const;
 
     std::vector<CollectionId> getCollectionNames() const;
 
@@ -47,7 +74,7 @@ public:
     bool removeCollection(const CollectionId& name);
 
     // Get a collection's specific mutex for fine-grained locking
-    std::shared_mutex& getCollectionMutex(const CollectionId& name);
+    // std::shared_mutex& getCollectionMutex(const CollectionId& name);
 
     size_t size() const;
     
@@ -62,7 +89,7 @@ public:
     //                              const VectorClock& incoming_version)
 private:       
     mutable std::shared_mutex m_mutex; //for read-write lock, multiple reads (shared lock), 1 write (unique lock),
-    mutable std::unordered_map<CollectionId, std::shared_mutex> m_collection_mutexes; //mutable allows const methods to lock
+    // mutable std::unordered_map<CollectionId, std::unique_ptr<std::shared_mutex>> m_collection_mutexes; //mutable allows const methods to lock
     //well since i am already using unordered_map, i think add, remove, lookup is handled?
     std::unordered_map<CollectionId, CollectionEntry> m_collections;
 };

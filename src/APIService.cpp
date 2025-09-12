@@ -163,7 +163,9 @@ svr.Post("/upsert", [&](const httplib::Request& req, httplib::Response& res) {
         auto status = vec_db->upsertPointsToCollection(collection_name, points_json);
 
         if (!status.ok) {
+            // std::cout << "Upsert failed: " << status.message << std::endl;
             vectordb::api_send_error(res, 404, status.message, vectordb::APIErrorType::UserInput);
+            return;
         }
         
         res.set_content(R"({"status":"ok"})", "application/json");

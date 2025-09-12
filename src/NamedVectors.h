@@ -1,5 +1,6 @@
-#include "TinyMap.h"
 #include "DataTypes.h"
+#include "TinyMap.h"
+
 
 /**
  * @brief NamedVectors in the collection are particularly useful when you need to 
@@ -32,17 +33,22 @@
  */
 namespace vectordb {
 
-// NamedVectors is just a TinyMap wrapper
 template <std::size_t N>
-struct NamedVectors {
-    TinyMap<VectorName, DenseVector, N> tinymap;
+class NamedVectors {
+    public:
+        NamedVectors() = default;
+        ~NamedVectors() = default;
 
-    bool addVector(const VectorName& name, const DenseVector& vec) {
-        return tinymap.insert(name, vec);
-    }
+        bool addVector(const VectorName& name, const DenseVector& vec) {
+            return tinymap.insert(name, vec);
+        }
 
-    std::optional<std::reference_wrapper<const DenseVector>> getVector(const VectorName& name) const {
-        return tinymap.get(name);
-    }
+        std::optional<DenseVector> getVector(const VectorName& name) const {
+            return tinymap.get(name);
+        }
+
+    private:
+        TinyMap<VectorName, DenseVector, N> tinymap;
 };
+
 }

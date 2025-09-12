@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DataTypes.h"
-#include "TinyMap.h"
 
 namespace vectordb {
 

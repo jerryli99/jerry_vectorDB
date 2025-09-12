@@ -46,10 +46,10 @@ public:
      *          ...use vec without copying or modifying
      *        }
      */
-    std::optional<std::reference_wrapper<const V>> get(const K& key) const {
+    std::optional<V> get(const K& key) const {
         for (std::size_t i = 0; i < m_size; ++i) {
             if (m_data[i].first == key) {
-                return std::cref(m_data[i].second);  // wrap const reference
+                return m_data[i].second;  // return a copy
             }
         }
         return std::nullopt;

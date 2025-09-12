@@ -45,7 +45,7 @@ def run_tests():
             id="img_1",
             vector={
                 "image": [0.1, 0.2, 0.3],
-                "text": ["erwe", 0.6, 0.7],
+                "text": [0,  0.6, 0.7],
             },
             payload={"type": "image+text"}
         ),
@@ -54,6 +54,22 @@ def run_tests():
             vector={
                 "image": [0.4, 0.13, 0.23],
                 "text": [0.35, 0.16, 0.7],
+            },
+            payload={"type": "image+text", "key": 23}
+        ),
+        models.PointStruct(
+            id="img_df",
+            vector={
+                "image": [0.1, 0.1, 0.3],
+                "text": [0.44, 0.5, 0.27],
+            },
+            payload={"type": "image+text", "key": 23}
+        ),
+        models.PointStruct(
+            id="imqdfhhr",
+            vector={
+                "image": [0.12, 0.15, 0.27],
+                "text": [0.3, 0.1, 0.17],
             },
             payload={"type": "image+text", "key": 23}
         )

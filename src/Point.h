@@ -2,7 +2,6 @@
 
 #include "DataTypes.h"
 #include "NamedVectors.h"
-#include "PointPayloadStore.h"
 /*
 A point can also have versions, but for now just ignore it.
 std::string version?
@@ -20,12 +19,22 @@ so yeah, speration of concerns I will say.
 */
 namespace vectordb {
     // A Point holds an ID + NamedVectors, default to macro MAX_ENTRIES_TINYMAP
-    template <std::size_t N = MAX_ENTRIES_TINYMAP>
-    struct Point {
-        PointIdType point_id;
-        NamedVectors<N> named_vecs;
-        explicit Point(PointIdType id) : point_id(id) {}
-        //other random data here
+    template <std::size_t N>
+    class Point {
+        public:
+            explicit Point(PointIdType id) : point_id{id} {}
+
+            bool addVector(const VectorName& name, const DenseVector& vec) {
+                return named_vecs.addVector(name, vec);
+            }
+
+            std::optional<DenseVector> getVector(const VectorName& name) const {
+                return named_vecs.getVector(name);
+            }
+
+        private:
+            PointIdType point_id;
+            NamedVectors<N> named_vecs;
     };
 }
 

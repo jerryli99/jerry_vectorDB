@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <filesystem>
 
-#include "Point.h"
+// #include "Point.h"
 
 /**
  * Currently, I only consider the dense vector implementation, sparse vectors later
@@ -24,7 +24,7 @@ namespace vectordb {
     using VectorName = std::string;
 
     // Dense vector, since faiss uses row major order, i will have to do this.
-    using DenseVector = std::vector<float>; //Eigen::Matrix<float, 1, Eigen::Dynamic, Eigen::RowMajor>;
+    using DenseVector = std::vector<float>; 
 
     // Point ID (unique vector identifier) add UUID later
     using PointIdType = std::string; //i will use uuid later. //std::variant<std::string, uint64_t>;
@@ -42,7 +42,7 @@ namespace vectordb {
     //use this name for better type identification
     using Payload = nlohmann::json;
 
-    using AppendableStorage = std::vector<Point<MAX_ENTRIES_TINYMAP>>;
+    // using AppendableStorage = std::vector<Point<MAX_ENTRIES_TINYMAP>>;
     
     //Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
     
