@@ -2,7 +2,6 @@
 #include "Status.h"
 #include "Point.h"
 
-
 namespace vectordb {
 
 class AppendableSegment {
@@ -24,6 +23,7 @@ public:
     // Multiple named vectors
     Status insertPoint(PointIdType point_id, const std::map<VectorName, DenseVector>& named_vectors);
 
+    void searchTopK(size_t top_k);
     // const AppendableStorage& data() const;
 
 private:

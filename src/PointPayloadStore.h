@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataTypes.h"
+#include "Status.h"
 #include <rocksdb/db.h>
 // #include <rocksdb/options.h>
 
@@ -14,28 +15,30 @@ I am trying to make Payload per Point storage not per named vector here, so yeah
 */
 
 namespace vectordb {
-class PointPayloadStore {
-public:
-    PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb = 0);
-    ~PointPayloadStore();
+    class PointPayloadStore {
+    public:
 
-    // Disable copying
-    PointPayloadStore(const PointPayloadStore&) = delete;
-    PointPayloadStore& operator=(const PointPayloadStore&) = delete;
+        PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb = 0);
+        ~PointPayloadStore();
 
-    void putPayload(const PointIdType& id, const Payload& data);
-    std::optional<Payload> getPayload(const PointIdType& id);
-    void deletePayload(const std::string& id);
+        // Disable copying
+        PointPayloadStore(const PointPayloadStore&) = delete;
+        PointPayloadStore& operator=(const PointPayloadStore&) = delete;
 
-    // Filter points by metadata field (simple equality)
-    //could also be tricky, might need helper member functions for this one
-    std::vector<Payload> filterWithPayload(const std::string& metadata_field, const Payload& condition); //?
+        Status putPayload(const PointIdType& id, const Payload& data);
+        StatusOr<Payload> getPayload(const PointIdType& id);
+        Status deletePayload(const std::string& id);
 
-private:
-    // Payload vec_metadata_;
-    rocksdb::DB* m_rkdb;
-    std::filesystem::path m_rkdb_path;
-};
+        // Filter points by metadata field (simple equality)
+        //could also be tricky, might need helper member functions for this one
+        std::vector<Payload> filterWithPayload(const std::string& metadata_field, const Payload& condition); //?
+
+    private:
+        // Payload vec_metadata_;
+        rocksdb::DB* m_rkdb;
+        std::filesystem::path m_rkdb_path;
+        mutable std::mutex m_mutex;
+    };
 
 }
 

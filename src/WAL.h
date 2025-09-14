@@ -16,7 +16,7 @@ namespace vectordb {
             WAL(const std::filesystem::path& path) : m_wal_path{path} {}
             ~WAL() = default;
             
-            void append(int64_t id, const AppendableStorage& vectors);//need to serialize the data here.
+            void append(std::atomic<int64_t> id, const std::vector<Point<MAX_ENTRIES_TINYMAP>>& vectors);//need to serialize the data here.
             std::vector<WalEntry> replay(...);//??maybe user can specify with http request to replay last or all ops..
             void truncate(WalTruncateMode mode = WalTruncateMode::FULL, size_t keep_last_n = 0);//user can decide how to truncate the wal file 
             void newAppend(...);//??

@@ -5,6 +5,7 @@
 #include "CollectionContainer.h"
 #include "Status.h"
 
+// #include <memory>
 
 namespace vectordb{
 class DB {
@@ -28,12 +29,15 @@ class DB {
         
         Status upsertPointsToCollection(const CollectionId& collection_name, const json& points_json);
         
-        Status upsertPoints(const CollectionId& collection_name, const PointIdType& point_id, 
-                            const DenseVector& vector, const json& payload);
+        //upsert for single vector 
+        Status upsertPoints(std::shared_ptr<Collection> collection, 
+                            const PointIdType& point_id, 
+                            const DenseVector& vector);
         
-        //just overload the member function so i don't need to create a seperate one from scratch.
-        Status upsertPoints(const CollectionId& collection_name, const PointIdType& point_id, 
-                            const std::map<VectorName, DenseVector>& named_vectors, const json& payload);
+        //upsert for multiple named vectors, overload the member function
+        Status upsertPoints(std::shared_ptr<Collection> collection, 
+                            const PointIdType& point_id, 
+                            const std::map<VectorName, DenseVector>& named_vectors);
         
         //size_t topK, collectioName
         void searchTopKInCollection(...);

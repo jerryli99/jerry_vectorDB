@@ -55,15 +55,16 @@ def run_tests():
                 "image": [0.4, 0.13, 0.23],
                 "text": [0.35, 0.16, 0.7],
             },
-            payload={"type": "image+text", "key": 23}
+            payload={"type": "image+text", "key": 43}
         ),
         models.PointStruct(
             id="img_df",
             vector={
                 "image": [0.1, 0.1, 0.3],
                 "text": [0.44, 0.5, 0.27],
+                "audio": [1, 21, 10],
             },
-            payload={"type": "image+text", "key": 23}
+            payload={"type": "image+text+audio", "key": 33}
         ),
         models.PointStruct(
             id="imqdfhhr",
@@ -71,8 +72,17 @@ def run_tests():
                 "image": [0.12, 0.15, 0.27],
                 "text": [0.3, 0.1, 0.17],
             },
-            payload={"type": "image+text", "key": 23}
-        )
+            payload={"type": "happy dog", "key": 23}
+        ),
+        models.PointStruct(
+            id="img_df",
+            vector={
+                "image": [0.1, 0.1, 0.3],
+                "text": [0.44, 0.5, 0.27],
+                "audio": [77, 20, 0],
+            },
+            payload={"type": "imwerweqttext", "key": 123}
+        ),
     ]
     print("Test 4: Upsert with multi-vector schema")
     print(client.upsert("multi_collection", multi_vec_points))
@@ -85,7 +95,7 @@ def run_tests():
     # print(client.delete_collection("multi_collection"))
 
     # List after deletion
-    print("Test 7: List collections after deletion")
+    # print("Test 7: List collections after deletion")
     print(client.list_collections())
 
 

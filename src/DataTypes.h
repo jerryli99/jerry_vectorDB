@@ -10,8 +10,8 @@
 #include <variant>
 #include <cstdint>
 #include <filesystem>
+#include <atomic>
 
-// #include "Point.h"
 
 /**
  * Currently, I only consider the dense vector implementation, sparse vectors later
@@ -65,7 +65,12 @@ namespace vectordb {
 
     inline constexpr size_t MIN_ENTRIES_TINYMAP = 1;
 
-    inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024;
+    inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024; //??? maybe uhm, well...
+
+    // Configurable rate limits for every http request for upsert points
+    //i might add another special endpoint for async, but for now just do things simple.
+    inline constexpr size_t MAX_POINTS_PER_REQUEST = 2000;
+    inline constexpr size_t MAX_JSON_REQUEST_SIZE = 64 * 1024 * 1024; // 64MB
 
     enum class DistanceMetric {
         L2,
@@ -92,12 +97,16 @@ namespace vectordb {
         Merged,
     };
 
+    //user client can see how things are going before 
+    //continue upserting or doing other stuff...
     enum class SegmentStatus {
-        Empty,
-        Active,
-        Full,
-        NewMerged,
-        None,
+        Empty,          // No points yet
+        Active,         // Accepting new points
+        Full,           // Reached capacity, ready for merge
+        Merging,        // Currently being merged
+        Immutable,      // Merged and indexed, read-only
+        ContinueInsert, // Ready for more data
+        Error           // Something went wrong
     };
 
     enum class WalTruncateMode {

@@ -125,11 +125,36 @@ svr.Delete(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Res
 
 
 // Upsert
-//ok, where we go...
+//i did not do a good job at handling or checking inputs because i will have to spend a lot of time
+//and i decide to use this time to do better stuff, so yeah. Ok, here we go...
 svr.Post("/upsert", [&](const httplib::Request& req, httplib::Response& res) {
+    //Check raw body size first (before JSON parsing!)
+    if (req.body.size() > vectordb::MAX_JSON_REQUEST_SIZE) {
+        vectordb::json error = {
+            {"error", "REQUEST_TOO_LARGE"},
+            {"message", "Request body too large"},
+            {"max_num_vectors", vectordb::MAX_POINTS_PER_REQUEST},
+            {"max_size_bytes", vectordb::MAX_JSON_REQUEST_SIZE},
+            {"received_bytes", req.body.size()},
+            {"suggestion", "Split into smaller batches"}
+        };
+        res.set_content(error.dump(), "application/json");
+        return;
+    }
+
     try {
         auto json_body = vectordb::json::parse(req.body);
         std::cout << "Received /upsert request:\n" << json_body.dump(4) << "\n";
+
+                // Check number of points
+        if (json_body.contains("points") && json_body["points"].is_array()) {
+            if (json_body["points"].size() > vectordb::MAX_POINTS_PER_REQUEST) {
+                vectordb::api_send_error(res, 413, 
+                    "Too many points. Maximum: " + std::to_string(vectordb::MAX_POINTS_PER_REQUEST),
+                    vectordb::APIErrorType::UserInput);
+                return;
+            }
+        }
 
         // Validate top-level keys
         static const std::set<std::string> allowed_keys = {"collection_name", "points"};

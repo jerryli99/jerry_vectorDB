@@ -1,5 +1,7 @@
 #include "AppendableSegment.h"
-
+/*
+Remember to add locks?
+*/
 namespace vectordb {
 
     Status AppendableSegment::insertPoint(PointIdType point_id, const DenseVector& vector)
@@ -9,7 +11,7 @@ namespace vectordb {
             return Status::Error("Too many named vectors for TinyMap capacity");
         }
 
-        //dont worry, payload is stored in rocksdb, in a seperate obj
+        //dont worry, payload is stored in rocksdb, in a seperate obj in collection
         active_buf.emplace_back(std::move(p));
         return Status::OK();
     } 
@@ -23,13 +25,9 @@ namespace vectordb {
                 return Status::Error("Too many named vectors for TinyMap capacity");
             }
         }
-        //dont worry, payload will get added in a seperate object...
+        //dont worry, payload will get added in a seperate object in the collection...
         active_buf.emplace_back(std::move(p));
         return Status::OK();
     }
-
-    // const AppendableStorage& AppendableSegment::data() const { 
-    //         return active_buf; 
-    // }
 
 }

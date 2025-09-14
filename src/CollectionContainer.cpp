@@ -25,14 +25,14 @@ namespace vectordb {
 
     std::optional<CollectionContainer::WriteAccess> 
     CollectionContainer::getCollectionForWrite(const CollectionId& name) {
-        std::shared_lock read_lock(m_mutex);
+        std::unique_lock write_lock(m_mutex);
         auto it = m_collections.find(name);
         if (it == m_collections.end()) {
             return std::nullopt;
         }
         
         std::unique_lock<std::shared_mutex> collection_lock(it->second.mutex);
-        read_lock.unlock();
+        write_lock.unlock();
         
         return std::make_pair(&it->second, std::move(collection_lock));
     }

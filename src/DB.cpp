@@ -116,7 +116,10 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
     }
     
     auto& access = access_opt.value();
-    auto collection_info = access.first->collection->m_collection_info;
+    auto& collection = access.first->collection;
+    auto collection_info = collection->m_collection_info;
+
+    std::cout << "Upsert into collection: " << collection_name << "\n";
 
     if (!points_json.is_array()) {
         return Status::Error("Points must be an array");
@@ -128,7 +131,7 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
             return Status::Error("Point missing id or vector field");
         }
 
-        std::string id = p["id"].get<PointIdType>();
+        std::string point_id = p["id"].get<PointIdType>();
         auto payload = p.value("payload", vectordb::json::object());
 
         // Schema 1: vector is array (single default vector)
@@ -137,7 +140,7 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
             if (!result.ok()) {
                 return result.status();
             }
-            auto status = upsertPoints(collection_name, id, result.value(), payload);
+            auto status = upsertPoints(collection, point_id, result.value());
             if (!status.ok) { return status; }
         }
         // Schema 2: vector is object (multiple named vectors)
@@ -157,15 +160,20 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
 
             // Must contain at least one valid vector
             if (named_vectors.empty()) {
-                return Status::Error("No valid vectors found for point " + id);
+                return Status::Error("No valid vectors found for point " + point_id);
             }
 
-            auto status = upsertPoints(collection_name, id, named_vectors, payload);
+            auto status = upsertPoints(collection, point_id, named_vectors);
             if (!status.ok) { return status; }
         } else {
-            return Status::Error("Invalid json vector format for point " + id);
+            return Status::Error("Invalid json vector format for point " + point_id);
         }
-    }
+
+        //add payload here
+        auto& collection_point_payload = collection->m_point_payload;
+        collection_point_payload.putPayload(point_id, payload);
+
+    } //end of point adding for-loop
 
     return Status::OK();
 }
@@ -207,12 +215,11 @@ StatusOr<DenseVector> DB::validateVector(const VectorName& name,
 
 
 //for single vector inserts, so just the default named vector, no multiple named vectors
-Status DB::upsertPoints(const CollectionId& collection_name, 
+Status DB::upsertPoints(std::shared_ptr<Collection> collection, 
                         const PointIdType& point_id, 
-                        const DenseVector& vector, 
-                        const json& payload) 
+                        const DenseVector& vector) 
 {
-    std::cout << "Upsert into collection: " << collection_name << "\n";
+    // std::cout << "Upsert into collection: " << collection_name << "\n";
     std::cout << "Point ID: " << point_id << "\n";
     std::cout << "Vector: [ ";
 
@@ -224,12 +231,10 @@ Status DB::upsertPoints(const CollectionId& collection_name,
 }
 
 //overload for multiple named vector inserts
-Status DB::upsertPoints(const CollectionId& collection_name, 
+Status DB::upsertPoints(std::shared_ptr<Collection> collection, 
                         const PointIdType& point_id, 
-                        const std::map<VectorName, DenseVector>& named_vectors, 
-                        const json& payload)
+                        const std::map<VectorName, DenseVector>& named_vectors)
 {
-    std::cout << "Upsert into collection: " << collection_name << "\n";
     std::cout << "Point ID: " << point_id << "\n";
 
     for (const auto& [name, vec] : named_vectors) {
