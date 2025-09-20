@@ -52,13 +52,12 @@ namespace vectordb {
     constexpr ensures compile-time evaluation (no runtime overhead).
     inline prevents "multiple definition" errors when included in headers.
     */
-    inline constexpr size_t INDEX_THRESHOLD_SIZE_BYTES = 1024 * 1024;  // configurable threshold??
 
-    //move these 2 later in config part...
+    //move these later in Config.h part...
     inline constexpr size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
 
     //could be adjusted, uhm, yeah i am thinking about just to have a config file here..but whatever, get the job done first.
-    const std::filesystem::path PAYLAOD_DIR = "./VectorDB/Payload";
+    const std::filesystem::path PAYLOAD_DIR = "./VectorDB/Payload";
 
     //max tinymap entries
     inline constexpr size_t MAX_ENTRIES_TINYMAP = 3;
@@ -69,8 +68,11 @@ namespace vectordb {
 
     // Configurable rate limits for every http request for upsert points
     //i might add another special endpoint for async, but for now just do things simple.
-    inline constexpr size_t MAX_POINTS_PER_REQUEST = 2000;
-    inline constexpr size_t MAX_JSON_REQUEST_SIZE = 64 * 1024 * 1024; // 64MB
+    inline constexpr size_t MAX_POINTS_PER_REQUEST = 1000;
+
+    inline constexpr size_t MAX_JSON_REQUEST_SIZE = 32 * 1024 * 1024; // 32MB
+
+    // inline constexpr size_t INDEX_THRESHOLD = ;  // configurable threshold??
 
     enum class DistanceMetric {
         L2,

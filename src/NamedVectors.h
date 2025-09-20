@@ -1,6 +1,7 @@
 #include "DataTypes.h"
 #include "TinyMap.h"
 
+#include <shared_mutex>
 
 /**
  * @brief NamedVectors in the collection are particularly useful when you need to 

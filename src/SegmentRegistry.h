@@ -1,91 +1,26 @@
-/*
-High-level orchestration: 
-Meta data and control tower
-where to insert, 
-when to flush, 
-when to create or replace segments, 
-searching in parallel?
-
-Deciding where to insert new points.
-Tracking memory usage of segments.
-Triggering flushes (persist to disk) or segment compactions/merging.
-Initiating indexing on full segments.
-Coordinating searches across multiple segments in parallel.
-
-*/
 #pragma once
 
 #include "DataTypes.h"
 #include "SegmentHolder.h"
-// // #include "SegmentUtils.h"
+
 #include <memory>
 #include <vector>
 #include <utility>
 #include <atomic>
 
 /*
-Maybe do this later... I will just get the basics down for now.
+Since each collection has a SegmentHolder obj, for multiple collections, we can have 
+multiple SegmentHolder objs, and to store these, use SegmentRegister. For this,
+I used std::unordered_map. Yeah, i use a lot of maps in this vectordb...
 */
-namespace vectordb 
-{
-    //monitors 
-    class SegmentRegister {
-    public:
+namespace vectordb {
 
-        //adds segment segmentholder.addSegment()
-        void registerSegment();
-        
-        //calculate only the (vector dim) * (# of vectors) in segment
-        //maybe use lambda functions in future?
-        //if bytesize meets index threshold, call toImmutable()
-        const uint64_t calculateSegmentSizeBytes();
-        
-        void buildSegmentVectorIndex();
-        // void markDelete(const std::string& id);
-        
-        // void updateStatus(const std::string& id, SegmentStatus new_status);
+class SegmentRegister {
+public:
 
-    private:
-        SegmentHolder m_segment_holder;
-        std::mutex mutex;
-        size_t vector_dim;
-    };
+private:
+    std::unordered_map<std::string, std::unique_ptr<SegmentHolder>> registry;
+
+};
 
 }
-
-
-// namespace vectordb {
-
-// class SegmentRegistry {
-// public:
-//     // Constructor with dimension and metric
-//     SegmentRegistry(size_t dim, DistanceMetric metric);
-    
-//     // Insert single vector with ID
-//     void insert(PointIdType id, const DenseVector& vec);
-    
-//     // Batch insert multiple vectors
-//     void insertBatch(const std::vector<std::pair<PointIdType, DenseVector>>& points);
-    
-//     // Search for similar vectors
-//     std::vector<std::pair<PointIdType, float>> search(const DenseVector& query, int top_k) const;
-
-// private:
-//     void createNewAppendableSegment();
-//     void flushToImmutable();
-//     size_t calculateVectorSize(const DenseVector& vec) const;
-
-//     // Configuration
-//     const size_t dim_;
-//     const DistanceMetric metric_;
-//     const size_t max_appendable_size_bytes_ = 20 * 1024 * 1024; // 20MB threshold
-
-//     // Current appendable segment state
-//     std::shared_ptr<AppendableSegment> current_appendable_;
-//     std::atomic<size_t> current_size_bytes_;
-
-//     // All segments
-//     SegmentHolder holder_;
-// };
-
-// } // namespace vectordb
