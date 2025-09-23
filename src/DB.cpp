@@ -16,7 +16,7 @@ Status DB::addCollection(const CollectionId& collection_name, const json& config
         [](const auto& item) { return item.is_object(); });
 
     if (is_multi) {
-        if (config_json.size() > MAX_ENTRIES_TINYMAP) {
+        if (config_json.size() > TINY_MAP_CAPACITY) {
             return Status::Error("Too many NamedVectors per Collection");
         }
 
@@ -73,9 +73,10 @@ json DB::listCollections() {
     for (const auto& name : collection_names) {
         auto collection_ptr = container.getCollectionPtr(name);
         if (collection_ptr) {
+            auto collectionInfo = collection_ptr->getInfo();
             // Convert CollectionInfo to JSON manually
             json vector_specs_json = json::object();
-            for (const auto& [vec_name, vec_spec] : collection_ptr->m_collection_info.vec_specs) {
+            for (const auto& [vec_name, vec_spec] : collectionInfo.vec_specs) {
                 vector_specs_json[vec_name] = {
                     {"size", vec_spec.dim},
                     {"distance", to_string(vec_spec.metric)}, // You'll need to implement this
@@ -117,7 +118,7 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
     
     auto& access = access_opt.value();
     auto& collection = access.first->collection;
-    auto collection_info = collection->m_collection_info;
+    auto collection_info = collection->getInfo();
 
     std::cout << "Upsert into collection: " << collection_name << "\n";
 
@@ -140,12 +141,17 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
             if (!result.ok()) {
                 return result.status();
             }
-            auto status = upsertPoints(collection, point_id, result.value());
+            auto status = upsertPoints(collection, point_id, result.value(), payload);
             if (!status.ok) { return status; }
         }
         // Schema 2: vector is object (multiple named vectors)
         else if (p["vector"].is_object()) {
             std::map<VectorName, DenseVector> named_vectors;
+
+            if (p["vector"].size() > TINY_MAP_CAPACITY) {
+                return Status::Error("Point has too many named vectors (max " 
+                        + std::to_string(TINY_MAP_CAPACITY) + ")");
+            }
 
             for (auto it = p["vector"].begin(); it != p["vector"].end(); ++it) {
                 const auto& vec_name = it.key();
@@ -163,15 +169,15 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
                 return Status::Error("No valid vectors found for point " + point_id);
             }
 
-            auto status = upsertPoints(collection, point_id, named_vectors);
+            auto status = upsertPoints(collection, point_id, named_vectors, payload);
             if (!status.ok) { return status; }
         } else {
             return Status::Error("Invalid json vector format for point " + point_id);
         }
 
         //add payload here
-        auto& collection_point_payload = collection->m_point_payload;
-        collection_point_payload.putPayload(point_id, payload);
+        // auto& collection_point_payload = collection->m_point_payload;
+        // collection_point_payload.putPayload(point_id, payload);
 
     } //end of point adding for-loop
 
@@ -215,9 +221,10 @@ StatusOr<DenseVector> DB::validateVector(const VectorName& name,
 
 
 //for single vector inserts, so just the default named vector, no multiple named vectors
-Status DB::upsertPoints(std::shared_ptr<Collection> collection, 
+Status DB::upsertPoints(std::shared_ptr<Collection>& collection, 
                         const PointIdType& point_id, 
-                        const DenseVector& vector) 
+                        const DenseVector& vector,
+                        const json& payload) 
 {
     // std::cout << "Upsert into collection: " << collection_name << "\n";
     std::cout << "Point ID: " << point_id << "\n";
@@ -227,13 +234,15 @@ Status DB::upsertPoints(std::shared_ptr<Collection> collection,
         std::cout << v << " ";
     }
     std::cout << "]\n";
-    return Status::OK();
+
+    return collection->insertPoint(point_id, vector, payload);
 }
 
 //overload for multiple named vector inserts
-Status DB::upsertPoints(std::shared_ptr<Collection> collection, 
+Status DB::upsertPoints(std::shared_ptr<Collection>& collection, 
                         const PointIdType& point_id, 
-                        const std::map<VectorName, DenseVector>& named_vectors)
+                        const std::map<VectorName, DenseVector>& named_vectors,
+                        const json& payload)
 {
     std::cout << "Point ID: " << point_id << "\n";
 
@@ -244,7 +253,8 @@ Status DB::upsertPoints(std::shared_ptr<Collection> collection,
         }
         std::cout << "]\n";
     }
-    return Status::OK();
+
+    return collection->insertPoint(point_id, named_vectors, payload);
 
 }
 }// end of vectordb namespace

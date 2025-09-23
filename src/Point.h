@@ -23,7 +23,6 @@ so yeah, speration of concerns I will say.
 */
 namespace vectordb {
 // A Point holds an ID + NamedVectors
-template <std::size_t N>
 class Point {
     public:
         explicit Point(PointIdType id) : point_id{id} {}
@@ -47,21 +46,16 @@ class Point {
             return result;
         }
 
+        PointIdType getId() const { 
+            std::shared_lock<std::shared_mutex> lock(m_mutex);
+            return point_id; 
+        }
+
     private:
         PointIdType point_id;
-        NamedVectors<N> named_vecs;
+        NamedVectors named_vecs;
         mutable std::shared_mutex m_mutex;
 };
 
 }
 //oh, multi tenancy? group_id? maybe i can put it in the payloadstore class?
-/*
-example 
-vectordb::Point<4> p(42);
-p.named_vecs.addVector("text", {0.1f, 0.2f});
-p.named_vecs.addVector("image", {0.5f, 0.9f});
-
-if (auto v = p.named_vecs.getVector("text")) {
-    for (float f : v->get()) std::cout << f << " ";
-}
-*/

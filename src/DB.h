@@ -30,14 +30,16 @@ class DB {
         Status upsertPointsToCollection(const CollectionId& collection_name, const json& points_json);
         
         //upsert for single vector 
-        Status upsertPoints(std::shared_ptr<Collection> collection, 
+        Status upsertPoints(std::shared_ptr<Collection>& collection, 
                             const PointIdType& point_id, 
-                            const DenseVector& vector);
+                            const DenseVector& vector,
+                            const Payload& payload);
         
         //upsert for multiple named vectors, overload the member function
-        Status upsertPoints(std::shared_ptr<Collection> collection, 
+        Status upsertPoints(std::shared_ptr<Collection>& collection, 
                             const PointIdType& point_id, 
-                            const std::map<VectorName, DenseVector>& named_vectors);
+                            const std::map<VectorName, DenseVector>& named_vectors,
+                            const Payload& payload);
         
         //size_t topK, collectioName
         void searchTopKInCollection(...);

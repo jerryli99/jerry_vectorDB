@@ -15,8 +15,11 @@ Main function goes here to start vectorDB service
 Yes the code is a mess, but for now i think is it fine to put all the stuff in main for now.
 I might have a CLI interface here. Just maybe..
 
-I am not familiar with writing API endpoints, especially in C++...So I might miss one or two json field type checking
-or have tedious code. But i feel like 
+I am not familiar with writing API endpoints, especially in C++...
+So I might miss one or two json field type checking or have tedious code. 
+
+Also, i don't really care much about the exact error code i need to return to the user 
+since i only care about if the prototype is working or not, i just care about the error msg.
 */
 
 
@@ -50,9 +53,9 @@ svr.Put(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Respon
         if (config_json.is_object()) {
             auto status = vec_db->addCollection(collection_name, config_json);
             if (!status.ok) {
-            vectordb::api_send_error(res, 400, status.message, vectordb::APIErrorType::UserInput);
-            return;
-        }
+                vectordb::api_send_error(res, 500, status.message, vectordb::APIErrorType::Server);
+                return;
+            }
         } else {
             vectordb::api_send_error(res, 400, "[vectors] must be an object", vectordb::APIErrorType::UserInput);
             return;
@@ -110,7 +113,7 @@ svr.Delete(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Res
 
         auto status = vec_db->deleteCollection(collection_name);
         if (!status.ok) {
-            vectordb::api_send_error(res, 404, status.message, vectordb::APIErrorType::UserInput);
+            vectordb::api_send_error(res, 500, status.message, vectordb::APIErrorType::Server);
             return;
         }
 
@@ -189,7 +192,7 @@ svr.Post("/upsert", [&](const httplib::Request& req, httplib::Response& res) {
 
         if (!status.ok) {
             // std::cout << "Upsert failed: " << status.message << std::endl;
-            vectordb::api_send_error(res, 404, status.message, vectordb::APIErrorType::UserInput);
+            vectordb::api_send_error(res, 500, status.message, vectordb::APIErrorType::Server);
             return;
         }
         

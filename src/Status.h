@@ -65,6 +65,7 @@ template <typename T>
 class StatusOr {
 public:
     StatusOr(const Status& status) : m_status(status), m_has_value(false) {}
+    StatusOr(const T& value) : m_status(Status::OK()), m_value(value), m_has_value(true) {}
     StatusOr(T&& value) : m_status(Status::OK()), m_value(std::move(value)), m_has_value(true) {}
 
     bool ok() const { 

@@ -34,7 +34,6 @@
  */
 namespace vectordb {
 
-template <std::size_t N>
 class NamedVectors {
     public:
         NamedVectors() = default;
@@ -48,8 +47,12 @@ class NamedVectors {
             return tinymap.get(name);
         }
 
+        // Expose iteration so Point can copy everything
+        auto begin() const { return tinymap.begin(); }
+        auto end()   const { return tinymap.end();   }
+
     private:
-        TinyMap<VectorName, DenseVector, N> tinymap;
+        TinyMap<VectorName, DenseVector, TINY_MAP_CAPACITY> tinymap;
 };
 
 }

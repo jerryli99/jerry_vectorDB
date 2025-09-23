@@ -6,7 +6,7 @@ namespace vectordb {
 
 //since i allow namedvectors, then a collection can have multiple dims of the same data
 //i am not sure if this design is good or not, but limiting it is fine i guess. 
-//reference link https://milvus.io/docs/hnsw.md
+//reference link https://milvus.io/docs/hnsw.md for hnsw index params
 struct VectorSpec {
     size_t dim;
     DistanceMetric metric;
@@ -18,9 +18,9 @@ struct VectorSpec {
 
 struct IndexSpec {
     //need to add below fields in python client in Collection creation request, now just use default value.
-    size_t index_threshold{3000}; //?? i might change this
+    size_t index_threshold{4000}; //the threshold value = (max_activeSeg_points - max_upload_points)
     bool wait_indexing{true}; //wait for the vectors to be indexed before returning, instead of searching buffers linearly.
-    size_t m_edges{64};//Maximum number of connections (or edges) each node can have in the graph at each level.
+    size_t m_edges{32};//Maximum number of connections (or edges) each node can have in the graph at each level.
     size_t ef_construction{360}; //The number of candidates considered during index construction.
     size_t ef_search{20}; //The number of neighbors evaluated during a search. Should be at least as large as Top K.
 };

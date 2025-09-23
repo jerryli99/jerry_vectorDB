@@ -18,7 +18,7 @@ namespace vectordb {
     class PointPayloadStore {
     public:
 
-        PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb = 0);
+        PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb);
         ~PointPayloadStore();
 
         // Disable copying

@@ -42,6 +42,8 @@ namespace vectordb {
     //use this name for better type identification
     using Payload = nlohmann::json;
 
+    using SegPointData = std::vector<std::pair<PointIdType, std::map<VectorName, DenseVector>>>;
+
     // using AppendableStorage = std::vector<Point<MAX_ENTRIES_TINYMAP>>;
     
     //Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -60,7 +62,7 @@ namespace vectordb {
     const std::filesystem::path PAYLOAD_DIR = "./VectorDB/Payload";
 
     //max tinymap entries
-    inline constexpr size_t MAX_ENTRIES_TINYMAP = 3;
+    inline constexpr size_t MAX_ENTRIES_TINYMAP = 8;
 
     inline constexpr size_t MIN_ENTRIES_TINYMAP = 1;
 
@@ -71,6 +73,8 @@ namespace vectordb {
     inline constexpr size_t MAX_POINTS_PER_REQUEST = 1000;
 
     inline constexpr size_t MAX_JSON_REQUEST_SIZE = 32 * 1024 * 1024; // 32MB
+
+    const size_t TINY_MAP_CAPACITY = 8;
 
     // inline constexpr size_t INDEX_THRESHOLD = ;  // configurable threshold??
 

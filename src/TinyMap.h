@@ -80,7 +80,6 @@ public:
         return true;
     }
 
-
     bool erase(const K& key) {
         for (std::size_t i = 0; i < m_size; ++i) {
             if (m_data[i].first == key) {
