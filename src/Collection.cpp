@@ -4,7 +4,7 @@ namespace vectordb {
 
     Collection::Collection(const CollectionId& id, const CollectionInfo& info) 
         : m_collection_info {info}, 
-          m_segment_holder(/*max_points*/5000, /*indexSpec*/info.index_specs),
+          m_segment_holder(/*max_points*/5000, /*collectionInfo*/info),
           m_point_payload("./vectordb/payload_" + id, CACHE_SIZE) //i might just add a base file path here instead of a hard coded one
     {}
     
@@ -12,7 +12,7 @@ namespace vectordb {
     {
         auto status = m_segment_holder.insertPoint(point_id, vector);
         if (status.ok && !payload.empty()) {
-            m_point_payload.putPayload(point_id, payload);
+            // m_point_payload.putPayload(point_id, payload);ignore payload now
         }
         return status;
     }
@@ -23,7 +23,7 @@ namespace vectordb {
     {
         auto status = m_segment_holder.insertPoint(point_id, named_vectors);
         if (status.ok && !payload.empty()) {
-            m_point_payload.putPayload(point_id, payload);
+            // m_point_payload.putPayload(point_id, payload);ignore payload now
         }
         return status;
     }

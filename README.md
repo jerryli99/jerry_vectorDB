@@ -4,9 +4,11 @@ Hello,
 
 This is my first time writing a DB, to be specific, a vector database that AI agents or future robots can possibily use some kind of DB like this. Just by thinking about this future is already exciting. I am still a C++ noob, but I feel like I should give it a try even though it could be hard, pointless, or feeling void. But even void has a pointer (void*), so I am heading to some direction.  
 
-API Schema
+The current DB only supports Dense Vectors, so to be continued with Sparse Vectors...
 
-upsert an array of this:
+## API Schema
+
+### upsert an array of this:
 ```
 (single vector per point)
 {
@@ -16,7 +18,7 @@ upsert an array of this:
 }
 ```
 
-or upsert an array of this:
+### or upsert an array of this:
 ```
 (multi vector per point)
 {
@@ -30,6 +32,76 @@ or upsert an array of this:
 }
 ```
 
+### For Querying (in python client of course)
+Note: This is for the "default" named vector in the DB. 
+```
+client.query_points(
+    collection_name="{collection_name}",
+    query_vectors=[[0.2, 0.1, 0.9, 0.7]], # <--- Single Dense vector
+    top_k=3 #<---default is 5, this is optional
+)
+
+or 
+
+client.query_points(
+    collection_name="{collection_name}",
+    query_pointids=["43cf51e2-8777-4f52-bc74-c2cbde0c8b04"], # <--- single point id
+)
+
+or with batch query
+
+client.query_points(
+  collection_name="{collection_name}",
+  query_vectors=[[vector1], [vector2], ...]   
+)
+
+client.query_points(
+  collection_name="{collection_name}",
+  query_pointids=["id1", "id2", ...]
+)
+
+And the result will look something like this:
+{
+  "result": [
+    { "id": "abcd", "score": 0.81 },
+    { "id": "herwewf", "score": 0.75 },
+    { "id": "qwer34wff-we", "score": 0.73 }
+  ],
+  "status": "ok",
+  "time": 0.001
+}
+
+or this
+
+{
+  "result": [
+    [
+        { "id": "sdafr", "score": 0.81 },
+        { "id": "qrt3f-ewf", "score": 0.75 },
+        { "id": "qwe-qwer3-4-q", "score": 0.73 }
+    ],
+    [
+        { "id": "dfgh-e-h", "score": 0.92 },
+        { "id": "5-tf-wer-t4", "score": 0.89 },
+        { "id": "ert-5-tw-erg-w", "score": 0.75 }
+    ]
+  ],
+  "status": "ok",
+  "time": 0.001
+}
+```
+
+### Query with filters 
+
+The using specifier here can make the user specify which named vector.
+```
+client.query_points(
+    collection_name="{collection_name}",
+    query=[0.2, 0.1, 0.9, 0.7, 1.2, 0.22, 0.54, ...],
+    using="image",
+    top_k=10,
+)
+```
 
 
 Below is just some libs i used for this project.

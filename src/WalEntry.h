@@ -4,13 +4,18 @@
 #include "Point.h"
 
 namespace vectordb {
-    struct WalEntry {
-        std::atomic<int64_t> id;
-        //so before toImmutableSegment(), we write the buffered vectors to WAL.
-        std::vector<Point<MAX_ENTRIES_TINYMAP>> vectors;
-        uint64_t timestamp;  // std::chrono::system_clock::now().time_since_epoch().count()
-        // uint32_t rows;??
-        // uint32_t cols;??
-        uint32_t checksum;  // Simple XOR checksum (optional)
-    };
+enum class WalEntryType : uint8_t {
+    Insert = 0,
+    Delete = 1,
+    Update = 2,
+};
+
+struct WalEntry {
+    WalEntryType type;
+    std::string collection_name;
+    PointIdType point_id;
+    std::map<VectorName, DenseVector> vectors;
+};
+
+
 }

@@ -44,17 +44,9 @@ namespace vectordb {
 
     using SegPointData = std::vector<std::pair<PointIdType, std::map<VectorName, DenseVector>>>;
 
-    // using AppendableStorage = std::vector<Point<MAX_ENTRIES_TINYMAP>>;
     
-    //Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-    
-    // constexpr std::size_t MAX_SEGMENT_SIZE_BYTES = 1024 * 1024; // 1 MiB
-
-    /*
-    constexpr ensures compile-time evaluation (no runtime overhead).
-    inline prevents "multiple definition" errors when included in headers.
-    */
-
+    //constexpr ensures compile-time evaluation (no runtime overhead).
+    //inline prevents "multiple definition" errors when included in headers.
     //move these later in Config.h part...
     inline constexpr size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
 
@@ -76,8 +68,6 @@ namespace vectordb {
 
     const size_t TINY_MAP_CAPACITY = 8;
 
-    // inline constexpr size_t INDEX_THRESHOLD = ;  // configurable threshold??
-
     enum class DistanceMetric {
         L2,
         DOT,
@@ -97,6 +87,7 @@ namespace vectordb {
         Connection
     };
 
+    //uhm, maybe this is useless??
     enum class SegmentType {
         Appendable,
         Immutable,

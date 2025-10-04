@@ -8,26 +8,42 @@ Status DB::addCollection(const CollectionId& collection_name, const json& config
         return Status::Error("Collection already exists: " + collection_name);
     }
 
+    if (!config_json.contains("vectors") || !config_json["vectors"].is_object()) {
+        return Status::Error("Add Collection -- Invalid vector json format. [vectors] must be an object");
+    }
+
+    if (!config_json.contains("on_disk") || !config_json["on_disk"].is_string()) {
+        return Status::Error("Invalid or missing [on_disk]; must be a string 'true' or 'false'");
+    }
+
+    std::string on_disk_str = config_json["on_disk"].get<std::string>();
+    std::transform(on_disk_str.begin(), on_disk_str.end(), on_disk_str.begin(), ::tolower);
+
     CollectionInfo collection_info;
     collection_info.name = collection_name;
 
+    bool on_disk = (on_disk_str == "true" || on_disk_str == "1" || on_disk_str == "yes");
+    collection_info.on_disk = on_disk;
+
+    auto vector_json = config_json["vectors"];
+
     // Multi-vector configuration handling
-    bool is_multi = std::any_of(config_json.begin(), config_json.end(),
+    bool is_multi = std::any_of(vector_json.begin(), vector_json.end(),
         [](const auto& item) { return item.is_object(); });
 
     if (is_multi) {
-        if (config_json.size() > TINY_MAP_CAPACITY) {
+        if (vector_json.size() > TINY_MAP_CAPACITY) {
             return Status::Error("Too many NamedVectors per Collection");
         }
 
-        for (auto& [vec_name, vec_cfg] : config_json.items()) {
+        for (auto& [vec_name, vec_cfg] : vector_json.items()) {
             auto [spec, status] = parseVectorSpec(vec_name, vec_cfg);
             if (!status.ok) return status;
             collection_info.vec_specs[vec_name] = std::move(spec);
         }
     } else {
         // Single vector configuration
-        auto [spec, status] = parseVectorSpec("default", config_json);
+        auto [spec, status] = parseVectorSpec("default", vector_json);
         if (!status.ok) return status;
         collection_info.vec_specs["default"] = std::move(spec);
     }
@@ -45,6 +61,7 @@ Status DB::addCollection(const CollectionId& collection_name, const json& config
         return Status::Error("Collection creation failed: " + std::string(e.what()));
     }
 }
+
 // Helper function for vector spec parsing
 std::pair<VectorSpec, Status> DB::parseVectorSpec(const std::string& name, const json& config) {
     std::string dist_str = config.value("distance", "UNKNOWN");
@@ -59,7 +76,7 @@ std::pair<VectorSpec, Status> DB::parseVectorSpec(const std::string& name, const
         return {VectorSpec{}, Status::Error("Unknown distance metric for: " + name)};
     }
 
-    return {VectorSpec{dim, metric, on_disk}, Status::OK()};
+    return {VectorSpec{dim, metric}, Status::OK()};
 }
 
 //i actually am not expecting a lot of collections created on a single computer.
@@ -80,19 +97,19 @@ json DB::listCollections() {
                 vector_specs_json[vec_name] = {
                     {"size", vec_spec.dim},
                     {"distance", to_string(vec_spec.metric)}, // You'll need to implement this
-                    {"on_disk", vec_spec.on_disk}
                 };
             }
             
             json item = {
                 {"name", name},
                 {"config", {
-                    {"vectors", vector_specs_json}
-                }}
+                    {"vectors", vector_specs_json},
+                    {"on_disk", collectionInfo.on_disk ? "true" : "false"}
+                }},
             };
             result.push_back(item);
         }
-    }
+    }//end of iterating collections
 
     return {
         {"status", "ok"},

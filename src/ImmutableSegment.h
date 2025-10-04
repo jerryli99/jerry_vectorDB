@@ -3,6 +3,7 @@
 #include "DataTypes.h"
 #include "CollectionInfo.h"
 #include "Status.h"
+#include "IdTracker.h"
 #include <faiss/IndexHNSW.h>
 #include <faiss/IndexFlat.h>
 #include <faiss/index_io.h>
@@ -44,6 +45,101 @@ public:
 
     ImmutableSegment(ImmutableSegment&&) noexcept = default;
     ImmutableSegment& operator=(ImmutableSegment&&) noexcept = default;
+
+    // Get statistics
+    size_t getPointCount() const { 
+        return m_point_ids.size(); 
+    }
+    
+    const std::vector<PointIdType>& getPointIds() const { 
+        return m_point_ids; 
+    }
+    
+    const std::unordered_map<VectorName, size_t>& getVectorDimensions() const { 
+        return m_vector_dims; 
+    }
+    
+    const IndexSpec& getIndexSpec() const { 
+        return m_index_spec; 
+    }
+
+    // size_t getTinyMapCapacity() const { return TinyMapCapacity; }
+
+    //will implement this later...
+    bool shouldMerge() const {
+        return m_point_ids.size() < m_index_spec.index_threshold * 2;
+    }
+
+    // ID mapping
+    std::optional<PointOffSetType> get_internal_id(PointIdType point_id) const {
+        return m_id_tracker.get_internal_id(point_id);
+    }
+
+    std::optional<PointIdType> get_external_id(PointOffSetType offset) const {
+        return m_id_tracker.get_external_id(offset);
+    }
+
+    const IdTracker& get_id_tracker() const { return m_id_tracker; }
+
+private:
+    void buildHNSWIndexes(const SegPointData& point_data) {
+        m_point_ids.reserve(point_data.size());
+
+        // Group sizes and dimensions first
+        std::unordered_map<VectorName, size_t> counts;
+        for (const auto& [point_id, vectors] : point_data) {
+            m_point_ids.emplace_back(point_id);
+            for (const auto& [name, vec] : vectors) {
+                if (m_vector_dims.find(name) == m_vector_dims.end()) {
+                    m_vector_dims[name] = vec.size();
+                } else if (m_vector_dims[name] != vec.size()) {
+                    throw std::runtime_error("Dimension mismatch for vector space: " + name);
+                    //still thinking about this error
+                }
+                counts[name]++; // count vectors per named space
+            }
+        }
+
+        // Allocate batch buffers per vector space
+        std::unordered_map<VectorName, std::vector<float>> batch_buffers;
+        for (const auto& [name, dim] : m_vector_dims) {
+            batch_buffers[name].reserve(counts[name] * dim);
+        }
+
+        // Fill directly into batch buffers
+        for (const auto& [point_id, vectors] : point_data) {
+            for (const auto& [name, vec] : vectors) {
+                auto& buf = batch_buffers[name];
+                buf.insert(buf.end(), vec.begin(), vec.end());
+            }
+        }
+
+        // Build FAISS indexes
+        for (const auto& [name, buf] : batch_buffers) {
+            size_t dim = m_vector_dims[name];
+            size_t num_vectors = buf.size() / dim;
+
+            auto index = std::make_unique<faiss::IndexHNSWFlat>(dim, m_index_spec.m_edges);
+            index->hnsw.efConstruction = m_index_spec.ef_construction;
+            index->hnsw.efSearch = m_index_spec.ef_search;
+
+            index->add(num_vectors, buf.data());
+            m_hnsw_indexes[name] = std::move(index);
+        }
+        std::cout << "in buildIndex Immutable class. Finished build.\n"; 
+    }
+
+private:
+    std::vector<PointIdType> m_point_ids;
+    std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;//i'm lazy, so use this for now
+    std::unordered_map<VectorName, size_t> m_vector_dims;
+    const IndexSpec& m_index_spec;
+    IdTracker m_id_tracker;
+};
+
+} // namespace vectordb
+
+
 /*
     Write segment to disk
     Status writeToDisk(const std::string& segment_path) const {
@@ -97,74 +193,6 @@ public:
         }
     }
 */
-    // Get statistics
-    size_t getPointCount() const { 
-        return m_point_ids.size(); 
-    }
-    
-    const std::vector<PointIdType>& getPointIds() const { 
-        return m_point_ids; 
-    }
-    
-    const std::unordered_map<VectorName, size_t>& getVectorDimensions() const { 
-        return m_vector_dims; 
-    }
-    
-    const IndexSpec& getIndexSpec() const { 
-        return m_index_spec; 
-    }
-    // size_t getTinyMapCapacity() const { return TinyMapCapacity; }
-
-    //will implement this later...
-    bool shouldMerge() const {
-        return m_point_ids.size() < m_index_spec.index_threshold * 2;
-    }
-
-private:
-    void buildHNSWIndexes(const SegPointData& point_data) {
-        m_point_ids.reserve(point_data.size());
-
-        // Group sizes and dimensions first
-        std::unordered_map<VectorName, size_t> counts;
-        for (const auto& [point_id, vectors] : point_data) {
-            m_point_ids.emplace_back(point_id);
-            for (const auto& [name, vec] : vectors) {
-                if (m_vector_dims.find(name) == m_vector_dims.end()) {
-                    m_vector_dims[name] = vec.size();
-                } else if (m_vector_dims[name] != vec.size()) {
-                    throw std::runtime_error("Dimension mismatch for vector space: " + name);//still thinking about this error
-                }
-                counts[name]++; // count vectors per named space
-            }
-        }
-
-        // Allocate batch buffers per vector space
-        std::unordered_map<VectorName, std::vector<float>> batch_buffers;
-        for (const auto& [name, dim] : m_vector_dims) {
-            batch_buffers[name].reserve(counts[name] * dim);
-        }
-
-        // Fill directly into batch buffers
-        for (const auto& [point_id, vectors] : point_data) {
-            for (const auto& [name, vec] : vectors) {
-                auto& buf = batch_buffers[name];
-                buf.insert(buf.end(), vec.begin(), vec.end());
-            }
-        }
-
-        // Build FAISS indexes
-        for (const auto& [name, buf] : batch_buffers) {
-            size_t dim = m_vector_dims[name];
-            size_t num_vectors = buf.size() / dim;
-
-            auto index = std::make_unique<faiss::IndexHNSWFlat>(dim, m_index_spec.m_edges);
-            index->hnsw.efConstruction = m_index_spec.ef_construction;
-            index->hnsw.efSearch = m_index_spec.ef_search;
-
-            index->add(num_vectors, buf.data());
-            m_hnsw_indexes[name] = std::move(index);
-        }
-    }
 
 /*
     void loadFromDisk(const std::string& segment_path) {
@@ -217,71 +245,58 @@ private:
     }
 */
 
-private:
-    std::vector<PointIdType> m_point_ids;
-    std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;//i'm lazy, so use this for now
-    std::unordered_map<VectorName, size_t> m_vector_dims;
-    IndexSpec m_index_spec;
-};
+/*
+std::vector<SearchResult> search(const DenseVector& query,
+                                size_t top_k,
+                                const VectorName& vector_name = "default") const
+{
+    std::vector<SearchResult> results;
+    
+    auto it = m_hnsw_indexes.find(vector_name);
+    if (it == m_hnsw_indexes.end()) {
+        return results; // Empty if vector type not found
+    }
 
-} // namespace vectordb
+    const auto& index = it->second;
 
+    std::vector<faiss::idx_t> labels(top_k);
+    std::vector<float> distances(top_k);
 
+    index->search(1, query.data(), top_k, distances.data(), labels.data());
 
+    results.reserve(top_k);
+    for (size_t i = 0; i < top_k; ++i) {
+        if (labels[i] >= 0 && static_cast<size_t>(labels[i]) < m_point_ids.size()) {
+            results.emplace_back(m_point_ids[labels[i]], distances[i]);
+        }
+    }
+    return results;
+}
 
+std::vector<SearchResult> search(const std::map<VectorName, DenseVector>& queries,
+                                size_t top_k) const
+{
+    std::vector<SearchResult> all_results;
+    
+    for (const auto& [vector_name, query] : queries) {
+        auto results = search(query, top_k, vector_name);
+        all_results.insert(all_results.end(), results.begin(), results.end());
+    }
 
+    std::sort(all_results.begin(), all_results.end(),
+            [](const SearchResult& a, const SearchResult& b) {
+                return a.distance < b.distance;
+            });
 
+    auto last = std::unique(all_results.begin(), all_results.end(),
+                        [](const SearchResult& a, const SearchResult& b) {
+                            return a.point_id == b.point_id;
+                        });
+    all_results.erase(last, all_results.end());
 
-    // std::vector<SearchResult> search(const DenseVector& query,
-    //                                 size_t top_k,
-    //                                 const VectorName& vector_name = "default") const
-    // {
-    //     std::vector<SearchResult> results;
-        
-    //     auto it = m_hnsw_indexes.find(vector_name);
-    //     if (it == m_hnsw_indexes.end()) {
-    //         return results; // Empty if vector type not found
-    //     }
-
-    //     const auto& index = it->second;
-
-    //     std::vector<faiss::idx_t> labels(top_k);
-    //     std::vector<float> distances(top_k);
-
-    //     index->search(1, query.data(), top_k, distances.data(), labels.data());
-
-    //     results.reserve(top_k);
-    //     for (size_t i = 0; i < top_k; ++i) {
-    //         if (labels[i] >= 0 && static_cast<size_t>(labels[i]) < m_point_ids.size()) {
-    //             results.emplace_back(m_point_ids[labels[i]], distances[i]);
-    //         }
-    //     }
-    //     return results;
-    // }
-
-    // std::vector<SearchResult> search(const std::map<VectorName, DenseVector>& queries,
-    //                                 size_t top_k) const
-    // {
-    //     std::vector<SearchResult> all_results;
-        
-    //     for (const auto& [vector_name, query] : queries) {
-    //         auto results = search(query, top_k, vector_name);
-    //         all_results.insert(all_results.end(), results.begin(), results.end());
-    //     }
-
-    //     std::sort(all_results.begin(), all_results.end(),
-    //             [](const SearchResult& a, const SearchResult& b) {
-    //                 return a.distance < b.distance;
-    //             });
-
-    //     auto last = std::unique(all_results.begin(), all_results.end(),
-    //                         [](const SearchResult& a, const SearchResult& b) {
-    //                             return a.point_id == b.point_id;
-    //                         });
-    //     all_results.erase(last, all_results.end());
-
-    //     if (all_results.size() > top_k) {
-    //         all_results.resize(top_k);
-    //     }
-    //     return all_results;
-    // }
+    if (all_results.size() > top_k) {
+        all_results.resize(top_k);
+    }
+    return all_results;
+}
+    */

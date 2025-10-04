@@ -19,8 +19,9 @@ namespace vectordb {
 
 class SegmentHolder {
 public:
-    SegmentHolder(size_t max_active_capacity, const IndexSpec& index_spec)
-        : m_active_segment{max_active_capacity, index_spec} {/*constructor body*/}
+    SegmentHolder(size_t max_active_capacity, const CollectionInfo& info)
+        : m_collection_info{info},
+          m_active_segment{max_active_capacity, info.index_specs} {/*constructor body*/}
     
     ~SegmentHolder() = default;
 
@@ -61,8 +62,15 @@ public:
         }
         
         //the value() which is from StatusOr, could later add ValueOrDie() method in.
-        m_immutable_segments.push_back(std::move(immutable_segment.value()));
-        
+        if (m_collection_info.on_disk == false) {
+            //fix: use a smartVector to manage this
+            m_immutable_segments.push_back(std::move(immutable_segment.value()));
+        } else {
+            //add to disk stuff here..
+            //do add some cache array here to hold some in memory immutable segments?
+            //like immutable_segment.writeToDisk?
+        }
+
         return Status::OK();
     }
 
@@ -83,6 +91,7 @@ public:
     }
 
 private:
+    const CollectionInfo& m_collection_info;
     ActiveSegment m_active_segment;
     //might implement my own AI driven std::vector for capacity prediction expansion later. Cool stuff
     std::vector<std::unique_ptr<ImmutableSegment>> m_immutable_segments;

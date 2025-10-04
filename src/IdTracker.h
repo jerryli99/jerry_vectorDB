@@ -11,7 +11,7 @@
 /*
 Used for converting external index (PointIDType) to internal index (sequential) hnsw indexing
 
-If we have 1000 segment objects, we have 1000 IdTracker objects
+If we have 1000 segment objects, we have 1000 IdTracker objects?
 */
 
 namespace vectordb {
@@ -25,7 +25,7 @@ public:
     std::optional<PointIdType> get_external_id(PointOffSetType offset) const;
 
     PointOffSetType insert(PointIdType point_id);
-    void remove(PointIdType point_id);
+    void remove(PointIdType point_id);//uhm, well, i will still keep this here for now.
 
     std::vector<PointOffSetType> iter_internal_ids() const;
     std::vector<PointIdType> iter_external_ids() const;

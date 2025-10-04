@@ -25,7 +25,10 @@ since i only care about if the prototype is working or not, i just care about th
 
 int main() {
 
-std::unique_ptr<vectordb::DB> vec_db = std::make_unique<vectordb::DB>();;
+// std::unique_ptr<vectordb::DB> vec_db = std::make_unique<vectordb::DB>();
+// Get the singleton instance as a reference
+vectordb::DB& vec_db = vectordb::DB::getInstance();
+
 httplib::Server svr;
 
 //So we only create one collection at a time. The concept of a collection is a collection of
@@ -43,21 +46,11 @@ svr.Put(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Respon
         auto json_body = vectordb::json::parse(req.body);
         std::cout << "Create collection: " << collection_name << "\n" << json_body.dump(4) << "\n";
 
-        if (!json_body.contains("vectors")) {
-            vectordb::api_send_error(res, 400, "Missing the [vectors] field", vectordb::APIErrorType::UserInput);
-            return;
-        }
+        //maybe in the future check number of fields as well (must be 2)? ignore this now...
 
-        vectordb::json& config_json = json_body["vectors"];
-
-        if (config_json.is_object()) {
-            auto status = vec_db->addCollection(collection_name, config_json);
-            if (!status.ok) {
-                vectordb::api_send_error(res, 500, status.message, vectordb::APIErrorType::Server);
-                return;
-            }
-        } else {
-            vectordb::api_send_error(res, 400, "[vectors] must be an object", vectordb::APIErrorType::UserInput);
+        auto status = vec_db.addCollection(collection_name, json_body);
+        if (!status.ok) {
+            vectordb::api_send_error(res, 400, status.message, vectordb::APIErrorType::UserInput);
             return;
         }
 
@@ -73,14 +66,15 @@ svr.Put(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Respon
 });
 
 
-// List Collections
+// List Collections, yes i can make it look like /collections/v1/....but i will just keep it simple
+//thinking about using LRU to cache the results for GET requests...
 svr.Get("/collections", [&](const httplib::Request& req, httplib::Response& res) {
     try {
         if (!req.body.empty()) {
             vectordb::api_send_error(res, 400, "GET collections does not accept a request body", vectordb::APIErrorType::UserInput);
             return;
         }
-        auto result_json = vec_db->listCollections();
+        auto result_json = vec_db.listCollections();
         res.set_content(result_json.dump(), "application/json");
 
     } catch (const std::exception &e) {
@@ -92,6 +86,74 @@ svr.Get("/collections", [&](const httplib::Request& req, httplib::Response& res)
             vectordb::APIErrorType::Connection);
     }
 });
+
+//search by vector(s) and by point id
+//the api is like /collection/{collection_name}/points/query
+// Query endpoint
+// svr.Post(R"(/collections/(.+)/query)", [&](const httplib::Request& req, httplib::Response& res) {
+//     auto t_start = std::chrono::steady_clock::now();
+
+//     try {
+//         if (req.matches.size() < 2) {
+//             vectordb::api_send_error(res, 400, "Missing collection name", vectordb::APIErrorType::UserInput);
+//             return;
+//         }
+
+//         std::string collection_name = req.matches[1];
+//         vectordb::json body = vectordb::json::parse(req.body);
+
+//         //needs more checking like negative numbers... 
+//         //the python client always have default val of 5
+//         int top_k = body["top_k"].get<int>();
+        
+//         // Determine query type
+//         bool has_vectors = body.contains("query_vectors");
+//         bool has_ids = body.contains("query_pointids");
+
+//         if (!has_vectors && !has_ids) {
+//             vectordb::api_send_error(res, 400, "Must provide query_vectors or query_pointids", vectordb::APIErrorType::UserInput);
+//             return;
+//         }
+
+//         vectordb::json query_result;
+
+//         if (has_vectors) {
+//             // Expecting array of arrays
+//             if (!body["query_vectors"].is_array()) {
+//                 vectordb::api_send_error(res, 400, "query_vectors must be an array", vectordb::APIErrorType::UserInput);
+//                 return;
+//             }
+
+//             query_result = vec_db.queryByVectors(collection_name, body["query_vectors"], top_k);
+//         }
+//         else if (has_ids) {
+//             if (!body["query_pointids"].is_array()) {
+//                 vectordb::api_send_error(res, 400, "query_pointids must be an array", vectordb::APIErrorType::UserInput);
+//                 return;
+//             }
+
+//             query_result = vec_db.queryByPointIDs(collection_name, body["query_pointids"], top_k);
+//         }
+
+//         auto t_end = std::chrono::steady_clock::now();
+//         double elapsed = std::chrono::duration<double>(t_end - t_start).count();
+
+//         vectordb::json response_json = {
+//             {"result", query_result},
+//             {"status", "ok"},
+//             {"time", elapsed}
+//         };
+
+//         res.set_content(response_json.dump(), "application/json");
+
+//     } catch (const vectordb::json::parse_error& e) {
+//         vectordb::api_send_error(res, 400, std::string("Invalid JSON: ") + e.what(), vectordb::APIErrorType::UserInput);
+//     } catch (const std::exception& e) {
+//         vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+//     } catch (...) {
+//         vectordb::api_send_error(res, 500, "Unknown error", vectordb::APIErrorType::Connection);
+//     }
+// });
 
 // Delete Collection
 svr.Delete(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Response& res) {
@@ -111,7 +173,7 @@ svr.Delete(R"(/collections/(.+))", [&](const httplib::Request& req, httplib::Res
         std::string collection_name = req.matches[1];
         std::cout << "Delete collection: " << collection_name << "\n";
 
-        auto status = vec_db->deleteCollection(collection_name);
+        auto status = vec_db.deleteCollection(collection_name);
         if (!status.ok) {
             vectordb::api_send_error(res, 500, status.message, vectordb::APIErrorType::Server);
             return;
@@ -188,7 +250,7 @@ svr.Post("/upsert", [&](const httplib::Request& req, httplib::Response& res) {
 
         auto points_json = json_body["points"];
 
-        auto status = vec_db->upsertPointsToCollection(collection_name, points_json);
+        auto status = vec_db.upsertPointsToCollection(collection_name, points_json);
 
         if (!status.ok) {
             // std::cout << "Upsert failed: " << status.message << std::endl;

@@ -5,47 +5,53 @@
 #include "CollectionContainer.h"
 #include "Status.h"
 
-// #include <memory>
-
-namespace vectordb{
+/*
+I will be using the Singleton Design Pattern for my DB class
+*/
+namespace vectordb {
 class DB {
-    public:
-        DB() = default;
-        ~DB() = default; //?? ehm, we will see about this part. 
-        
-        //helper for addCollection
-        std::pair<VectorSpec, Status> parseVectorSpec(const std::string& name, const json& config);
+public:
+    // Delete copy constructor and assignment operator to prevent copying
+    DB(const DB&) = delete;
+    DB& operator=(const DB&) = delete;
+    
+    // Static method to get the single instance
+    static DB& getInstance() {
+        static DB instance; //Created only once (thread-safe sice C++11)
+        return instance;
+    }
 
-        //config collection obj
-        Status addCollection(const CollectionId& collection_name, const json& config_json);
+    Status addCollection(const CollectionId& collection_name, const json& config_json);
+    Status deleteCollection(const CollectionId& collection_name);
+    Status upsertPointsToCollection(const CollectionId& collection_name, const json& points_json);
+    
+    json listCollections();
+    json queryByVectors(const std::string& collection, const json& vectors,int top_k);
+    json queryByPointIDs(const std::string& collection, const json& ids, int top_k);
+    
+    void searchTopKInCollection(...);
 
-        json listCollections();
-        
-        Status deleteCollection(const CollectionId& collection_name);
-        
-        //helper for upsertPointsToCollection
-        StatusOr<DenseVector> validateVector(const VectorName& name, const json& jvec, 
-                                             const CollectionInfo& collection_info);
-        
-        Status upsertPointsToCollection(const CollectionId& collection_name, const json& points_json);
-        
-        //upsert for single vector 
-        Status upsertPoints(std::shared_ptr<Collection>& collection, 
-                            const PointIdType& point_id, 
-                            const DenseVector& vector,
-                            const Payload& payload);
-        
-        //upsert for multiple named vectors, overload the member function
-        Status upsertPoints(std::shared_ptr<Collection>& collection, 
-                            const PointIdType& point_id, 
-                            const std::map<VectorName, DenseVector>& named_vectors,
-                            const Payload& payload);
-        
-        //size_t topK, collectioName
-        void searchTopKInCollection(...);
-
-    private:
-        CollectionContainer container;
+private:
+    //Private constructor - can only be created internally
+    //Prevents doing DB db; or auto db = DB(); or auto another_db = new DB();
+    DB() = default;
+    ~DB() = default;
+    
+    CollectionContainer container;
+    
+    std::pair<VectorSpec, Status> parseVectorSpec(const std::string& name, const json& config);
+    StatusOr<DenseVector> validateVector(const VectorName& name, const json& jvec, 
+                                         const CollectionInfo& collection_info);
+    
+    // Upsert helpers
+    Status upsertPoints(std::shared_ptr<Collection>& collection, 
+                        const PointIdType& point_id, 
+                        const DenseVector& vector,
+                        const Payload& payload);
+    Status upsertPoints(std::shared_ptr<Collection>& collection, 
+                        const PointIdType& point_id, 
+                        const std::map<VectorName, DenseVector>& named_vectors,
+                        const Payload& payload);
 };
 
-}
+} // namespace vectordb

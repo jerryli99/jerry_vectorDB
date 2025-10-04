@@ -12,7 +12,7 @@ namespace vectordb {
                                          size_t cache_size_mb) : m_rkdb_path{db_path} 
     {
         // Create the directory if it doesn't exist
-        std::filesystem::create_directories(db_path.parent_path());
+        std::filesystem::create_directories(db_path.parent_path()); //uncomment this line after things work
         
         rocksdb::Options options;
         options.create_if_missing = true;

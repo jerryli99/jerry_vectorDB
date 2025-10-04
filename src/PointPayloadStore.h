@@ -17,8 +17,8 @@ I am trying to make Payload per Point storage not per named vector here, so yeah
 namespace vectordb {
     class PointPayloadStore {
     public:
-
-        PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb);
+        // prevents copy-initialization such as PointPayloadStore payload = {} No No here
+        explicit PointPayloadStore(const std::filesystem::path& db_path, size_t cache_size_mb);
         ~PointPayloadStore();
 
         // Disable copying

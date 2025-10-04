@@ -10,7 +10,8 @@ def run_tests():
 
     # Create single-vector collection
     single_config = models.CreateCollectionRequest(
-        vectors=models.VectorParams(size=4, distance="Cosine")
+        vectors=models.VectorParams(size=4, distance="Cosine"),
+        on_disk="false"
     )
     print("Test 1: Create single-vector collection")
     print(client.create_collection("single_collection", single_config))
@@ -20,8 +21,9 @@ def run_tests():
         vectors={
             "image": models.VectorParams(size=3, distance="Dot"),
             "text": models.VectorParams(size=3, distance="Cosine"),
-            "audio": models.VectorParams(size=4, distance="Cosine"),
-        }
+            "audio": models.VectorParams(size=3, distance="Cosine"),
+        },
+        on_disk="false"
     )
     print("Test 2: Create multi-vector collection")
     print(client.create_collection("multi_collection", multi_config))
@@ -95,7 +97,7 @@ def run_tests():
     # print(client.delete_collection("multi_collection"))
 
     # List after deletion
-    # print("Test 7: List collections after deletion")
+    print("Test 7: List collections after deletion")
     print(client.list_collections())
 
 
