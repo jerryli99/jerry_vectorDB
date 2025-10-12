@@ -4,6 +4,9 @@
 #include "CollectionInfo.h"
 #include "Status.h"
 #include "IdTracker.h"
+#include "Distance.h"
+#include "QueryResult.h"
+
 #include <faiss/IndexHNSW.h>
 #include <faiss/IndexFlat.h>
 #include <faiss/index_io.h>
@@ -16,30 +19,23 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-
+#include <set>
 
 namespace vectordb {
 
 class ImmutableSegment {
 public:
     // Constructor that takes copied data 
-    //[note] SegPointData is defined in DataTypes.h.
-    //using vectordb::SegPointData = std::vector<std::pair<vectordb::PointIdType, std::map<vectordb::VectorName, vectordb::DenseVector>>>
-    ImmutableSegment(const SegPointData& point_data, const IndexSpec& index_spec)
-        : m_index_spec{index_spec}
+    ImmutableSegment(const SegPointData& point_data, const CollectionInfo& info)
+        : m_info{info}
+        , m_index_spec{info.index_specs}
     {
         buildHNSWIndexes(point_data);
     }
 
-/*
-    Constructor from disk, use this for search
-    ImmutableSegment(const std::string& segment_path) {
-        loadFromDisk(segment_path);
-    }
-*/
     ~ImmutableSegment() = default;
 
-    //prevent copying, but I might change my mind?
+    // Prevent copying
     ImmutableSegment(const ImmutableSegment&) = delete;
     ImmutableSegment& operator=(const ImmutableSegment&) = delete;
 
@@ -63,240 +59,362 @@ public:
         return m_index_spec; 
     }
 
-    // size_t getTinyMapCapacity() const { return TinyMapCapacity; }
-
-    //will implement this later...
-    bool shouldMerge() const {
-        return m_point_ids.size() < m_index_spec.index_threshold * 2;
+    const IdTracker& getIdTracker() const { 
+        return m_id_tracker; 
     }
 
-    // ID mapping
-    std::optional<PointOffSetType> get_internal_id(PointIdType point_id) const {
-        return m_id_tracker.get_internal_id(point_id);
-    }
+    QueryResult searchTopK(const std::string& vector_name,
+                           const std::vector<DenseVector>& query_vectors,
+                           size_t k) const
+    {
+        QueryResult query_result;
+        // auto start = std::chrono::high_resolution_clock::now();
 
-    std::optional<PointIdType> get_external_id(PointOffSetType offset) const {
-        return m_id_tracker.get_external_id(offset);
-    }
+        auto it = m_hnsw_indexes.find(vector_name);
+        if (it == m_hnsw_indexes.end()) {
+            query_result.status = Status::Error("Vector space not found: " + vector_name);
+            return query_result;
+        }
 
-    const IdTracker& get_id_tracker() const { return m_id_tracker; }
+        if (query_vectors.empty()) {
+            query_result.status = Status::Error("No query vectors provided");
+            return query_result;
+        }
+
+        size_t nq = query_vectors.size();
+        size_t dim = m_vector_dims.at(vector_name);
+
+        for (const auto& qvec : query_vectors) {
+            if (qvec.size() != dim) {
+                query_result.status = Status::Error("Query vector dimension mismatch [@ImmutableSegment]");
+                return query_result;
+            }
+        }
+
+        try {
+            auto metric = m_info.vec_specs.at(vector_name).metric;
+
+            // Normalize queries for cosine metric
+            std::vector<DenseVector> processed_queries = query_vectors;
+            if (metric == DistanceMetric::COSINE) {
+                for (auto& qvec : processed_queries) {
+                    float query_norm = vectordb::norm(qvec.data(), qvec.size());
+                    if (query_norm > 1e-12f) {
+                        for (auto& val : qvec)
+                            val /= query_norm;
+                    }
+                }
+            }
+
+            //flatten queries
+            std::vector<float> flat_queries;
+            flat_queries.reserve(nq * dim);
+            for (const auto& qvec : processed_queries)
+                flat_queries.insert(flat_queries.end(), qvec.begin(), qvec.end());
+
+            //output buffers
+            std::vector<faiss::idx_t> indices(nq * k);
+            std::vector<float> dists(nq * k);
+
+            //perform FAISS search
+            it->second->search(nq, flat_queries.data(), k, dists.data(), indices.data());
+
+            //build QueryResult structure
+            query_result.results.resize(nq);
+            for (size_t i = 0; i < nq; i++) {
+                auto& batch = query_result.results[i].hits;
+                batch.reserve(k);
+
+                for (size_t j = 0; j < k; j++) {
+                    size_t idx = i * k + j;
+                    if (auto point_id = m_id_tracker.getExternalId(vector_name, indices[idx])) {
+                        float score = dists[idx];
+                        // Convert cosine inner product -> similarity if needed
+                        if (metric == DistanceMetric::COSINE) {
+                            // optional: score = 1.0f - score; // if you want distance
+                        }
+                        batch.push_back({*point_id, score});
+                    }
+                }
+            }
+
+            query_result.status = Status::OK();
+        } catch (const std::exception& e) {
+            query_result.status = Status::Error(std::string("Search failed: ") + e.what());
+        }
+
+        // auto end = std::chrono::high_resolution_clock::now();
+        // query_result.time_seconds = std::chrono::duration<double>(end - start).count();
+        return query_result;//return a copy, which is fine.
+    }//end of searchTopK here
+
 
 private:
     void buildHNSWIndexes(const SegPointData& point_data) {
         m_point_ids.reserve(point_data.size());
+        
+        //get all possible vector names from collection info
+        std::vector<VectorName> all_vector_names;
+        all_vector_names.reserve(m_info.vec_specs.size());
+        for (const auto& [name, _] : m_info.vec_specs) {
+            all_vector_names.push_back(name);
+        }
+        
+        //init IdTracker with all possible vector names
+        m_id_tracker.init(all_vector_names, point_data.size());
 
-        // Group sizes and dimensions first
-        std::unordered_map<VectorName, size_t> counts;
+        //first pass: collect point IDs and track which vectors exist
+        std::unordered_map<VectorName, size_t> vector_counts;
+        std::set<VectorName> existing_vector_names;
+        
         for (const auto& [point_id, vectors] : point_data) {
-            m_point_ids.emplace_back(point_id);
+            m_point_ids.push_back(point_id);
+            
+            // Track existing vectors for this point
             for (const auto& [name, vec] : vectors) {
+                m_id_tracker.insert(name, point_id);
+                vector_counts[name]++;
+                existing_vector_names.insert(name);
+                
+                // Set dimension if not already set
                 if (m_vector_dims.find(name) == m_vector_dims.end()) {
                     m_vector_dims[name] = vec.size();
                 } else if (m_vector_dims[name] != vec.size()) {
                     throw std::runtime_error("Dimension mismatch for vector space: " + name);
-                    //still thinking about this error
                 }
-                counts[name]++; // count vectors per named space
             }
         }
 
-        // Allocate batch buffers per vector space
+        //second pass: build batch buffers only for vectors that actually exist
         std::unordered_map<VectorName, std::vector<float>> batch_buffers;
-        for (const auto& [name, dim] : m_vector_dims) {
-            batch_buffers[name].reserve(counts[name] * dim);
+        
+        for (const auto& name : existing_vector_names) {
+            size_t dim = m_vector_dims[name];
+            size_t count = vector_counts[name];
+            batch_buffers[name].reserve(count * dim);
         }
 
-        // Fill directly into batch buffers
+        //fill batch buffers in point order (important for ID mapping consistency)
         for (const auto& [point_id, vectors] : point_data) {
-            for (const auto& [name, vec] : vectors) {
-                auto& buf = batch_buffers[name];
-                buf.insert(buf.end(), vec.begin(), vec.end());
+            for (const auto& name : existing_vector_names) {
+                auto it = vectors.find(name);
+                if (it != vectors.end()) {
+                    const auto& vec = it->second;
+                    auto& buf = batch_buffers[name];
+                    // buf.insert(buf.end(), vec.begin(), vec.end());
+                    //normalize vectors for cosine metric during build
+                    if (m_info.vec_specs.at(name).metric == DistanceMetric::COSINE) {
+                        DenseVector normalized_vec = vec;
+                        float vec_norm = vectordb::norm(normalized_vec.data(), normalized_vec.size());
+                        if (vec_norm > 1e-12f) {
+                            for (auto& val : normalized_vec) {
+                                val /= vec_norm;
+                            }
+                        }
+                        buf.insert(buf.end(), normalized_vec.begin(), normalized_vec.end());
+                    } else {
+                        //for L2 and DOT, store vectors as-is
+                        buf.insert(buf.end(), vec.begin(), vec.end());
+                    }//
+                }
             }
         }
 
-        // Build FAISS indexes
+        // Build FAISS indexes only for vector spaces that have data
         for (const auto& [name, buf] : batch_buffers) {
             size_t dim = m_vector_dims[name];
             size_t num_vectors = buf.size() / dim;
 
-            auto index = std::make_unique<faiss::IndexHNSWFlat>(dim, m_index_spec.m_edges);
+            if (num_vectors == 0) {
+                continue; // Skip empty vector spaces
+            }
+
+            std::cout << "Building HNSW index for vector space: " << name 
+                      << " with " << num_vectors << " vectors of dimension " << dim << std::endl;
+
+            auto faiss_metric = to_faiss_metric(m_info.vec_specs.at(name).metric);
+            auto index = std::make_unique<faiss::IndexHNSWFlat>(dim, m_index_spec.m_edges, faiss_metric);
             index->hnsw.efConstruction = m_index_spec.ef_construction;
             index->hnsw.efSearch = m_index_spec.ef_search;
 
+            // Add vectors to the index
             index->add(num_vectors, buf.data());
             m_hnsw_indexes[name] = std::move(index);
         }
-        std::cout << "in buildIndex Immutable class. Finished build.\n"; 
+
+        std::cout << "ImmutableSegment: built " << m_hnsw_indexes.size() 
+                  << " HNSW indexes for " << m_point_ids.size() << " points\n";
+        
+        // Debug: print vector space statistics
+        for (const auto& [name, count] : vector_counts) {
+            std::cout << "  Vector space '" << name << "': " << count << " vectors" << std::endl;
+        }
     }
 
 private:
     std::vector<PointIdType> m_point_ids;
-    std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;//i'm lazy, so use this for now
+    std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;
     std::unordered_map<VectorName, size_t> m_vector_dims;
-    const IndexSpec& m_index_spec;
+    CollectionInfo m_info;
+    IndexSpec m_index_spec;
     IdTracker m_id_tracker;
 };
 
 } // namespace vectordb
 
 
-/*
-    Write segment to disk
-    Status writeToDisk(const std::string& segment_path) const {
-        try {
-            std::filesystem::create_directories(segment_path);
+// #pragma once
 
-            // Save metadata
-            std::ofstream meta_file(segment_path + "/metadata.txt");
-            if (!meta_file) {
-                return Status::Error("Failed to create metadata file");
-            }
+// #include "DataTypes.h"
+// #include "CollectionInfo.h"
+// #include "Status.h"
+// #include "IdTracker.h"
+// #include <faiss/IndexHNSW.h>
+// #include <faiss/IndexFlat.h>
+// #include <faiss/index_io.h>
+// #include <memory>
+// #include <unordered_map>
+// #include <vector>
+// #include <string>
+// #include <map>
+// #include <filesystem>
+// #include <fstream>
+// #include <sstream>
+// #include <algorithm>
 
-            meta_file << "point_count: " << m_point_ids.size() << "\n";
-            meta_file << "tiny_map_capacity: " << TinyMapCapacity << "\n";
-            meta_file << "index_threshold: " << m_index_spec.index_threshold << "\n";
-            meta_file << "m_edges: " << m_index_spec.m_edges << "\n";
-            meta_file << "ef_construction: " << m_index_spec.ef_construction << "\n";
-            meta_file << "ef_search: " << m_index_spec.ef_search << "\n";
-            meta_file << "wait_indexing: " << m_index_spec.wait_indexing << "\n";
 
-            // Save point IDs
-            std::ofstream id_file(segment_path + "/point_ids.bin", std::ios::binary);
-            if (!id_file) {
-                return Status::Error("Failed to create point IDs file");
-            }
-            id_file.write(reinterpret_cast<const char*>(m_point_ids.data()),
-                        m_point_ids.size() * sizeof(PointIdType));
+// namespace vectordb {
 
-            // Save vector dimensions
-            std::ofstream dim_file(segment_path + "/vector_dims.bin", std::ios::binary);
-            if (!dim_file) {
-                return Status::Error("Failed to create vector dimensions file");
-            }
-            for (const auto& [name, dim] : m_vector_dims) {
-                size_t name_length = name.size();
-                dim_file.write(reinterpret_cast<const char*>(&name_length), sizeof(size_t));
-                dim_file.write(name.c_str(), name_length);
-                dim_file.write(reinterpret_cast<const char*>(&dim), sizeof(size_t));
-            }
+// class ImmutableSegment {
+// public:
+//     // Constructor that takes copied data 
+//     //[note] SegPointData is defined in DataTypes.h.
+//     //using vectordb::SegPointData = std::vector<std::pair<vectordb::PointIdType, std::map<vectordb::VectorName, vectordb::DenseVector>>>
+//     ImmutableSegment(const SegPointData& point_data, const CollectionInfo& info)
+//         : m_info{info} 
+//         , m_index_spec{info.index_specs}
+//     {
+//         buildHNSWIndexes(point_data);
+//     }
 
-            // Save Faiss indexes
-            for (const auto& [name, index] : m_hnsw_indexes) {
-                std::string index_path = segment_path + "/index_" + name + ".faiss";
-                faiss::write_index(index.get(), index_path.c_str());
-            }
+// /*
+//     Constructor from disk, use this for search
+//     ImmutableSegment(const std::string& segment_path) {
+//         loadFromDisk(segment_path);
+//     }
+// */
+//     ~ImmutableSegment() = default;
 
-            return Status::OK();
+//     //prevent copying, but I might change my mind?
+//     ImmutableSegment(const ImmutableSegment&) = delete;
+//     ImmutableSegment& operator=(const ImmutableSegment&) = delete;
 
-        } catch (const std::exception& e) {
-            return Status::Error(std::string("Failed to write segment to disk: ") + e.what());
-        }
-    }
-*/
+//     ImmutableSegment(ImmutableSegment&&) noexcept = default;
+//     ImmutableSegment& operator=(ImmutableSegment&&) noexcept = default;
 
-/*
-    void loadFromDisk(const std::string& segment_path) {
-        std::ifstream meta_file(segment_path + "/metadata.txt");
-        if (!meta_file) {
-            throw std::runtime_error("Failed to open metadata file");
-        }
-
-        std::ifstream id_file(segment_path + "/point_ids.bin", std::ios::binary);
-        if (!id_file) {
-            throw std::runtime_error("Failed to open point IDs file");
-        }
-
-        id_file.seekg(0, std::ios::end);
-        size_t file_size = id_file.tellg();
-        id_file.seekg(0, std::ios::beg);
-
-        size_t point_count = file_size / sizeof(PointIdType);
-        m_point_ids.resize(point_count);
-        id_file.read(reinterpret_cast<char*>(m_point_ids.data()), file_size);
-
-        std::ifstream dim_file(segment_path + "/vector_dims.bin", std::ios::binary);
-        if (!dim_file) {
-            throw std::runtime_error("Failed to open vector dimensions file");
-        }
-
-        while (dim_file) {
-            size_t name_length;
-            if (!dim_file.read(reinterpret_cast<char*>(&name_length), sizeof(size_t))) break;
-
-            std::string name(name_length, '\0');
-            dim_file.read(&name[0], name_length);
-
-            size_t dim;
-            dim_file.read(reinterpret_cast<char*>(&dim), sizeof(size_t));
-
-            m_vector_dims[name] = dim;
-        }
-
-        for (const auto& [name, dim] : m_vector_dims) {
-            std::string index_path = segment_path + "/index_" + name + ".faiss";
-            faiss::Index* index = faiss::read_index(index_path.c_str());
-            m_hnsw_indexes[name] = std::unique_ptr<faiss::IndexHNSW>(
-                dynamic_cast<faiss::IndexHNSW*>(index));
-
-            if (!m_hnsw_indexes[name]) {
-                throw std::runtime_error("Failed to load HNSW index for vector: " + name);
-            }
-        }
-    }
-*/
-
-/*
-std::vector<SearchResult> search(const DenseVector& query,
-                                size_t top_k,
-                                const VectorName& vector_name = "default") const
-{
-    std::vector<SearchResult> results;
+//     // Get statistics
+//     size_t getPointCount() const { 
+//         return m_point_ids.size(); 
+//     }
     
-    auto it = m_hnsw_indexes.find(vector_name);
-    if (it == m_hnsw_indexes.end()) {
-        return results; // Empty if vector type not found
-    }
-
-    const auto& index = it->second;
-
-    std::vector<faiss::idx_t> labels(top_k);
-    std::vector<float> distances(top_k);
-
-    index->search(1, query.data(), top_k, distances.data(), labels.data());
-
-    results.reserve(top_k);
-    for (size_t i = 0; i < top_k; ++i) {
-        if (labels[i] >= 0 && static_cast<size_t>(labels[i]) < m_point_ids.size()) {
-            results.emplace_back(m_point_ids[labels[i]], distances[i]);
-        }
-    }
-    return results;
-}
-
-std::vector<SearchResult> search(const std::map<VectorName, DenseVector>& queries,
-                                size_t top_k) const
-{
-    std::vector<SearchResult> all_results;
+//     const std::vector<PointIdType>& getPointIds() const { 
+//         return m_point_ids; 
+//     }
     
-    for (const auto& [vector_name, query] : queries) {
-        auto results = search(query, top_k, vector_name);
-        all_results.insert(all_results.end(), results.begin(), results.end());
-    }
+//     const std::unordered_map<VectorName, size_t>& getVectorDimensions() const { 
+//         return m_vector_dims; 
+//     }
+    
+//     const IndexSpec& getIndexSpec() const { 
+//         return m_index_spec; 
+//     }
 
-    std::sort(all_results.begin(), all_results.end(),
-            [](const SearchResult& a, const SearchResult& b) {
-                return a.distance < b.distance;
-            });
+//     // size_t getTinyMapCapacity() const { return TinyMapCapacity; }
 
-    auto last = std::unique(all_results.begin(), all_results.end(),
-                        [](const SearchResult& a, const SearchResult& b) {
-                            return a.point_id == b.point_id;
-                        });
-    all_results.erase(last, all_results.end());
+//     //will implement this later...
+//     bool shouldMerge() const {
+//         return m_point_ids.size() < m_index_spec.index_threshold * 2;
+//     }
 
-    if (all_results.size() > top_k) {
-        all_results.resize(top_k);
-    }
-    return all_results;
-}
-    */
+//     // // ID mapping
+//     // std::optional<PointOffSetType> get_internal_id(PointIdType point_id) const {
+//     //     return m_id_tracker.get_internal_id(point_id);
+//     // }
+
+//     // std::optional<PointIdType> get_external_id(PointOffSetType offset) const {
+//     //     return m_id_tracker.get_external_id(offset);
+//     // }
+
+//     const IdTracker& get_id_tracker() const { return m_id_tracker; }
+
+// private:
+//     void buildHNSWIndexes(const SegPointData& point_data) {
+//         m_point_ids.reserve(point_data.size());
+        
+//             // Initialize IdTracker using all vector names from collection_info
+//         std::vector<VectorName> vector_names;
+//         vector_names.reserve(m_info.vec_specs.size());
+//         for (const auto& [name, _] : m_info.vec_specs) {
+//             vector_names.push_back(name);
+//         }
+//         m_id_tracker.init(vector_names, point_data.size());
+
+
+//         // Group sizes and dimensions first
+//         std::unordered_map<VectorName, size_t> counts;
+//         for (const auto& [point_id, vectors] : point_data) {
+//             m_point_ids.emplace_back(point_id);
+
+//             for (const auto& [name, vec] : vectors) {
+//                 m_id_tracker.insert(name, point_id); // <-- per named vector
+
+//                 if (m_vector_dims.find(name) == m_vector_dims.end()) {
+//                     m_vector_dims[name] = vec.size();
+//                 } else if (m_vector_dims[name] != vec.size()) {
+//                     throw std::runtime_error("Dimension mismatch for vector space: " + name);
+//                     //still thinking about this error
+//                 }
+//                 counts[name]++; // count vectors per named space
+//             }
+//         }
+
+//         // Allocate batch buffers per vector space
+//         std::unordered_map<VectorName, std::vector<float>> batch_buffers;
+//         for (const auto& [name, dim] : m_vector_dims) {
+//             batch_buffers[name].reserve(counts[name] * dim);
+//         }
+
+//         // Fill directly into batch buffers
+//         for (const auto& [point_id, vectors] : point_data) {
+//             for (const auto& [name, vec] : vectors) {
+//                 auto& buf = batch_buffers[name];
+//                 buf.insert(buf.end(), vec.begin(), vec.end());
+//             }
+//         }
+
+//         // Build FAISS indexes
+//         for (const auto& [name, buf] : batch_buffers) {
+//             size_t dim = m_vector_dims[name];
+//             size_t num_vectors = buf.size() / dim;
+
+//             auto index = std::make_unique<faiss::IndexHNSWFlat>(dim, m_index_spec.m_edges);
+//             index->hnsw.efConstruction = m_index_spec.ef_construction;
+//             index->hnsw.efSearch = m_index_spec.ef_search;
+
+//             index->add(num_vectors, buf.data());
+//             m_hnsw_indexes[name] = std::move(index);
+//         }
+//         std::cout << "ImmutableSegment: built HNSW indexes\n";
+//     }
+
+// private:
+//     std::vector<PointIdType> m_point_ids;
+//     std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;//i'm lazy, so use this for now
+//     std::unordered_map<VectorName, size_t> m_vector_dims;
+//     const CollectionInfo m_info;
+//     const IndexSpec& m_index_spec;
+//     IdTracker m_id_tracker;
+//     // std::unordered_map<std::string, BitmapIndex> m_filter_bitmaps; // e.g. "tenant_123", "category_image"
+// };
+
+// } // namespace vectordb

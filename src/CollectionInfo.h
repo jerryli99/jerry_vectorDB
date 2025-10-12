@@ -6,7 +6,6 @@ namespace vectordb {
 
 //since i allow namedvectors, then a collection can have multiple dims of the same data
 //i am not sure if this design is good or not, but limiting it is fine i guess. 
-//reference link https://milvus.io/docs/hnsw.md for hnsw index params
 struct VectorSpec {
     size_t dim;
     DistanceMetric metric;
@@ -15,6 +14,7 @@ struct VectorSpec {
     //create_timestamp...
 };
 
+//reference link https://milvus.io/docs/hnsw.md for hnsw index params
 struct IndexSpec {
     //need to add below fields in python client in Collection creation request, now just use default value.
     size_t index_threshold{4000}; //the threshold value = (max_activeSeg_points - max_upload_points)

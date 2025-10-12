@@ -4,6 +4,7 @@
 #include "ActiveSegment.h"
 #include "ImmutableSegment.h"
 
+#include <future>
 /**
  * @brief 
  * Low-level container: stores and manages access to segments
@@ -21,7 +22,7 @@ class SegmentHolder {
 public:
     SegmentHolder(size_t max_active_capacity, const CollectionInfo& info)
         : m_collection_info{info},
-          m_active_segment{max_active_capacity, info.index_specs} {/*constructor body*/}
+          m_active_segment{max_active_capacity, info} {/*constructor body*/}
     
     ~SegmentHolder() = default;
 
@@ -52,7 +53,7 @@ public:
     // Convert active to immutable when ready
     Status convertActiveToImmutable() {
         if (!m_active_segment.shouldIndex() && !m_active_segment.isFull()) {
-            std::cout << "Hello From Segmentholder, converActiveToImmutable\n";
+            // std::cout << "Hello From Segmentholder, converActiveToImmutable\n";
             return Status::OK();
         }
         
@@ -89,6 +90,107 @@ public:
         }
         return count;
     }
+
+    QueryResult searchTopK(
+        const std::string& vector_name,
+        const std::vector<DenseVector>& query_vectors,
+        size_t k) const 
+    {
+        auto start_time = std::chrono::high_resolution_clock::now();
+
+        // Collect all results
+        std::vector<QueryResult> all_results;
+
+        // Search active segment first
+        all_results.push_back(
+            m_active_segment.searchTopK(vector_name, query_vectors, k)
+        );
+
+        // Multi-threaded search for immutable segments
+        const size_t num_threads = std::max(1u, std::thread::hardware_concurrency() / 2);
+        std::atomic<size_t> next_index{0};
+        std::vector<std::future<std::vector<QueryResult>>> futures;
+
+        // Worker: searches one or more immutable segments
+        auto worker = [&]() -> std::vector<QueryResult> {
+            std::vector<QueryResult> local_results;
+            size_t idx;
+            while ((idx = next_index.fetch_add(1)) < m_immutable_segments.size()) {
+                auto& seg = *m_immutable_segments[idx];
+                local_results.push_back(
+                    seg.searchTopK(vector_name, query_vectors, k)
+                );
+            }
+            return local_results;
+        };
+
+        // Launch workers
+        for (size_t i = 0; i < num_threads; ++i)
+            futures.push_back(std::async(std::launch::async, worker));
+
+        // Collect results
+        for (auto& f : futures) {
+            auto local = f.get();
+            for (auto& r : local)
+                all_results.push_back(std::move(r));
+        }
+
+        // Merge across all segments
+        QueryResult merged = mergeBatchResults(all_results, k);
+
+        auto end_time = std::chrono::high_resolution_clock::now();
+        merged.time_seconds =
+            std::chrono::duration<double>(end_time - start_time).count();
+        merged.status = Status::OK();
+
+        return merged;
+    }
+
+    QueryResult mergeBatchResults(
+        const std::vector<QueryResult>& results,
+        size_t k) const
+    {
+        QueryResult merged;
+        if (results.empty()) return merged;
+
+        size_t num_queries = results.front().results.size();
+        merged.results.resize(num_queries);
+
+        // For each query in the batch
+        for (size_t qi = 0; qi < num_queries; ++qi) {
+            using Item = ScoredId;
+            auto cmp = [](const Item& a, const Item& b) {
+                return a.score < b.score; // higher score is better
+            };
+            std::priority_queue<Item, std::vector<Item>, decltype(cmp)> max_heap(cmp);
+
+            // Gather all hits for this query index
+            for (const auto& r : results) {
+                if (qi >= r.results.size()) continue;
+                for (const auto& hit : r.results[qi].hits) {
+                    if (max_heap.size() < k) {
+                        max_heap.push(hit);
+                    } else if (hit.score > max_heap.top().score) {
+                        max_heap.pop();
+                        max_heap.push(hit);
+                    }
+                }
+            }
+
+            // Extract top-k (highest scores)
+            std::vector<ScoredId> topk;
+            topk.reserve(max_heap.size());
+            while (!max_heap.empty()) {
+                topk.push_back(max_heap.top());
+                max_heap.pop();
+            }
+            std::reverse(topk.begin(), topk.end());
+            merged.results[qi].hits = std::move(topk);
+        }
+
+        return merged;
+    }
+
 
 private:
     const CollectionInfo& m_collection_info;

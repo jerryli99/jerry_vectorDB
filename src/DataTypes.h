@@ -35,7 +35,7 @@ namespace vectordb {
     // Segment ID add UUID later
     using SegmentIdType = std::string;
     
-    using PointOffSetType = size_t;
+    using PointOffSetType = std::size_t;
 
     using json = nlohmann::json;
 
@@ -62,11 +62,13 @@ namespace vectordb {
 
     // Configurable rate limits for every http request for upsert points
     //i might add another special endpoint for async, but for now just do things simple.
-    inline constexpr size_t MAX_POINTS_PER_REQUEST = 1000;
+    inline constexpr std::size_t MAX_POINTS_PER_REQUEST = 1000;
 
     inline constexpr size_t MAX_JSON_REQUEST_SIZE = 32 * 1024 * 1024; // 32MB
 
-    const size_t TINY_MAP_CAPACITY = 8;
+    inline constexpr std::size_t MAX_MEMORYPOOL_POINTS = 10000;
+
+    inline constexpr std::size_t TINY_MAP_CAPACITY = 8;
 
     enum class DistanceMetric {
         L2,

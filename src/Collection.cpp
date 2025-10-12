@@ -4,7 +4,7 @@ namespace vectordb {
 
     Collection::Collection(const CollectionId& id, const CollectionInfo& info) 
         : m_collection_info {info}, 
-          m_segment_holder(/*max_points*/5000, /*collectionInfo*/info),
+          m_segment_holder(/*max_points*/MAX_MEMORYPOOL_POINTS, /*collectionInfo*/info),
           m_point_payload("./vectordb/payload_" + id, CACHE_SIZE) //i might just add a base file path here instead of a hard coded one
     {}
     

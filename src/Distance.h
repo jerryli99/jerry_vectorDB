@@ -6,7 +6,15 @@
 #include <cmath>
 
 /**
- * @details
+ * @brief Since it is possible that the points in the activeSegment is not added to the immutableSegment,
+ *        I will also need to do searching in there, which means i will need to calculate similarities. 
+ *        I will also use this code for my LRUCache. I might call it QueryCache, whatever. Essentially,
+ *        this will calcualte the query vectors, compare them from my previous query vectors to see if 
+ *        they are similiar enough to skip the search of the whole vectordb...
+ *        I could do better with a rough classification first, but for prototype, who cares...
+ *        
+ * 
+ * @details Some notes here in case i forgot
     L2 = sqrt((a₁-b₁)² + (a₂-b₂)² + ...)
     DOT = a₁*b₁ + a₂*b₂ + a₃*b₃ + ...
     COSINE = (a·b) / (|a| * |b|)
