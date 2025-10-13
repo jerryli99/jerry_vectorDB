@@ -20,6 +20,7 @@
  *        The S-shape Curve is not really ideal, but i decided to do that because in economics, 
  *        S-curve graphs helps describe, visualize and predict a business' performance progressively over time.
  *        Since the Database is going to be sort of related to business in software, the usage can be described as such.
+ *        Economic growth curve ~= computer memory growth curve, well if memory is limited, we don't want to growth too much.       
  * 
  *        It is good? No. 
  *        But i feel like it is good enough for prototyping my vectordb. 
@@ -29,7 +30,6 @@
  * 
  *        [arr{1,2,3,4,5,6}]-->[arr{1,2,3,4,5,6,7,8,9,10}]-->[arr{1,2,3,4,5,6,7,89,0,100,12,12,3,123}]-->[arr{1,2,3,4,5}]
  */
-
 #pragma once
 
 #include <vector>
@@ -48,37 +48,35 @@ namespace vectordb {
 template<typename T>
 class ArrayChunk {
 public:
-    ArrayChunk(size_t predicted_capacity) 
-        : m_data{std::make_unique<T[]>(predicted_capacity)}, 
-          m_capacity{predicted_capacity}, 
+    explicit ArrayChunk(size_t predicted_capacity)
+        : m_data{std::make_unique<T[]>(predicted_capacity)},
+          m_capacity{predicted_capacity},
           m_size{0} {}
-    
+
     bool is_full() const { return m_size >= m_capacity; }
     size_t size() const { return m_size; }
     size_t capacity() const { return m_capacity; }
     bool empty() const { return m_size == 0; }
-    
+
     void push_back(const T& item) {
         if (is_full()) throw std::runtime_error("ArrayChunk is full");
         m_data[m_size++] = item;
     }
-    
+
     void push_back(T&& item) {
         if (is_full()) throw std::runtime_error("ArrayChunk is full");
         m_data[m_size++] = std::move(item);
     }
-    
-    const T& operator[](size_t index) const { 
-        if (index >= m_size) throw std::out_of_range("ArrayChunk index out of range");
-        return m_data[index]; 
-    }
-    
-    T& operator[](size_t index) { 
-        if (index >= m_size) throw std::out_of_range("ArrayChunk index out of range");
-        return m_data[index]; 
-    }
-    
 
+    const T& operator[](size_t index) const {
+        if (index >= m_size) throw std::out_of_range("ArrayChunk index out of range");
+        return m_data[index];
+    }
+
+    T& operator[](size_t index) {
+        if (index >= m_size) throw std::out_of_range("ArrayChunk index out of range");
+        return m_data[index];
+    }
 
 private:
     std::unique_ptr<T[]> m_data;
@@ -87,93 +85,83 @@ private:
 };
 
 /**
- * @brief SmartArray with S-curve based capacity prediction
- *        Combines arrays in linked list nodes for better memory locality
- *        while avoiding expensive reallocations
+ * @brief SmartArray with S-curve based capacity prediction and
+ *        binary search for O(log n) access.
  */
 template<typename T>
 class SmartArray {
 public:
-    //maybe allow user to configure with macros later?
-    SmartArray(size_t initial_capacity = 100, 
-               size_t max_expected_capacity = 100000,
+    SmartArray(size_t initial_capacity = 100,
+               size_t max_expected_capacity = 40000,
                double growth_rate = 0.001)
-        : m_total_size{0}, 
+        : m_total_size{0},
           m_chunk_count{0},
           m_max_capacity{max_expected_capacity},
           m_growth_rate{growth_rate},
           m_inflection_point{max_expected_capacity / 4} {
-        
-        // Create first chunk with initial prediction
-        size_t first_chunk_size = predict_next_chunk_size(0);
+
+        size_t first_chunk_size = predictNextChunkSize(0);
         m_head = std::make_unique<ChunkNode>(first_chunk_size);
         m_tail = m_head.get();
+
+        m_prefix_sizes.reserve(64);//should be enough for prototype.
+        m_chunk_ptrs.reserve(64);
+        m_prefix_sizes.push_back(0);
+        m_chunk_ptrs.push_back(m_tail);
     }
-    
+
     void push_back(const T& value) {
-        if (m_tail->chunk.is_full()) {
-            add_new_chunk();
-        }
+        if (m_tail->chunk.is_full()) addNewChunk();
         m_tail->chunk.push_back(value);
         m_total_size++;
+        m_prefix_sizes.back() = m_prefix_sizes[m_prefix_sizes.size() - 2] + m_tail->chunk.size();
     }
-    
+
     void push_back(T&& value) {
-        if (m_tail->chunk.is_full()) {
-            add_new_chunk();
-        }
+        if (m_tail->chunk.is_full()) addNewChunk();
         m_tail->chunk.push_back(std::move(value));
         m_total_size++;
+        m_prefix_sizes.back() = m_prefix_sizes[m_prefix_sizes.size() - 2] + m_tail->chunk.size();
     }
-    
+
     size_t size() const { return m_total_size; }
     bool empty() const { return m_total_size == 0; }
-    
+
     /**
-     * @brief Access element by index (O(n/chunk_size) complexity)
+     * @brief O(log n) access via prefix sums + binary search. Designed for read access only.
      */
     const T& operator[](size_t index) const {
-        if (index >= m_total_size) {
+        if (index >= m_total_size)
             throw std::out_of_range("SmartArray index out of range");
-        }
-        
-        ChunkNode* current = m_head.get();
-        size_t cumulative_size = 0;
-        
-        while (current) {
-            size_t chunk_size = current->chunk.size();
-            if (index < cumulative_size + chunk_size) {
-                return current->chunk[index - cumulative_size];
-            }
-            cumulative_size += chunk_size;
-            current = current->next.get();
-        }
-        
-        throw std::out_of_range("SmartArray index out of range");
+
+        //locate chunk using binary search
+        auto it = std::upper_bound(m_prefix_sizes.begin(), m_prefix_sizes.end(), index);
+        size_t chunk_idx = std::distance(m_prefix_sizes.begin(), it) - 1;
+        size_t offset = index - m_prefix_sizes[chunk_idx];
+
+        return m_chunk_ptrs[chunk_idx]->chunk[offset];
     }
-    
-    T& operator[](size_t index) {
-        //const cast to avoid code duplication
-        return const_cast<T&>(static_cast<const SmartArray*>(this)->operator[](index));
-    }
-    
-    void get_memory_stats() const {
+
+    //note: array[10] = obj; is not allowed, enforce immutability
+    T& operator[](size_t index) = delete;
+
+    void getMemoryStats() const {
         size_t total_allocated = 0;
         size_t total_used = 0;
         size_t chunk_num = 0;
-        
+
         ChunkNode* current = m_head.get();
         while (current) {
             total_allocated += current->chunk.capacity();
             total_used += current->chunk.size();
-            std::cout << "Chunk " << chunk_num++ 
+            std::cout << "Chunk " << chunk_num++
                       << ": capacity=" << current->chunk.capacity()
                       << ", size=" << current->chunk.size()
                       << ", usage=" << (current->chunk.size() * 100.0 / current->chunk.capacity()) << "%\n";
             current = current->next.get();
         }
-        
-        std::cout << "Total: allocated=" << total_allocated 
+
+        std::cout << "Total: allocated=" << total_allocated
                   << ", used=" << total_used
                   << ", efficiency=" << (total_used * 100.0 / total_allocated) << "%\n";
     }
@@ -182,10 +170,9 @@ private:
     struct ChunkNode {
         ArrayChunk<T> chunk;
         std::unique_ptr<ChunkNode> next;
-        
-        ChunkNode(size_t predicted_size) : chunk(predicted_size), next(nullptr) {}
+        explicit ChunkNode(size_t predicted_size) : chunk(predicted_size), next(nullptr) {}
     };
-    
+
     std::unique_ptr<ChunkNode> m_head;
     ChunkNode* m_tail;
     size_t m_total_size;
@@ -193,42 +180,59 @@ private:
     size_t m_max_capacity;
     double m_growth_rate;
     size_t m_inflection_point;
-    
-    /**
-     * @brief S-curve based capacity prediction
-     *        Uses logistic growth model: L / (1 + e^(-k*(x - x0)))
-     */
-    size_t predict_next_chunk_size(size_t current_total_size) {
-        //normalize current size to [0, 1] range
-        double progress = static_cast<double>(current_total_size) / m_max_capacity;
-        
-        //logistic S-curve calculation
+
+    std::vector<size_t> m_prefix_sizes;//prefix cumulative sizes
+    std::vector<ChunkNode*> m_chunk_ptrs;//direct chunk pointers
+
+    size_t predictNextChunkSize(size_t current_total_size) {
         double exponent = -m_growth_rate * (current_total_size - m_inflection_point);
         double s_curve_value = 1.0 / (1.0 + std::exp(exponent));
-        
-        //map to chunk size range (5% to 20% of max capacity)
+
         double min_chunk_ratio = 0.05;
         double max_chunk_ratio = 0.20;
-        
         double chunk_ratio = min_chunk_ratio + s_curve_value * (max_chunk_ratio - min_chunk_ratio);
+
         size_t predicted_size = static_cast<size_t>(m_max_capacity * chunk_ratio);
-        
-        //ensure reasonable bounds
         const size_t min_chunk_size = 100;
-        const size_t max_chunk_size = 10000;
-        
+        const size_t max_chunk_size = 1000;
         return std::clamp(predicted_size, min_chunk_size, max_chunk_size);
     }
-    
-    void add_new_chunk() {
-        size_t new_chunk_size = predict_next_chunk_size(m_total_size);
+
+    void addNewChunk() {
+        size_t new_chunk_size = predictNextChunkSize(m_total_size);
         auto new_chunk = std::make_unique<ChunkNode>(new_chunk_size);
-        
         m_tail->next = std::move(new_chunk);
         m_tail = m_tail->next.get();
+
         m_chunk_count++;
+        m_chunk_ptrs.push_back(m_tail);
+
+        //push new prefix placeholder
+        m_prefix_sizes.push_back(m_prefix_sizes.back() + m_tail->chunk.size());
     }
 };
 
 } // namespace vectordb
 
+/*
+m_prefix_sizes = [0, 100, 230, 400, 640]
+                 |    |    |    |    |
+ index           0   100  230  400  640
+
+Chunk 0 covers indices [0, 99]
+Chunk 1 covers [100, 229]
+Chunk 2 covers [230, 399]
+Chunk 3 covers [400, 639]
+
+ upper_bound(250) -> points to 400
+ position = 3
+ chunk_idx = 3 - 1 = 2
+
+ Usage:
+ vectordb::SmartArray<int> arr;
+for (int i = 0; i < 5000; ++i) arr.push_back(i);
+arr.getMemoryStats();
+std::cout << "arr[1234] = " << arr[1234] << "\n";
+
+
+*/

@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union, Literal
+from collections import OrderedDict
 
 """
-OK, so for now I only supoprt ids of string type, no integer type.
+OK, so for now I only supoprt point ids of string type, no integer type.
 I can always add it later.
 """
 
@@ -10,14 +11,14 @@ I can always add it later.
 class VectorParams:
     size: int
     distance: Literal["Cosine", "L2", "Dot"]
-    # on_disk: Optional[bool] = False
 
     def to_dict(self):
         return {
             "size": self.size,
             "distance": self.distance,
-            # "on_disk": self.on_disk
         }
+
+#----------------
 
 @dataclass
 class CreateCollectionRequest:
@@ -39,9 +40,9 @@ class CreateCollectionRequest:
         
         result["on_disk"] = self.on_disk
         return result
+
+#----------------
     
-
-
 @dataclass
 class PointStruct:
     id: str 
@@ -54,6 +55,7 @@ class PointStruct:
             d["payload"] = self.payload
         return d
 
+#-------------------
 
 @dataclass
 class UpsertBatch:
@@ -67,12 +69,85 @@ class UpsertBatch:
             d["payloads"] = self.payloads
         return d
     
+#--------------------
+
+@dataclass
+class QueryRequest:
+    collection_name: str
+    query_vectors: Optional[List[List[float]]] = None
+    query_pointids: Optional[List[str]] = None
+    using: str = "default"
+    top_k: int = 10
+
+    def __post_init__(self):
+        #validate collection name
+        if not isinstance(self.collection_name, str) or not self.collection_name.strip():
+            raise ValueError("`collection_name` must be a non-empty string.")
+
+        #see which field is active
+        has_vectors = self.query_vectors is not None and len(self.query_vectors) > 0
+        has_ids = self.query_pointids is not None and len(self.query_pointids) > 0
+
+        if has_vectors and has_ids:
+            raise ValueError("Provide only one of 'query_vectors' or 'query_pointids', not both.")
+        if not has_vectors and not has_ids:
+            raise ValueError("Must provide at least one non-empty 'query_vectors' or 'query_pointids'.")
+
+        #check query vectors
+        if has_vectors:
+            for i, vec in enumerate(self.query_vectors):
+                if not isinstance(vec, list) or not all(isinstance(x, (int, float)) for x in vec):
+                    raise TypeError(f"query_vectors[{i}] must be a list of numbers, got {vec}")
+                if len(vec) == 0:
+                    raise ValueError(f"query_vectors[{i}] cannot be empty")
+
+        #check query point IDs
+        if has_ids:
+            for pid in self.query_pointids:
+                if not isinstance(pid, str) or not pid.strip():
+                    raise ValueError(f"Invalid point ID: {pid!r}")
+
+        #check 'using'
+        if not isinstance(self.using, str) or not self.using.strip():
+            raise ValueError("`using` must be a non-empty string.")
+        if len(self.using) > 64:
+            raise ValueError("`using` name too long (max 64 characters).")
+
+        #check 'top_k'
+        if not isinstance(self.top_k, int):
+            raise TypeError("`top_k` must be an integer.")
+        if self.top_k <= 0:
+            raise ValueError("`top_k` must be positive.")
+        if self.top_k > 100: #yes, i might change this number here, oh well. just prototyping remember
+            raise ValueError("`top_k` is too large (must be <= 100).")
+
+    def to_dict(self):
+        data = OrderedDict()
+        data["collection_name"] = self.collection_name
+
+        if self.query_vectors is not None:
+            if len(self.query_vectors) == 0:
+                raise ValueError("'query_vectors' cannot be empty.")
+            data["query_vectors"] = self.query_vectors
+        elif self.query_pointids is not None:
+            if len(self.query_pointids) == 0:
+                raise ValueError("'query_pointids' cannot be empty.")
+            data["query_pointids"] = self.query_pointids
+
+        data["using"] = self.using
+        data["top_k"] = self.top_k
+
+        return data
+
+#-------------------
+
 @dataclass
 class ScoredPoint:
     id: str
     score: float
 
-
+#-------------------
+#I might keep this
 @dataclass
 class QueryResponse:
     # For single-query: a flat list of ScoredPoint
@@ -85,14 +160,14 @@ class QueryResponse:
     def from_dict(cls, data: dict) -> "QueryResponse":
         raw_result = data.get("result")
 
-        # Single query
+        #single query
         if len(raw_result) > 0 and isinstance(raw_result[0], dict):
             parsed_result = [
                 ScoredPoint(id=p["id"], score=p["score"])
                 for p in raw_result
             ]
 
-        # Batch query
+        #batch query
         else:
             parsed_result = [
                 [ScoredPoint(id=p["id"], score=p["score"]) for p in group]

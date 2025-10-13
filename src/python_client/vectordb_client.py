@@ -1,6 +1,8 @@
 import requests
+from vectordb_models import *
 from typing import List, Union, Optional
-from vectordb_models import CreateCollectionRequest, PointStruct, UpsertBatch, QueryResponse
+
+# from vectordb_models import CreateCollectionRequest, PointStruct, UpsertBatch, QueryRequest
 
 
 class VectorDBClient:
@@ -101,45 +103,53 @@ class VectorDBClient:
 
         return last_response
 
-
-    def _validate_point_id(self, pid):
-        if not isinstance(pid, str):
-            raise TypeError(f"Point ID must be a string, got {type(pid).__name__}")
-
     def query_points(
-        self,
-        collection_name: str,
-        query_vectors: Optional[Union[List[float], List[List[float]]]] = None,
-        query_pointids: Optional[Union[str, List[str]]] = None,
-        top_k: int = 5 # default to 5
-    ) -> Optional[QueryResponse]:
+            self,
+            collection_name: str,
+            query_vectors: Optional[List[List[float]]] = None,
+            query_pointids: Optional[List[str]] = None,
+            using: str = "default",
+            top_k: int = 10,
+        ) -> Optional[QueryResponse]:
+            """
+            Query the collection using either query vectors or existing point IDs.
+            """
 
-        if (query_vectors is None) and (query_pointids is None):
-            raise ValueError("Either query_vectors or query_pointids fields must be provided")
+            # Build and validate request object
+            try:
+                req = QueryRequest(
+                    collection_name=collection_name,
+                    query_vectors=query_vectors,
+                    query_pointids=query_pointids,
+                    using=using,
+                    top_k=top_k
+                )
+            except ValueError as e:
+                print(f"[ERROR] Invalid query request: {e}")
+                return None
+            except TypeError as e:
+                print(f"[ERROR] Invalid query request: {e}")
+                return None
 
-        if not isinstance(top_k, int) or top_k <= 0:
-            raise ValueError(f"top_k must be a positive integer, got {top_k}")
+            payload = req.to_dict()
+            url = f"{self.host}/query"
 
-        payload = {"collection_name": collection_name, "top_k": top_k}
+            # Send to backend
+            response = self._post(url, payload)
+            if not response:
+                print("[ERROR] No response from server.")
+                return None
 
-        if query_vectors is not None:
-            if isinstance(query_vectors[0], (float, int)):
-                payload["query_vectors"] = [query_vectors]
-            else:
-                payload["query_vectors"] = query_vectors
+            # If backend follows your spec
+            if response.get("status") == "ok" and "result" in response:
+                try:
+                    return QueryResponse.from_dict(response)
+                except Exception as e:
+                    print(f"[WARN] Failed to parse QueryResponse: {e}")
+                    return response
 
-        if query_pointids is not None:
-            if isinstance(query_pointids, str):
-                self._validate_point_id(query_pointids)
-                payload["query_pointids"] = [query_pointids]
-            else:
-                for pid in query_pointids:
-                    self._validate_point_id(pid)
-                payload["query_pointids"] = query_pointids
-
-        url = f"{self.host}/collections/{collection_name}/query"
-        raw = self._post(url, payload)
-        return QueryResponse.from_dict(raw) if raw else None
+            print(f"[ERROR] Query failed: {response}")
+            return None
 
     # Some helpers-------------------------------------------------
     def _post(self, url: str, data: dict) -> Optional[dict]:
@@ -183,3 +193,8 @@ class VectorDBClient:
         except requests.RequestException as e:
             print(f"[ERROR] {e}")
             return None
+
+    def _validate_point_id(self, pid):
+        if not isinstance(pid, str):
+            raise TypeError(f"Point ID must be a string, got {type(pid).__name__}")
+

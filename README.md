@@ -52,12 +52,16 @@ or with batch query
 
 client.query_points(
   collection_name="{collection_name}",
-  query_vectors=[[vector1], [vector2], ...]   
+  query_vectors=[vector1, vector2, ...], (note -->one or more, error if none)  
+  using="default",
+  top_k=10,
 )
 
+//this one i think will just return the vector itself
 client.query_points(
   collection_name="{collection_name}",
-  query_pointids=["id1", "id2", ...]
+  query_pointids=["id1", "id2", ...], --> one or more, error if none
+  using="default",
 )
 
 And the result will look something like this:
@@ -95,12 +99,7 @@ or this
 
 The using specifier here can make the user specify which named vector.
 ```
-client.query_points(
-    collection_name="{collection_name}",
-    query=[0.2, 0.1, 0.9, 0.7, 1.2, 0.22, 0.54, ...],
-    using="image",
-    top_k=10,
-)
+
 ```
 
 
