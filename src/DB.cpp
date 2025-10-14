@@ -244,13 +244,13 @@ Status DB::upsertPoints(std::shared_ptr<Collection>& collection,
                         const json& payload) 
 {
     // std::cout << "Upsert into collection: " << collection_name << "\n";
-    std::cout << "Point ID: " << point_id << "\n";
-    std::cout << "Vector: [ ";
+    // std::cout << "Point ID: " << point_id << "\n";
+    // std::cout << "Vector: [ ";
 
-    for (float v : vector) {
-        std::cout << v << " ";
-    }
-    std::cout << "]\n";
+    // for (float v : vector) {
+    //     std::cout << v << " ";
+    // }
+    // std::cout << "]\n";
 
     return collection->insertPoint(point_id, vector, payload);
 }
@@ -261,17 +261,48 @@ Status DB::upsertPoints(std::shared_ptr<Collection>& collection,
                         const std::map<VectorName, DenseVector>& named_vectors,
                         const json& payload)
 {
-    std::cout << "Point ID: " << point_id << "\n";
+    // std::cout << "Point ID: " << point_id << "\n";
 
-    for (const auto& [name, vec] : named_vectors) {
-        std::cout << "Vector name: " << name << " -> [ ";
-        for (float v : vec) {
-            std::cout << v << " ";
-        }
-        std::cout << "]\n";
-    }
+    // for (const auto& [name, vec] : named_vectors) {
+    //     std::cout << "Vector name: " << name << " -> [ ";
+    //     for (float v : vec) {
+    //         std::cout << v << " ";
+    //     }
+    //     std::cout << "]\n";
+    // }
 
     return collection->insertPoint(point_id, named_vectors, payload);
 
 }
+
+json DB::queryCollection(const std::string& collection_name, 
+                         const json& query_body,
+                         const std::string& using_index, 
+                         size_t top_k)
+{
+    auto access_opt = container.getCollectionForRead(collection_name);
+    if (!access_opt) {
+        std::cout << "[ehhhhh]" << std::endl;
+        return { {"status", "ok"}, {"result", "Nothing"} };
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    auto collection_info = collection->getInfo();
+
+    
+    std::cout << query_body.dump(4) << std::endl;
+
+    return {
+        {"status", "ok"},
+        {"result", {
+            {"collection", collection_name},
+            {"using_index", using_index},
+            {"top_k", top_k},
+            {"hits", json::array()}  // Empty results for now
+        }}
+    };
+
+}
+
 }// end of vectordb namespace

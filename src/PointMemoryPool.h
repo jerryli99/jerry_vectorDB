@@ -63,7 +63,7 @@ public:
     // Simple pointer return instead of StatusOr
     Point* allocatePoint(const PointIdType& point_id) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        std::cout << "Hello i am in memory pool\n";
+        // std::cout << "Hello i am in memory pool\n";
         if (m_total_allocated >= m_max_points) {
             return nullptr;  // Return nullptr instead of StatusOr
         }

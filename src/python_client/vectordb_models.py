@@ -77,14 +77,14 @@ class QueryRequest:
     query_vectors: Optional[List[List[float]]] = None
     query_pointids: Optional[List[str]] = None
     using: str = "default"
-    top_k: int = 10
+    top_k: Optional[int] = 10
 
     def __post_init__(self):
-        #validate collection name
+        # Validate collection name
         if not isinstance(self.collection_name, str) or not self.collection_name.strip():
             raise ValueError("`collection_name` must be a non-empty string.")
 
-        #see which field is active
+        # Determine which field is active
         has_vectors = self.query_vectors is not None and len(self.query_vectors) > 0
         has_ids = self.query_pointids is not None and len(self.query_pointids) > 0
 
@@ -93,7 +93,7 @@ class QueryRequest:
         if not has_vectors and not has_ids:
             raise ValueError("Must provide at least one non-empty 'query_vectors' or 'query_pointids'.")
 
-        #check query vectors
+        # Validate query vectors
         if has_vectors:
             for i, vec in enumerate(self.query_vectors):
                 if not isinstance(vec, list) or not all(isinstance(x, (int, float)) for x in vec):
@@ -101,41 +101,46 @@ class QueryRequest:
                 if len(vec) == 0:
                     raise ValueError(f"query_vectors[{i}] cannot be empty")
 
-        #check query point IDs
+        # Validate query point IDs
         if has_ids:
             for pid in self.query_pointids:
                 if not isinstance(pid, str) or not pid.strip():
                     raise ValueError(f"Invalid point ID: {pid!r}")
 
-        #check 'using'
+        # Validate `using`
         if not isinstance(self.using, str) or not self.using.strip():
             raise ValueError("`using` must be a non-empty string.")
         if len(self.using) > 64:
             raise ValueError("`using` name too long (max 64 characters).")
 
-        #check 'top_k'
-        if not isinstance(self.top_k, int):
-            raise TypeError("`top_k` must be an integer.")
-        if self.top_k <= 0:
-            raise ValueError("`top_k` must be positive.")
-        if self.top_k > 100: #yes, i might change this number here, oh well. just prototyping remember
-            raise ValueError("`top_k` is too large (must be <= 100).")
+        # Only check top_k if query is by vectors
+        if has_vectors:
+            if self.top_k is None:
+                raise ValueError("`top_k` is required when using 'query_vectors'.")
+            if not isinstance(self.top_k, int):
+                raise TypeError("`top_k` must be an integer.")
+            if self.top_k <= 0:
+                raise ValueError("`top_k` must be positive.")
+            if self.top_k > 100:
+                raise ValueError("`top_k` is too large (must be <= 100).")
+        else:
+            # For ID-based queries, ignore top_k entirely
+            self.top_k = None
 
     def to_dict(self):
         data = OrderedDict()
         data["collection_name"] = self.collection_name
 
         if self.query_vectors is not None:
-            if len(self.query_vectors) == 0:
-                raise ValueError("'query_vectors' cannot be empty.")
             data["query_vectors"] = self.query_vectors
         elif self.query_pointids is not None:
-            if len(self.query_pointids) == 0:
-                raise ValueError("'query_pointids' cannot be empty.")
             data["query_pointids"] = self.query_pointids
 
         data["using"] = self.using
-        data["top_k"] = self.top_k
+
+        # Only include top_k if present
+        if self.top_k is not None:
+            data["top_k"] = self.top_k
 
         return data
 

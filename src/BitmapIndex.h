@@ -37,10 +37,6 @@ class BitmapIndex {
 public:
     BitmapIndex() = default;
     ~BitmapIndex() = default;
-    
-    BitmapIndex(size_t size = 0) : 
-        m_bits{(size + 63) / 64, 0}, 
-        m_size{size} {/*constructor body*/}
 
     void resize(size_t new_size) {
         m_bits.resize((new_size + 63) / 64, 0);
@@ -75,7 +71,9 @@ public:
     // Bitwise AND (intersection)
     BitmapIndex operator&(const BitmapIndex& other) const {
         if (m_size != other.m_size) throw std::invalid_argument("BitmapIndex sizes must match");
-        BitmapIndex result(m_size);
+        BitmapIndex result;
+        result.m_size = m_size;
+        result.m_bits.resize(m_bits.size(), 0);
         for (size_t i = 0; i < m_bits.size(); i++) {
             result.m_bits[i] = m_bits[i] & other.m_bits[i];
         }
@@ -85,7 +83,9 @@ public:
     // Bitwise OR (union)
     BitmapIndex operator|(const BitmapIndex& other) const {
         if (m_size != other.m_size) throw std::invalid_argument("BitmapIndex sizes must match");
-        BitmapIndex result(m_size);
+        BitmapIndex result;
+        result.m_size = m_size;
+        result.m_bits.resize(m_bits.size(), 0);
         for (size_t i = 0; i < m_bits.size(); i++) {
             result.m_bits[i] = m_bits[i] | other.m_bits[i];
         }
@@ -113,7 +113,7 @@ public:
 
 private:
     std::vector<uint64_t> m_bits;
-    size_t m_size;
+    size_t m_size = 0;
 };
 
 } // namespace vectordb

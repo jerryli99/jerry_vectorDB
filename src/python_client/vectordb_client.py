@@ -41,38 +41,13 @@ class VectorDBClient:
         if not points:
             raise ValueError("No points provided for upsert")
 
-        # --- Deduplicate by point_id ---
-        merged_points = {}
-        for p in points:
-            self._validate_point_id(p.id)
-            if p.id not in merged_points:
-                merged_points[p.id] = p
-            else:
-                merged_points[p.id].vectors.update(p.vectors)
-
-        # --- Remove identical named vectors ---
-        unique_points = []
-        for p in merged_points.values():
-            seen = set()
-            filtered_vectors = {}
-            for name, vec in p.vectors.items():
-                vec_tuple = tuple(vec)
-                if (name, vec_tuple) not in seen:
-                    seen.add((name, vec_tuple))
-                    filtered_vectors[name] = vec
-            p.vectors = filtered_vectors
-            unique_points.append(p)
-
-        total_points = len(unique_points)
-        if total_points == 0:
-            print("[WARN] No unique points to upsert (all duplicates removed).")
-            return None
-
+        total_points = len(points)
+        
         # --- Skip batching if <= 1000 ---
         if total_points <= 1000:
-            print(f"[INFO] Upserting {total_points} unique points in a single request")
+            print(f"[INFO] Upserting {total_points} points in a single request")
             payload = dict(payload_base)
-            payload["points"] = [p.to_dict() for p in unique_points]
+            payload["points"] = [p.to_dict() for p in points]
             response = self._post(f"{self.host}/upsert", payload)
             if not response or response.get("status") != "ok":
                 print(f"[ERROR] Upsert failed: {response}")
@@ -82,8 +57,8 @@ class VectorDBClient:
 
         # --- Otherwise, batch in chunks of 1000 ---
         batch_size = 1000
-        batches = [unique_points[i:i + batch_size] for i in range(0, total_points, batch_size)]
-        print(f"[INFO] Upserting {total_points} unique points in {len(batches)} batch(es) (max 1000 per batch)")
+        batches = [points[i:i + batch_size] for i in range(0, total_points, batch_size)]
+        print(f"[INFO] Upserting {total_points} points in {len(batches)} batch(es) (max 1000 per batch)")
 
         last_response = None
         for i, batch in enumerate(batches, start=1):
@@ -102,14 +77,14 @@ class VectorDBClient:
             print(f"[SUCCESS] Batch {i}/{len(batches)} completed")
 
         return last_response
-
+    
     def query_points(
             self,
             collection_name: str,
             query_vectors: Optional[List[List[float]]] = None,
             query_pointids: Optional[List[str]] = None,
             using: str = "default",
-            top_k: int = 10,
+            top_k: Optional[int] = 10,
         ) -> Optional[QueryResponse]:
             """
             Query the collection using either query vectors or existing point IDs.
@@ -122,7 +97,7 @@ class VectorDBClient:
                     query_vectors=query_vectors,
                     query_pointids=query_pointids,
                     using=using,
-                    top_k=top_k
+                    top_k=top_k if top_k is not None else 0
                 )
             except ValueError as e:
                 print(f"[ERROR] Invalid query request: {e}")
@@ -132,7 +107,7 @@ class VectorDBClient:
                 return None
 
             payload = req.to_dict()
-            url = f"{self.host}/query"
+            url = f"{self.host}/collections/{collection_name}/query"
 
             # Send to backend
             response = self._post(url, payload)
@@ -140,15 +115,19 @@ class VectorDBClient:
                 print("[ERROR] No response from server.")
                 return None
 
-            # If backend follows your spec
-            if response.get("status") == "ok" and "result" in response:
+            # print(f"[DEBUG] Raw response: {response}")
+
+            # Check if the response has the basic structure we expect
+            if response.get("status") == "ok":
                 try:
+                    # Try to parse as QueryResponse
                     return QueryResponse.from_dict(response)
                 except Exception as e:
                     print(f"[WARN] Failed to parse QueryResponse: {e}")
+                    # Return the raw response so we can see what's happening
                     return response
 
-            print(f"[ERROR] Query failed: {response}")
+            print(f"[ERROR] Query failed - status not 'ok': {response}")
             return None
 
     # Some helpers-------------------------------------------------

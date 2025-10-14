@@ -37,7 +37,7 @@ public:
     //insert single unnamed vector
     Status insertPoint(PointIdType point_id, const DenseVector& vector) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        std::cout << "Hello from activeSegment inserting 1 vector\n";
+        // std::cout << "Hello from activeSegment inserting 1 vector\n";
         auto* point = m_pool->allocatePoint(point_id);
         if (!point) {
             return Status::Error("Active segment is full");
@@ -55,7 +55,7 @@ public:
     Status insertPoint(PointIdType point_id,
                        const std::map<VectorName, DenseVector>& named_vectors) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        std::cout << "Hello from activeSegment inserting multi namedvectors\n";
+        // std::cout << "Hello from activeSegment inserting multi namedvectors\n";
         auto* point = m_pool->allocatePoint(point_id);
         if (!point) {
             return Status::Error("Active segment is full");

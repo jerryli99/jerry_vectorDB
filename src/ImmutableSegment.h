@@ -3,6 +3,7 @@
 #include "DataTypes.h"
 #include "CollectionInfo.h"
 #include "Status.h"
+#include "Utils.h"
 #include "IdTracker.h"
 #include "Distance.h"
 #include "QueryResult.h"

@@ -26,10 +26,8 @@ public:
     Status upsertPointsToCollection(const CollectionId& collection_name, const json& points_json);
     
     json listCollections();
-    json queryByVectors(const std::string& collection, const json& vectors,int top_k);
-    json queryByPointIDs(const std::string& collection, const json& ids, int top_k);
-    
-    void searchTopKInCollection(...);
+    json queryCollection(const std::string& collection_name, const json& query_body, 
+                         const std::string& using_index, std::size_t top_k);
 
 private:
     //Private constructor - can only be created internally
@@ -48,6 +46,7 @@ private:
                         const PointIdType& point_id, 
                         const DenseVector& vector,
                         const Payload& payload);
+    
     Status upsertPoints(std::shared_ptr<Collection>& collection, 
                         const PointIdType& point_id, 
                         const std::map<VectorName, DenseVector>& named_vectors,
