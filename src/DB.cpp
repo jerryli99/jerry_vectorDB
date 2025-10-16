@@ -1,5 +1,6 @@
 #include "DB.h"
 #include "Utils.h"
+#include "JsonConverters.h"
 
 namespace vectordb {
 Status DB::addCollection(const CollectionId& collection_name, const json& config_json) {
@@ -275,6 +276,7 @@ Status DB::upsertPoints(std::shared_ptr<Collection>& collection,
 
 }
 
+//Still missing query by points here. Need to add the logic...
 json DB::queryCollection(const std::string& collection_name, 
                          const json& query_body,
                          const std::string& using_index, 
@@ -282,26 +284,48 @@ json DB::queryCollection(const std::string& collection_name,
 {
     auto access_opt = container.getCollectionForRead(collection_name);
     if (!access_opt) {
-        std::cout << "[ehhhhh]" << std::endl;
-        return { {"status", "ok"}, {"result", "Nothing"} };
+        return { {"status", "error"}, {"message", "Collection not found"} };
     }
     
     auto& access = access_opt.value();
     auto& collection = access.first->collection;
     auto collection_info = collection->getInfo();
+    QueryResult qr;
+    auto start_time = std::chrono::high_resolution_clock::now();
 
-    
     std::cout << query_body.dump(4) << std::endl;
 
-    return {
-        {"status", "ok"},
-        {"result", {
-            {"collection", collection_name},
-            {"using_index", using_index},
-            {"top_k", top_k},
-            {"hits", json::array()}  // Empty results for now
-        }}
-    };
+    if (query_body.contains("query_vectors")) 
+    {
+        const auto& query_vectors_json = query_body["query_vectors"];
+        if (!query_vectors_json.is_array() || query_vectors_json.empty()) {
+            return { {"status", "error"}, {"message", "'query_vectors' must be a non-empty array"} };
+        }
+
+        std::vector<DenseVector> query_vectors;
+        const std::string vector_name = query_body.value("using", "default");
+
+        for (const auto& vec_json : query_vectors_json) {
+            auto result = validateVector(vector_name, vec_json, collection_info);
+            if (!result.ok()) {
+                return { {"status", "error"}, {"message", result.status().message} };
+            }
+            query_vectors.push_back(result.value());
+        }
+
+        if (query_vectors.empty()) {
+            qr.status = Status::Error("No valid vectors found for given point IDs");
+        } else {
+            qr = collection->searchTopK(vector_name, query_vectors, top_k);
+        }
+    }
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    qr.time_seconds = std::chrono::duration<double>(end_time - start_time).count();
+    
+    json response;
+    vectordb::to_json(response, qr);
+    return response;
 
 }
 

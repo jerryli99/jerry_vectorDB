@@ -31,7 +31,9 @@ public:
     }
     
     BitmapIndex query(const std::vector<std::string>& filter_names) noexcept {
-        BitmapIndex result(total_points);
+        BitmapIndex result;
+        result.resize(total_points);
+
         // Initialize with all ones
         for (size_t i = 0; i < total_points; i++) {
             result.set(i, true);
@@ -42,6 +44,7 @@ public:
         }
         return result;
     }
+    
 private:
     std::unordered_map<std::string, BitmapIndex> filters;
     size_t total_points;

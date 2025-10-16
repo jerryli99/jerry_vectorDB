@@ -134,6 +134,7 @@ public:
                         if (metric == DistanceMetric::COSINE) {
                             // optional: score = 1.0f - score; // if you want distance
                         }
+                        score = std::round(score * 10000.0f) / 10000.0f;
                         batch.push_back({*point_id, score});
                     }
                 }

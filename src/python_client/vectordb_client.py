@@ -90,6 +90,20 @@ class VectorDBClient:
             Query the collection using either query vectors or existing point IDs.
             """
 
+            def round_selected_fields(obj, digits=4): 
+                if isinstance(obj, dict): 
+                    new_obj = {} 
+                    for k, v in obj.items(): 
+                        if k in ("score", "time") and isinstance(v, (int, float)): 
+                            new_obj[k] = round(v, digits) 
+                        else: 
+                            new_obj[k] = round_selected_fields(v, digits)
+
+                    return new_obj 
+                elif isinstance(obj, list): 
+                    return [round_selected_fields(x, digits) for x in obj] 
+                return obj
+            
             # Build and validate request object
             try:
                 req = QueryRequest(
@@ -115,20 +129,17 @@ class VectorDBClient:
                 print("[ERROR] No response from server.")
                 return None
 
-            # print(f"[DEBUG] Raw response: {response}")
-
-            # Check if the response has the basic structure we expect
-            if response.get("status") == "ok":
-                try:
-                    # Try to parse as QueryResponse
-                    return QueryResponse.from_dict(response)
-                except Exception as e:
-                    print(f"[WARN] Failed to parse QueryResponse: {e}")
-                    # Return the raw response so we can see what's happening
-                    return response
-
-            print(f"[ERROR] Query failed - status not 'ok': {response}")
-            return None
+            response = round_selected_fields(response) 
+            
+            if response.get("status") == "ok": 
+                try: 
+                    return QueryResponse.from_dict(response) 
+                except Exception as e: 
+                    print(f"[WARN] Failed to parse QueryResponse: {e}") 
+                    return None 
+            else: 
+                print(f"[ERROR] Query failed - status not 'ok': {response}") 
+                return None
 
     # Some helpers-------------------------------------------------
     def _post(self, url: str, data: dict) -> Optional[dict]:

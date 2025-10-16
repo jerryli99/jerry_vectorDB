@@ -7,6 +7,18 @@
  * the 2 queries or more stored in the LRU cache are similiar, and if so, then
  * simply retrieve it instead of adding a new one to the list?
  * 
+ * [
+ *    Update (10/16/2025): I feel like this will be fine for low to mid rate queries.
+ *    But for large and frequent queries, this might be a bad idea as we can expect the
+ *    cache size to be big, perhaps this vector query cache might even deserve its own server for it. LOL.
+ *    So i will still keep this as an option though.
+ * 
+ *    std::unorderedmap<VectorName, LRUCache> cache;
+ *    another cache will be hash based cache. I will implement it later.
+ *    Maybe borrow from LSH (Locality Sensitive Hashing) and Product Quantization?
+ * ]
+ * 
+ * 
  */
 #pragma once
 
@@ -36,7 +48,7 @@ public:
 
     /**
      * Try to find a similar query in cache.
-     * For COSINE: higher is more similar.
+     * For COSINE higher is more similar.
      * For L2: smaller is more similar.
      */
     std::optional<QueryResult> getApproximate(

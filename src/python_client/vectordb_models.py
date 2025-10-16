@@ -152,32 +152,27 @@ class ScoredPoint:
     score: float
 
 #-------------------
-#I might keep this
 @dataclass
 class QueryResponse:
-    # For single-query: a flat list of ScoredPoint
-    # For batch-query: a list of lists of ScoredPoint
     result: Union[List[ScoredPoint], List[List[ScoredPoint]]]
     status: str
     time: float
 
     @classmethod
     def from_dict(cls, data: dict) -> "QueryResponse":
-        raw_result = data.get("result")
+        raw_result = data.get("result", [])
 
-        #single query
-        if len(raw_result) > 0 and isinstance(raw_result[0], dict):
+        if not raw_result:
+            parsed_result = []
+        # batch query
+        elif isinstance(raw_result[0], dict) and "hits" in raw_result[0]:
             parsed_result = [
-                ScoredPoint(id=p["id"], score=p["score"])
-                for p in raw_result
-            ]
-
-        #batch query
-        else:
-            parsed_result = [
-                [ScoredPoint(id=p["id"], score=p["score"]) for p in group]
+                [ScoredPoint(id=p["id"], score=p["score"]) for p in group["hits"]]
                 for group in raw_result
             ]
+        else:
+            # fallback: treat as single flat list
+            parsed_result = [ScoredPoint(id=p["id"], score=p["score"]) for p in raw_result]
 
         return cls(
             result=parsed_result,

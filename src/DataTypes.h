@@ -43,7 +43,6 @@ namespace vectordb {
     using Payload = nlohmann::json;
 
     using SegPointData = std::vector<std::pair<PointIdType, std::map<VectorName, DenseVector>>>;
-
     
     //constexpr ensures compile-time evaluation (no runtime overhead).
     //inline prevents "multiple definition" errors when included in headers.

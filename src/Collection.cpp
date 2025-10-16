@@ -28,6 +28,13 @@ namespace vectordb {
         return status;
     }
 
+    QueryResult Collection::searchTopK(const std::string& vector_name,
+                                       const std::vector<DenseVector>& query_vectors,
+                                       size_t k) const 
+    {
+        return m_segment_holder.searchTopK(vector_name, query_vectors, k);
+    }
+
     const CollectionId& Collection::getId() const { return m_collection_id; }
     const CollectionInfo& Collection::getInfo() const { return m_collection_info; }
     SegmentHolder& Collection::getSegmentHolder() { return m_segment_holder; }

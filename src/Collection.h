@@ -19,14 +19,19 @@ public:
     Status insertPoint(PointIdType point_id, const DenseVector& vector, const Payload& payload);
 
     Status insertPoint(PointIdType point_id, 
-                    const std::map<VectorName, DenseVector>& named_vectors,
-                    const Payload& payload);
+                       const std::map<VectorName, DenseVector>& named_vectors,
+                       const Payload& payload);
+
+    QueryResult searchTopK(const std::string& vector_name,
+                           const std::vector<DenseVector>& query_vectors, 
+                           size_t k) const;
 
     const CollectionId& getId() const;
     const CollectionInfo& getInfo() const;
     SegmentHolder& getSegmentHolder();
     const SegmentHolder& getSegmentHolder() const;
     PointPayloadStore& getPayloadStore();
+    
 
 private:
     CollectionId m_collection_id;

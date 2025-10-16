@@ -96,7 +96,7 @@ public:
         const std::vector<DenseVector>& query_vectors,
         size_t k) const 
     {
-        auto start_time = std::chrono::high_resolution_clock::now();
+        // auto start_time = std::chrono::high_resolution_clock::now();
 
         // Collect all results
         std::vector<QueryResult> all_results;
@@ -138,9 +138,9 @@ public:
         // Merge across all segments
         QueryResult merged = mergeBatchResults(all_results, k);
 
-        auto end_time = std::chrono::high_resolution_clock::now();
-        merged.time_seconds =
-            std::chrono::duration<double>(end_time - start_time).count();
+        // auto end_time = std::chrono::high_resolution_clock::now();
+        // merged.time_seconds =
+        //     std::chrono::duration<double>(end_time - start_time).count();
         merged.status = Status::OK();
 
         return merged;
