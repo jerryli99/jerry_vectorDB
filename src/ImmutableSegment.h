@@ -31,6 +31,7 @@ public:
         : m_info{info}
         , m_index_spec{info.index_specs}
     {
+        std::cout << "Hello from Immutabe\n";
         buildHNSWIndexes(point_data);
     }
 
@@ -70,7 +71,7 @@ public:
     {
         QueryResult query_result;
         // auto start = std::chrono::high_resolution_clock::now();
-
+        std::cout << "In immutable searchTopK\n";
         auto it = m_hnsw_indexes.find(vector_name);
         if (it == m_hnsw_indexes.end()) {
             query_result.status = Status::Error("Vector space not found: " + vector_name);
@@ -264,159 +265,3 @@ private:
 
 } // namespace vectordb
 
-
-// #pragma once
-
-// #include "DataTypes.h"
-// #include "CollectionInfo.h"
-// #include "Status.h"
-// #include "IdTracker.h"
-// #include <faiss/IndexHNSW.h>
-// #include <faiss/IndexFlat.h>
-// #include <faiss/index_io.h>
-// #include <memory>
-// #include <unordered_map>
-// #include <vector>
-// #include <string>
-// #include <map>
-// #include <filesystem>
-// #include <fstream>
-// #include <sstream>
-// #include <algorithm>
-
-
-// namespace vectordb {
-
-// class ImmutableSegment {
-// public:
-//     // Constructor that takes copied data 
-//     //[note] SegPointData is defined in DataTypes.h.
-//     //using vectordb::SegPointData = std::vector<std::pair<vectordb::PointIdType, std::map<vectordb::VectorName, vectordb::DenseVector>>>
-//     ImmutableSegment(const SegPointData& point_data, const CollectionInfo& info)
-//         : m_info{info} 
-//         , m_index_spec{info.index_specs}
-//     {
-//         buildHNSWIndexes(point_data);
-//     }
-
-// /*
-//     Constructor from disk, use this for search
-//     ImmutableSegment(const std::string& segment_path) {
-//         loadFromDisk(segment_path);
-//     }
-// */
-//     ~ImmutableSegment() = default;
-
-//     //prevent copying, but I might change my mind?
-//     ImmutableSegment(const ImmutableSegment&) = delete;
-//     ImmutableSegment& operator=(const ImmutableSegment&) = delete;
-
-//     ImmutableSegment(ImmutableSegment&&) noexcept = default;
-//     ImmutableSegment& operator=(ImmutableSegment&&) noexcept = default;
-
-//     // Get statistics
-//     size_t getPointCount() const { 
-//         return m_point_ids.size(); 
-//     }
-    
-//     const std::vector<PointIdType>& getPointIds() const { 
-//         return m_point_ids; 
-//     }
-    
-//     const std::unordered_map<VectorName, size_t>& getVectorDimensions() const { 
-//         return m_vector_dims; 
-//     }
-    
-//     const IndexSpec& getIndexSpec() const { 
-//         return m_index_spec; 
-//     }
-
-//     // size_t getTinyMapCapacity() const { return TinyMapCapacity; }
-
-//     //will implement this later...
-//     bool shouldMerge() const {
-//         return m_point_ids.size() < m_index_spec.index_threshold * 2;
-//     }
-
-//     // // ID mapping
-//     // std::optional<PointOffSetType> get_internal_id(PointIdType point_id) const {
-//     //     return m_id_tracker.get_internal_id(point_id);
-//     // }
-
-//     // std::optional<PointIdType> get_external_id(PointOffSetType offset) const {
-//     //     return m_id_tracker.get_external_id(offset);
-//     // }
-
-//     const IdTracker& get_id_tracker() const { return m_id_tracker; }
-
-// private:
-//     void buildHNSWIndexes(const SegPointData& point_data) {
-//         m_point_ids.reserve(point_data.size());
-        
-//             // Initialize IdTracker using all vector names from collection_info
-//         std::vector<VectorName> vector_names;
-//         vector_names.reserve(m_info.vec_specs.size());
-//         for (const auto& [name, _] : m_info.vec_specs) {
-//             vector_names.push_back(name);
-//         }
-//         m_id_tracker.init(vector_names, point_data.size());
-
-
-//         // Group sizes and dimensions first
-//         std::unordered_map<VectorName, size_t> counts;
-//         for (const auto& [point_id, vectors] : point_data) {
-//             m_point_ids.emplace_back(point_id);
-
-//             for (const auto& [name, vec] : vectors) {
-//                 m_id_tracker.insert(name, point_id); // <-- per named vector
-
-//                 if (m_vector_dims.find(name) == m_vector_dims.end()) {
-//                     m_vector_dims[name] = vec.size();
-//                 } else if (m_vector_dims[name] != vec.size()) {
-//                     throw std::runtime_error("Dimension mismatch for vector space: " + name);
-//                     //still thinking about this error
-//                 }
-//                 counts[name]++; // count vectors per named space
-//             }
-//         }
-
-//         // Allocate batch buffers per vector space
-//         std::unordered_map<VectorName, std::vector<float>> batch_buffers;
-//         for (const auto& [name, dim] : m_vector_dims) {
-//             batch_buffers[name].reserve(counts[name] * dim);
-//         }
-
-//         // Fill directly into batch buffers
-//         for (const auto& [point_id, vectors] : point_data) {
-//             for (const auto& [name, vec] : vectors) {
-//                 auto& buf = batch_buffers[name];
-//                 buf.insert(buf.end(), vec.begin(), vec.end());
-//             }
-//         }
-
-//         // Build FAISS indexes
-//         for (const auto& [name, buf] : batch_buffers) {
-//             size_t dim = m_vector_dims[name];
-//             size_t num_vectors = buf.size() / dim;
-
-//             auto index = std::make_unique<faiss::IndexHNSWFlat>(dim, m_index_spec.m_edges);
-//             index->hnsw.efConstruction = m_index_spec.ef_construction;
-//             index->hnsw.efSearch = m_index_spec.ef_search;
-
-//             index->add(num_vectors, buf.data());
-//             m_hnsw_indexes[name] = std::move(index);
-//         }
-//         std::cout << "ImmutableSegment: built HNSW indexes\n";
-//     }
-
-// private:
-//     std::vector<PointIdType> m_point_ids;
-//     std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;//i'm lazy, so use this for now
-//     std::unordered_map<VectorName, size_t> m_vector_dims;
-//     const CollectionInfo m_info;
-//     const IndexSpec& m_index_spec;
-//     IdTracker m_id_tracker;
-//     // std::unordered_map<std::string, BitmapIndex> m_filter_bitmaps; // e.g. "tenant_123", "category_image"
-// };
-
-// } // namespace vectordb

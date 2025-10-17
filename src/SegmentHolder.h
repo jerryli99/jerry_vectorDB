@@ -56,16 +56,21 @@ public:
             // std::cout << "Hello From Segmentholder, converActiveToImmutable\n";
             return Status::OK();
         }
-        
+        std::cout << "[******] convertActiveToImmutable called. shouldIndex=" << m_active_segment.shouldIndex()
+          << " isFull=" << m_active_segment.isFull() << "\n";
         auto immutable_segment = m_active_segment.convertToImmutable();
         if (!immutable_segment.ok()) {
             return immutable_segment.status();
         }
-        
+        // m_immutable_segments.push_back(std::move(immutable_segment.value()));
+        // std::cout << "[OK???] immutableSeg Size ?" << m_immutable_segments.size();        
         //the value() which is from StatusOr, could later add ValueOrDie() method in.
-        if (m_collection_info.on_disk == false) {
+        // std::cout << "on_disk = [" << m_collection_info.on_disk << "]\n";
+        if (!m_collection_info.on_disk) {
             //fix: use a smartVector to manage this
+            // m_immutable_segments.push_back(std::move(immutable_segment.value()));
             m_immutable_segments.push_back(std::move(immutable_segment.value()));
+            std::cout << "[OK???] immutableSeg Size ?" << m_immutable_segments.size();  
         } else {
             //add to disk stuff here..
             //do add some cache array here to hold some in memory immutable segments?
@@ -105,9 +110,10 @@ public:
         all_results.push_back(
             m_active_segment.searchTopK(vector_name, query_vectors, k)
         );
-
+        std::cout << "[DEBUG] immutable_segments.size=" << m_immutable_segments.size() << "\n";
         // Multi-threaded search for immutable segments
-        const size_t num_threads = std::max(1u, std::thread::hardware_concurrency() / 2);
+        const size_t num_threads = std::max(1u, std::thread::hardware_concurrency() - 1);
+        std::cout << "[heheh] Number of threads: " << num_threads << std::endl;
         std::atomic<size_t> next_index{0};
         std::vector<std::future<std::vector<QueryResult>>> futures;
 
@@ -134,7 +140,7 @@ public:
             for (auto& r : local)
                 all_results.push_back(std::move(r));
         }
-
+        std::cout <<"+++++ All results size " << all_results.size() << "\n"; 
         // Merge across all segments
         QueryResult merged = mergeBatchResults(all_results, k);
 

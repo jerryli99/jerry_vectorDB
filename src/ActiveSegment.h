@@ -140,6 +140,7 @@ public:
                            size_t k) const 
     {
         std::lock_guard<std::mutex> lock(m_mutex);
+        std::cout << "In ActiveSeg searchTopK\n";
         std::cout << "[DEBUG] searchTopK k=" << k << "\n";
         std::cout << "[DEBUG] searchTopK got " << query_vectors.size() << " query vectors\n";
         if (!query_vectors.empty())

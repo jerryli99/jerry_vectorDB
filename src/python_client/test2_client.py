@@ -56,21 +56,21 @@ def run_tests():
     print(client.upsert("single_collection", points))
 
     # ------------------------------------------------------------
-    # STEP 4: Insert 50 random points into multi_collection
+    # STEP 4: Insert 100 random points into multi_collection
     # ------------------------------------------------------------
-    # print("\n[Test 4] Upsert 50 random points to multi_collection")
-    # multi_points = [
-    #     models.PointStruct(
-    #         id=f"m_{i}",
-    #         vector={
-    #             "image": generate_random_vector(4),
-    #             "text": generate_random_vector(4)
-    #         },
-    #         payload={"category": "multi", "index": i}
-    #     )
-    #     for i in range(50)
-    # ]
-    # print(client.upsert("multi_collection", multi_points))
+    print("\n[Test 4] Upsert 100 random points to multi_collection")
+    multi_points = [
+        models.PointStruct(
+            id=f"m_{i}",
+            vector={
+                "image": generate_random_vector(4),
+                "text": generate_random_vector(4)
+            },
+            payload={"category": "multi", "index": i}
+        )
+        for i in range(10000)
+    ]
+    print(client.upsert("multi_collection", multi_points))
 
     # ------------------------------------------------------------
     # STEP 5: Query by vector (single_collection)
@@ -100,6 +100,16 @@ def run_tests():
     # result2 = client.query(query_req2)
     # print(result2)
 
+    print("\n[Test 6] Query multi_collection by vector")
+    query_vec = generate_random_vector(4)
+    query_vec2 = generate_random_vector(4)
+    result = client.query_points(
+        collection_name="multi_collection",
+        query_vectors=[query_vec, query_vec2],
+        using="image",
+        top_k=15
+    )
+    print(result)
     # ------------------------------------------------------------
     # STEP 7: List collections at the end
     # ------------------------------------------------------------

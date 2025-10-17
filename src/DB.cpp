@@ -18,12 +18,15 @@ Status DB::addCollection(const CollectionId& collection_name, const json& config
     }
 
     std::string on_disk_str = config_json["on_disk"].get<std::string>();
-    std::transform(on_disk_str.begin(), on_disk_str.end(), on_disk_str.begin(), ::tolower);
+    std::transform(on_disk_str.begin(), on_disk_str.end(), on_disk_str.begin(),
+                [](unsigned char c) { return std::tolower(c); });
+
 
     CollectionInfo collection_info;
     collection_info.name = collection_name;
 
-    bool on_disk = (on_disk_str == "true" || on_disk_str == "1" || on_disk_str == "yes");
+    // bool on_disk = (on_disk_str == "true" || on_disk_str == "1" || on_disk_str == "yes");
+    bool on_disk = (on_disk_str == "true" || on_disk_str == "1");
     collection_info.on_disk = on_disk;
 
     auto vector_json = config_json["vectors"];

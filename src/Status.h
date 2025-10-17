@@ -76,17 +76,21 @@ public:
         return m_status; 
     }
     
-    T& value() { 
-        return m_value; 
-    }
+    // T& value() { 
+    //     return m_value; 
+    // }
 
-    const T& value() const { 
-        return m_value; 
-    }
+    // const T& value() const { 
+    //     return m_value; 
+    // }
+
+    T& value() { return *m_value; }
+    const T& value() const { return *m_value; }
 
 private:
     Status m_status;
-    T m_value{};
+    // T m_value{};
+    std::optional<T> m_value;
     bool m_has_value;
 };
 
