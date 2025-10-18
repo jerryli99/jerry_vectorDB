@@ -180,3 +180,126 @@ private:
 };
 
 } // namespace vectordb
+
+/*
+Memory Layout of PointMemoryPool
+==========================================================
+
+[PointMemoryPool Object on Stack/Heap]
++-----------------------------------------+
+| m_max_points    [size_t]                |
+| m_total_allocated [size_t]              |
+| m_mutex         [std::mutex]            |
+| m_buffer        [unique_ptr] → ───────┐ |
+| m_current       [PointStorage*] → ────┼─┘
+| m_free_list     [vector<PointStorage*>] |
+| m_occupied      [vector<bool>]          |
++-----------------------------------------+
+         │
+         │ Points to
+         ▼
+   
+[Raw Memory Buffer (m_buffer) - Contiguous Block]
++---+---+---+---+---+---+---+---+---+---+
+│ 0 │ 1 │ 2 │ 3 │ 4 │ 5 │ ... │ N-1    │ ← Slot indices
++---+---+---+---+---+---+---+---+---+---+
+│   │   │   │   │   │   │     │        │ ← PointStorage (aligned memory)
++---+---+---+---+---+---+---+---+---+---+
+  │   │   │       │           │
+  │   │   │       │           │
+  │   │   │       │           │
+  ▼   ▼   ▼       ▼           ▼
+
+[Individual Point Objects Constructed in Place]
++-------------+-------------+-------------+-------------+
+│ Point obj   │ Point obj   │ Point obj   │ ...         │
+│ slot 0      │ slot 1      │ slot 2      │             │
+│             │             │             │             │
+│ point_id    │ point_id    │ point_id    │             │
+│ named_vecs  │ named_vecs  │ named_vecs  │             │
+│ m_mutex     │ m_mutex     │ m_mutex     │             │
++-------------+-------------+-------------+-------------+
+
+[m_occupied Bit Vector - Tracks Used Slots]
++---+---+---+---+---+---+---+---+---+---+
+│ 1 │ 1 │ 1 │ 0 │ 0 │ 1 │ ... │ 0 │ 1 │ ← true/false for each slot
++---+---+---+---+---+---+---+---+---+---+
+  │   │   │   │   │   │       │   │
+  │   │   │   │   │   │       │   │
+Used Used Used Free Free Used     Used
+
+[m_free_list - Vector of Available Slot Pointers]
++-------------------------+
+│ → slot 3               │
+│ → slot 4               │
+│ → slot N-2             │
+│ ...                    │
++-------------------------+
+
+[m_current Pointer Progression]
+Initially: m_current → slot 0
+After 3 allocs: m_current → slot 3
+After free(slot 1): m_free_list gains → slot 1
+Next alloc: uses slot 1 from free_list
+When free_list empty: continues from m_current
+
+Initial State:
+Slots:    [0][1][2][3][4][5]
+Occupied: [0][0][0][0][0][0]
+FreeList: []
+Current: →[0]
+
+After alloc P1, P2, P3:
+Slots:    [P1][P2][P3][ ][ ][ ]
+Occupied: [1][1][1][0][0][0]
+FreeList: []
+Current: →[3]
+
+After dealloc P2:
+Slots:    [P1][  ][P3][ ][ ][ ]
+Occupied: [1][0][1][0][0][0]
+FreeList: [→slot1]
+Current: →[3]
+
+After alloc P4:
+Slots:    [P1][P4][P3][ ][ ][ ]
+Occupied: [1][1][1][0][0][0]
+FreeList: []
+Current: →[3]  (unchanged - reused from free_list)
+
+ALIGNED MEMORY POOL (Current Implementation)
+============================================
+
+[Memory Pool Buffer - Perfectly Aligned Slots]
++-------------+-------------+-------------+-------------+
+| Slot 0      | Slot 1      | Slot 2      | Slot 3      |
+| 0x1000      | 0x1040      | 0x1080      | 0x10C0      |
+|             |             |             |             |
+| [Point A]   | [Point B]   | [FREE]      | [Point D]   |
+| point_id=1  | point_id=2  |             | point_id=4  |
+| vectors...  | vectors...  |             | vectors...  |
+| mutex...    | mutex...    |             | mutex...    |
++-------------+-------------+-------------+-------------+
+     │              │                         │
+     │              │                         │
+Occupied        Occupied                    Occupied
+
+UNALIGNED MEMORY POOL (If We Didn't Use aligned_storage)
+========================================================
+
+[Memory Pool Buffer - Misaligned Mess]
++-----------+-----------+-----------+-----------+-----------+
+|Slot 0     |Slot 1     |Slot 2     |Slot 3     |Slot 4     |
+|0x1000     |0x1038     |0x1070     |0x10A8     |0x10E0     |
+|           |           |           |           |           |
+|[Point A]  |[Point B]  |[Point C]  |[FREE]     |[Point E]  |
+|point_id=1 |point_id=2 |point_id=3 |           |point_id=5 |
+|vectors... |vectors... |vectors... |           |vectors... |
+|mutex...   |mutex...   |mutex...   |           |mutex...   |
++-----------+-----------+-----------+-----------+-----------+
+     │           │           │                    │
+     │           │           │                    │
+Starts at    MISALIGNED! MISALIGNED!           MISALIGNED!
+proper       (0x1038 % 8   (0x1070 % 8         (0x10E0 % 8  
+boundary     != 0)        != 0)               != 0)
+*/
