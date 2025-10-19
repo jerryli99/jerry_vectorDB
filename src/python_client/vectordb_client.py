@@ -1,4 +1,5 @@
 import requests
+import json
 from vectordb_models import *
 from typing import List, Union, Optional
 
@@ -140,6 +141,39 @@ class VectorDBClient:
             else: 
                 print(f"[ERROR] Query failed - status not 'ok': {response}") 
                 return None
+
+
+    def parse_query_response(self, response: QueryResponse, show: Optional[bool] = None):
+        """
+        Pretty-print and also return a parsed JSON dictionary of the response.
+        """
+        if response is None:
+            print("[ERROR] No response to display.")
+            return None
+
+        # Convert the QueryResponse dataclass into a clean dict
+        def to_dict(obj):
+            if isinstance(obj, QueryResponse):
+                return {
+                    "status": obj.status,
+                    "time": obj.time,
+                    "result": [
+                        [{"id": p.id, "score": p.score} for p in group]
+                        for group in obj.result
+                    ] if isinstance(obj.result, list) and len(obj.result) > 0 and isinstance(obj.result[0], list)
+                    else [{"id": p.id, "score": p.score} for p in obj.result]
+                }
+            return obj
+
+        parsed = to_dict(response)
+
+        # Pretty print
+        if show is True:
+            print(json.dumps(parsed, indent=2))
+
+        return parsed
+
+
 
     # Some helpers-------------------------------------------------
     def _post(self, url: str, data: dict) -> Optional[dict]:

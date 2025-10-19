@@ -2,6 +2,7 @@
 *.out
 *.bin
 *.so
+*.pyc
 random
 build
 rocksdb_benchmark

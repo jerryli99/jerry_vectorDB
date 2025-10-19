@@ -131,10 +131,9 @@ public:
                     size_t idx = i * k + j;
                     if (auto point_id = m_id_tracker.getExternalId(vector_name, indices[idx])) {
                         float score = dists[idx];
-                        // Convert cosine inner product -> similarity if needed
-                        if (metric == DistanceMetric::COSINE) {
-                            // optional: score = 1.0f - score; // if you want distance
-                        }
+                        //normalize L2 to match cosine "higher is better"
+                        if (metric == DistanceMetric::L2)
+                            score = -score;  // negate distance so higher = better
                         score = std::round(score * 10000.0f) / 10000.0f;
                         batch.push_back({*point_id, score});
                     }

@@ -106,30 +106,115 @@ private:
 
 /**
  * @brief SmartArray with multiple growth models for capacity prediction and
- *        binary search for O(log n) access.
+ *        binary search for O(log n) access. Growth model is fixed at construction.
  */
 template<typename T>
 class SmartArray {
 public:
-    SmartArray(GrowthModel model = GrowthModel::S_CURVE,
-               size_t initial_capacity = 100,
-               size_t max_expected_capacity = 40000,
-               double growth_rate = 0.001)
-        : m_total_size{0},
-          m_chunk_count{0},
-          m_max_capacity{max_expected_capacity},
+    // Iterator support, make it inner class for better encapulation and 
+    class Iterator {
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const T*;
+        using reference = const T&;
+
+        Iterator() = default;
+        
+        bool operator==(const Iterator& other) const {
+            return (m_current_chunk == other.m_current_chunk) && 
+                   (m_chunk_index == other.m_chunk_index) &&
+                   (m_element_index == other.m_element_index);
+        }
+        
+        bool operator!=(const Iterator& other) const { 
+            return !(*this == other); 
+        }
+        
+        reference operator*() const {
+            return (*m_current_chunk)->chunk[m_element_index];
+        }
+        
+        pointer operator->() const {
+            return &(*m_current_chunk)->chunk[m_element_index];
+        }
+        
+        // Prefix increment
+        Iterator& operator++() {
+            if (m_current_chunk == m_end_chunk) {
+                m_chunk_index = static_cast<size_t>(-1); // Mark as end
+                return *this;
+            }
+            
+            ++m_element_index;
+            if (m_element_index >= (*m_current_chunk)->chunk.size()) {
+                // Move to next chunk
+                ++m_current_chunk;
+                ++m_chunk_index;
+                m_element_index = 0;
+                
+                if (m_current_chunk == m_end_chunk) {
+                    m_chunk_index = static_cast<size_t>(-1); // Mark as end
+                }
+            }
+            return *this;
+        }
+        
+        // Postfix increment
+        Iterator operator++(int) {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+    private:
+        friend class SmartArray;
+        
+        using ChunkIterator = typename std::vector<ChunkNode*>::const_iterator;
+        
+        ChunkIterator m_current_chunk;
+        ChunkIterator m_end_chunk;
+        size_t m_chunk_index = 0;
+        size_t m_element_index = 0;
+        
+        Iterator(ChunkIterator current, ChunkIterator end, size_t chunk_idx, size_t elem_idx)
+            : m_current_chunk{current}, 
+              m_end_chunk{end}, 
+              m_chunk_index{chunk_idx}, 
+              m_element_index{elem_idx} {/*constructor body*/}
+    };
+
+    // Constructor-only growth model
+    explicit SmartArray(GrowthModel model = GrowthModel::S_CURVE,
+                       size_t initial_capacity = 100,
+                       size_t max_expected_capacity = 40000,
+                       double growth_rate = 0.001)
+        : m_total_size{0}, 
+          m_max_capacity{max_expected_capacity}, 
+          m_growth_model{model}, 
           m_growth_rate{growth_rate},
-          m_model{model},
-          m_inflection_point{max_expected_capacity / 4} {
+          m_inflection_point{max_expected_capacity / 4} 
+    {
+        
+        initializeFirstChunk(initial_capacity);
+    }
 
-        size_t first_chunk_size = predictNextChunkSize(0);
-        m_head = std::make_unique<ChunkNode>(first_chunk_size);
-        m_tail = m_head.get();
+    // No copy/move for now (can implement later if needed)
+    SmartArray(const SmartArray&) = delete;
+    SmartArray& operator=(const SmartArray&) = delete;
+    SmartArray(SmartArray&&) = delete;
+    SmartArray& operator=(SmartArray&&) = delete;
 
-        m_prefix_sizes.reserve(64); // Should be enough for prototype
-        m_chunk_ptrs.reserve(64);
-        m_prefix_sizes.push_back(0);
-        m_chunk_ptrs.push_back(m_tail);
+    // Iterator support
+    Iterator begin() const {
+        if (empty()) return end();
+        return Iterator(m_chunk_ptrs.begin(), m_chunk_ptrs.end(), 0, 0);
+    }
+    
+    Iterator end() const {
+        return Iterator(m_chunk_ptrs.end(), m_chunk_ptrs.end(), 
+                       static_cast<size_t>(-1), 0);
     }
 
     void push_back(const T& value) {
@@ -157,23 +242,17 @@ public:
     size_t size() const { return m_total_size; }
     bool empty() const { return m_total_size == 0; }
 
-    // Change growth model at runtime
-    void setGrowthModel(GrowthModel new_model) {
-        m_model = new_model;
-    }
-
-    GrowthModel getGrowthModel() const {
-        return m_model;
-    }
+    // Growth model is immutable after construction
+    GrowthModel getGrowthModel() const { return m_growth_model; }
 
     /**
-     * @brief O(log n) access via prefix sums + binary search. Designed for read access only.
+     * @brief O(log n) access via prefix sums + binary search. Read-only access.
      */
     const T& operator[](size_t index) const {
         if (index >= m_total_size)
             throw std::out_of_range("SmartArray index out of range");
 
-        // Locate chunk using binary search
+        // Binary search to find the right chunk
         auto it = std::upper_bound(m_prefix_sizes.begin(), m_prefix_sizes.end(), index);
         size_t chunk_idx = std::distance(m_prefix_sizes.begin(), it) - 1;
         size_t offset = index - m_prefix_sizes[chunk_idx];
@@ -181,9 +260,21 @@ public:
         return m_chunk_ptrs[chunk_idx]->chunk[offset];
     }
 
-    // Note: array[10] = obj; is not allowed, enforce immutability
+    // Non-const access is deleted to enforce read-only element access
     T& operator[](size_t index) = delete;
 
+    /**
+     * @brief Get element with bounds checking
+     */
+    const T& at(size_t index) const {
+        if (index >= m_total_size)
+            throw std::out_of_range("SmartArray index out of range");
+        return (*this)[index];
+    }
+
+    /**
+     * @brief Memory usage statistics
+     */
     void getMemoryStats() const {
         size_t total_allocated = 0;
         size_t total_used = 0;
@@ -203,47 +294,55 @@ public:
         std::cout << "Total: allocated=" << total_allocated
                   << ", used=" << total_used
                   << ", efficiency=" << (total_used * 100.0 / total_allocated) << "%\n";
-        std::cout << "Growth Model: " << growthModelToString(m_model) << std::endl;
+        std::cout << "Growth Model: " << growthModelToString(m_growth_model) << std::endl;
     }
 
 private:
     struct ChunkNode {
         ArrayChunk<T> chunk;
         std::unique_ptr<ChunkNode> next;
-        explicit ChunkNode(size_t predicted_size) : chunk(predicted_size), next(nullptr) {}
+        explicit ChunkNode(size_t predicted_size) : chunk{predicted_size}, next{nullptr} {}
     };
 
     std::unique_ptr<ChunkNode> m_head;
     ChunkNode* m_tail;
     size_t m_total_size;
-    size_t m_chunk_count;
     size_t m_max_capacity;
+    GrowthModel m_growth_model;
     double m_growth_rate;
-    GrowthModel m_model;
     size_t m_inflection_point;
 
-    std::vector<size_t> m_prefix_sizes; // Prefix cumulative sizes
-    std::vector<ChunkNode*> m_chunk_ptrs; // Direct chunk pointers
+    std::vector<size_t> m_prefix_sizes;
+    std::vector<ChunkNode*> m_chunk_ptrs;
+
+    void initializeFirstChunk(size_t initial_capacity) {
+        size_t first_chunk_size = predictNextChunkSize(0);
+        m_head = std::make_unique<ChunkNode>(first_chunk_size);
+        m_tail = m_head.get();
+
+        m_prefix_sizes.reserve(64);
+        m_chunk_ptrs.reserve(64);
+        m_prefix_sizes.push_back(0);
+        m_chunk_ptrs.push_back(m_tail);
+    }
 
     size_t predictNextChunkSize(size_t current_total_size) {
-        switch (m_model) {
+        switch (m_growth_model) {
             case GrowthModel::S_CURVE:
-                return predictS Curve(current_total_size);
+                return predictSCurve(current_total_size);
             case GrowthModel::EXPONENTIAL:
                 return predictExponential(current_total_size);
-            case GrowthModel::FIBONACCI:
-                return predictFibonacci(current_total_size);
             case GrowthModel::LINEAR:
                 return predictLinear(current_total_size);
             case GrowthModel::LOGARITHMIC:
                 return predictLogarithmic(current_total_size);
             default:
-                return predictS Curve(current_total_size);
+                return predictSCurve(current_total_size);
         }
     }
 
-    // Original S-curve prediction
-    size_t predictS Curve(size_t current_total_size) {
+    // Simplified growth models without Fibonacci
+    size_t predictSCurve(size_t current_total_size) {
         double exponent = -m_growth_rate * (current_total_size - m_inflection_point);
         double s_curve_value = 1.0 / (1.0 + std::exp(exponent));
 
@@ -252,65 +351,37 @@ private:
         double chunk_ratio = min_chunk_ratio + s_curve_value * (max_chunk_ratio - min_chunk_ratio);
 
         size_t predicted_size = static_cast<size_t>(m_max_capacity * chunk_ratio);
-        const size_t min_chunk_size = 100;
-        const size_t max_chunk_size = 1000;
-        return std::clamp(predicted_size, min_chunk_size, max_chunk_size);
+        return std::clamp(predicted_size, size_t(100), size_t(1000));
     }
 
-    // Exponential growth prediction - aggressive scaling
     size_t predictExponential(size_t current_total_size) {
-        double base_growth = 1.5; // 50% growth factor
+        double base_growth = 1.5;
         double exponent = m_growth_rate * current_total_size;
         
         size_t base_size = 100;
         size_t predicted_size = static_cast<size_t>(base_size * std::pow(base_growth, exponent));
         
-        const size_t min_chunk_size = 100;
-        const size_t max_chunk_size = 5000; // Higher max for exponential
-        return std::clamp(predicted_size, min_chunk_size, max_chunk_size);
+        return std::clamp(predicted_size, size_t(100), size_t(5000));
     }
 
-    // Fibonacci-based growth - natural progression
-    size_t predictFibonacci(size_t current_total_size) {
-        static size_t fib_prev = 100;
-        static size_t fib_curr = 200;
-        
-        // Use Fibonacci sequence but scale based on current size
-        size_t next_fib = fib_prev + fib_curr;
-        fib_prev = fib_curr;
-        fib_curr = next_fib;
-        
-        // Scale Fibonacci numbers to reasonable chunk sizes
-        double scale_factor = 1.0 + (static_cast<double>(current_total_size) / m_max_capacity);
-        size_t predicted_size = static_cast<size_t>(next_fib * scale_factor / 10.0); // Scale down
-        
-        const size_t min_chunk_size = 100;
-        const size_t max_chunk_size = 3000;
-        return std::clamp(predicted_size, min_chunk_size, max_chunk_size);
-    }
-
-    // Linear growth - predictable and steady
     size_t predictLinear(size_t current_total_size) {
         double base_size = 200.0;
-        double growth_per_chunk = 50.0; // Fixed growth per chunk
+        double growth_per_chunk = 50.0;
         
-        size_t predicted_size = static_cast<size_t>(base_size + (growth_per_chunk * m_chunk_count));
+        // Use current_total_size to determine growth
+        size_t chunk_count_estimate = current_total_size / 100; // rough estimate
+        size_t predicted_size = static_cast<size_t>(base_size + (growth_per_chunk * chunk_count_estimate));
         
-        const size_t min_chunk_size = 100;
-        const size_t max_chunk_size = 2000;
-        return std::clamp(predicted_size, min_chunk_size, max_chunk_size);
+        return std::clamp(predicted_size, size_t(100), size_t(2000));
     }
 
-    // Logarithmic growth - conservative, good for memory-constrained environments
     size_t predictLogarithmic(size_t current_total_size) {
         double base_size = 300.0;
-        double log_factor = std::log1p(current_total_size); // log(1 + x)
+        double log_factor = std::log1p(current_total_size);
         
         size_t predicted_size = static_cast<size_t>(base_size + (50.0 * log_factor));
         
-        const size_t min_chunk_size = 100;
-        const size_t max_chunk_size = 1500;
-        return std::clamp(predicted_size, min_chunk_size, max_chunk_size);
+        return std::clamp(predicted_size, size_t(100), size_t(1500));
     }
 
     void addNewChunk() {
@@ -319,13 +390,12 @@ private:
         m_tail->next = std::move(new_chunk);
         m_tail = m_tail->next.get();
 
-        m_chunk_count++;
         m_chunk_ptrs.push_back(m_tail);
-        m_prefix_sizes.push_back(m_prefix_sizes.back()); // Initialize with previous value
+        m_prefix_sizes.push_back(m_total_size); // New chunk starts at current total size
     }
 
     void updatePrefixSizes() {
-        // Update the last prefix size to reflect current total
+        // Rebuild the last prefix size to reflect current total
         if (!m_prefix_sizes.empty()) {
             m_prefix_sizes.back() = m_total_size;
         }
@@ -335,7 +405,6 @@ private:
         switch (model) {
             case GrowthModel::S_CURVE: return "S_CURVE";
             case GrowthModel::EXPONENTIAL: return "EXPONENTIAL";
-            case GrowthModel::FIBONACCI: return "FIBONACCI";
             case GrowthModel::LINEAR: return "LINEAR";
             case GrowthModel::LOGARITHMIC: return "LOGARITHMIC";
             default: return "UNKNOWN";
@@ -343,26 +412,8 @@ private:
     }
 };
 
-} // namespace vectordb
+}//vectordb namespace
 
-/*
-Usage examples:
-
-// Different growth models for different use cases
-vectordb::SmartArray<int> business_data(vectordb::GrowthModel::S_CURVE);
-vectordb::SmartArray<int> rapid_growth_data(vectordb::GrowthModel::EXPONENTIAL);
-vectordb::SmartArray<int> natural_data(vectordb::GrowthModel::FIBONACCI);
-vectordb::SmartArray<int> predictable_data(vectordb::GrowthModel::LINEAR);
-vectordb::SmartArray<int> memory_constrained_data(vectordb::GrowthModel::LOGARITHMIC);
-
-// Change model at runtime if needed
-business_data.setGrowthModel(vectordb::GrowthModel::EXPONENTIAL);
-
-for (int i = 0; i < 5000; ++i) {
-    business_data.push_back(i);
-}
-business_data.getMemoryStats();
-*/
 
 /*
 m_prefix_sizes = [0, 100, 230, 400, 640]

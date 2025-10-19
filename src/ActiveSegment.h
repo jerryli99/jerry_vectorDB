@@ -140,13 +140,12 @@ public:
                            size_t k) const 
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        std::cout << "In ActiveSeg searchTopK\n";
-        std::cout << "[DEBUG] searchTopK k=" << k << "\n";
-        std::cout << "[DEBUG] searchTopK got " << query_vectors.size() << " query vectors\n";
+        // std::cout << "In ActiveSeg searchTopK\n";
+        // std::cout << "[DEBUG] searchTopK k=" << k << "\n";
+        // std::cout << "[DEBUG] searchTopK got " << query_vectors.size() << " query vectors\n";
         if (!query_vectors.empty())
-            std::cout << "[DEBUG] first query vector size=" << query_vectors[0].size() << "\n";
+            std::cout << "[ERROR] first query vector size=" << query_vectors[0].size() << "\n";
         QueryResult query_result;
-        // auto start_time = std::chrono::high_resolution_clock::now();
 
         try {
             //find the vector specification for the given vector name
@@ -235,27 +234,16 @@ public:
                 std::vector<ScoredId> scored_points;
                 scored_points.reserve(valid_vectors.size());
                 std::cout << "[DEBUG] valid_vectors.size()=" << valid_vectors.size() << "\n";
-                // // Calculate scores for all valid points against this query
-                // for (size_t i = 0; i < valid_vectors.size(); ++i) {
-                //     float score = compute_distance(metric, query_vector, *valid_vectors[i]);
-                //     if (i < 3) // print first few for sanity
-                //         std::cout << "[DEBUG] i=" << i << " score=" << score << "\n";
-                //     scored_points.emplace_back(ScoredId{valid_point_ids[i], score});
-                // }
                 
                 //-------------------
                 for (size_t i = 0; i < valid_vectors.size(); ++i) {
-                    // debug first element sizes once
-                    if (i == 0) {
-                        std::cout << "[DEBUG] compute_distance check: query.size=" << query_vector.size()
-                        << " stored.size=" << (valid_vectors[i]).size()
-                        << " metric=" << static_cast<int>(metric) << "\n";
-                    }
-
                     try {
                         float score = compute_distance(metric, query_vector, valid_vectors[i]);
+                        // Unify metric convention: higher = better
+                        if (metric == DistanceMetric::L2)
+                            score = -score;
                         score = std::round(score * 10000.0f) / 10000.0f; //just round to 4 digits
-                        if (i < 3) std::cout << "[DEBUG] i=" << i << " score=" << score << "\n";
+                        // if (i < 3) std::cout << "[DEBUG] i=" << i << " score=" << score << "\n";
                         scored_points.emplace_back(ScoredId{valid_point_ids[i], score});
                     } catch (const std::exception& e) {
                         std::cerr << "[ERROR] compute_distance threw: " << e.what()
@@ -270,21 +258,21 @@ public:
                 std::cout << "[DEBUG] scored_points.size()=" << scored_points.size() << "\n";
                 // Sort based on metric type and take top K
                 if (metric == DistanceMetric::L2) {
-                    // For L2, lower distance is better
+                    // For L2, lower distance is better, but since i negate the score, so higher the better
                     if (scored_points.size() > k) {
                         std::partial_sort(
                             scored_points.begin(),
                             scored_points.begin() + k,
                             scored_points.end(),
                             [](const ScoredId& a, const ScoredId& b) {
-                                return a.score < b.score;
+                                return a.score > b.score;
                             }
                         );
                         batch_result.hits.assign(scored_points.begin(), scored_points.begin() + k);
                     } else {
                         std::sort(scored_points.begin(), scored_points.end(),
                                 [](const ScoredId& a, const ScoredId& b) {
-                                    return a.score < b.score;
+                                    return a.score > b.score;
                                 });
                         batch_result.hits = std::move(scored_points);
                     }
@@ -322,9 +310,6 @@ public:
             }
         }
 
-        
-        // auto end_time = std::chrono::high_resolution_clock::now();
-        // result.time_seconds = std::chrono::duration<double>(end_time - start_time).count();
         for (size_t qi = 0; qi < query_result.results.size(); ++qi) {
             std::cout << "[DEBUG] Final batch " << qi << " hits=" << query_result.results[qi].hits.size() << "\n";
         }

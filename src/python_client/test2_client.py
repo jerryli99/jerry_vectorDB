@@ -22,7 +22,7 @@ def run_tests():
     # STEP 1: Create single-vector collection
     # ------------------------------------------------------------
     single_cfg = models.CreateCollectionRequest(
-        vectors=models.VectorParams(size=8, distance="Cosine"),
+        vectors=models.VectorParams(size=8, distance="L2"),
         on_disk="false"
     )
     print("\n[Test 1] Create 'single_collection'")
@@ -85,7 +85,7 @@ def run_tests():
         using="default",
         top_k=5
     )
-    print(result)
+    parsed = client.parse_query_response(result, show=True)
 
     # ------------------------------------------------------------
     # STEP 6: Query by point IDs (multi_collection)
@@ -109,7 +109,7 @@ def run_tests():
         using="image",
         top_k=15
     )
-    print(result)
+    parsed = client.parse_query_response(result)
     # ------------------------------------------------------------
     # STEP 7: List collections at the end
     # ------------------------------------------------------------

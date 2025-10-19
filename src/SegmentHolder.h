@@ -112,7 +112,7 @@ public:
         );
         std::cout << "[DEBUG] immutable_segments.size=" << m_immutable_segments.size() << "\n";
         // Multi-threaded search for immutable segments
-        const size_t num_threads = std::max(1u, std::thread::hardware_concurrency() - 1);
+        const size_t num_threads = std::max(1u, std::thread::hardware_concurrency() /2 );
         std::cout << "[heheh] Number of threads: " << num_threads << std::endl;
         std::atomic<size_t> next_index{0};
         std::vector<std::future<std::vector<QueryResult>>> futures;
