@@ -7,28 +7,21 @@
  * 
  * 
  *        The SmartArray will be predicting array capacity via the S-shape Curve math model.
- *        I will be using linkedlist, where each node of the linkedlist is a predicted size array.
+ *        I will be using an std::vector of pointers pointing to the predicted std::vector chunk.
  * 
- *        Why i chose linkedlist and why S-shape Curve?
+ *        Why S-shape Curve?
  *        Ah, so i am kind of annoyed by the fact that whenever we need to resize the array, 
  *        we need to reallocate a new empty array and then copy the elements into the new array.
- *        My ImmutableSegment objs are large, I don't want to copy them or "std::move" them as 
- *        they are meant to be const. We also know linkedlist is good to be used for holding stuff
- *        like data you don't know the sizeof, but the disadvantage is that there will be a lot of 
- *        scattered memory locations, hence i put the array in the nodes for better continuity. 
+ *        My ImmutableSegment objs are large, I don't want to copy them so "std::move" them. 
  * 
  *        The S-shape Curve is not really ideal, but i decided to do that because in economics, 
  *        S-curve graphs helps describe, visualize and predict a business' performance progressively over time.
  *        Since the Database is going to be sort of related to business in software, the usage can be described as such.
  *        Economic growth curve ~= computer memory growth curve, well if memory is limited, we don't want to growth too much.       
- * 
- *        It is good? No. 
- *        But i feel like it is good enough for prototyping my vectordb. 
- *        std::vector is fine, but i want not boring stuff.
- * 
- *        The data structure might look something like this, where each node's array size is predicted via the S-shape Curve.
- * 
- *        [arr{1,2,3,4,5,6}]-->[arr{1,2,3,4,5,6,7,8,9,10}]-->[arr{1,2,3,4,5,6,7,89,0,100,12,12,3,123}]-->[arr{1,2,3,4,5}]
+ */
+
+/**
+ * @brief Simplified SmartArray using vector of vectors with growth model prediction
  */
 #pragma once
 
@@ -45,146 +38,18 @@ namespace vectordb {
 enum class GrowthModel {
     S_CURVE,        // S-shape curve for business-like growth patterns
     EXPONENTIAL,    // Exponential growth for rapid scaling
-    FIBONACCI,      // Fibonacci sequence for natural growth patterns
     LINEAR,         // Linear growth for predictable memory usage
     LOGARITHMIC     // Logarithmic growth for conservative memory usage
 };
 
 /**
- * @brief Array chunk with predicted capacity using various growth models
- *        Now using std::vector with reserve() for automatic memory management
- */
-template<typename T>
-class ArrayChunk {
-public:
-    explicit ArrayChunk(size_t predicted_capacity)
-        : m_capacity{predicted_capacity} {
-        m_data.reserve(m_capacity); // Pre-allocate fixed capacity
-    }
-
-    bool is_full() const { return m_data.size() >= m_capacity; }
-    size_t size() const { return m_data.size(); }
-    size_t capacity() const { return m_capacity; }
-    bool empty() const { return m_data.empty(); }
-
-    void push_back(const T& item) {
-        if (is_full()) throw std::runtime_error("ArrayChunk is full");
-        m_data.push_back(item);
-    }
-
-    void push_back(T&& item) {
-        if (is_full()) throw std::runtime_error("ArrayChunk is full");
-        m_data.push_back(std::move(item));
-    }
-
-    template<typename... Args>
-    void emplace_back(Args&&... args) {
-        if (is_full()) throw std::runtime_error("ArrayChunk is full");
-        m_data.emplace_back(std::forward<Args>(args)...);
-    }
-
-    const T& operator[](size_t index) const {
-        if (index >= m_data.size()) throw std::out_of_range("ArrayChunk index out of range");
-        return m_data[index];
-    }
-
-    T& operator[](size_t index) {
-        if (index >= m_data.size()) throw std::out_of_range("ArrayChunk index out of range");
-        return m_data[index];
-    }
-
-    // Optional: provide vector-like interface for iteration
-    auto begin() const { return m_data.begin(); }
-    auto end() const { return m_data.end(); }
-    auto begin() { return m_data.begin(); }
-    auto end() { return m_data.end(); }
-
-private:
-    std::vector<T> m_data;
-    size_t m_capacity; // Track fixed capacity separately
-};
-
-/**
- * @brief SmartArray with multiple growth models for capacity prediction and
- *        binary search for O(log n) access. Growth model is fixed at construction.
+ * @brief SmartArray with multiple growth models for capacity prediction
+ *        Uses vector of vectors for simpler memory management
+ *        Maintains O(log n) access via prefix sums + binary search
  */
 template<typename T>
 class SmartArray {
 public:
-    // Iterator support, make it inner class for better encapulation and 
-    class Iterator {
-    public:
-        using iterator_category = std::forward_iterator_tag;
-        using value_type = T;
-        using difference_type = std::ptrdiff_t;
-        using pointer = const T*;
-        using reference = const T&;
-
-        Iterator() = default;
-        
-        bool operator==(const Iterator& other) const {
-            return (m_current_chunk == other.m_current_chunk) && 
-                   (m_chunk_index == other.m_chunk_index) &&
-                   (m_element_index == other.m_element_index);
-        }
-        
-        bool operator!=(const Iterator& other) const { 
-            return !(*this == other); 
-        }
-        
-        reference operator*() const {
-            return (*m_current_chunk)->chunk[m_element_index];
-        }
-        
-        pointer operator->() const {
-            return &(*m_current_chunk)->chunk[m_element_index];
-        }
-        
-        // Prefix increment
-        Iterator& operator++() {
-            if (m_current_chunk == m_end_chunk) {
-                m_chunk_index = static_cast<size_t>(-1); // Mark as end
-                return *this;
-            }
-            
-            ++m_element_index;
-            if (m_element_index >= (*m_current_chunk)->chunk.size()) {
-                // Move to next chunk
-                ++m_current_chunk;
-                ++m_chunk_index;
-                m_element_index = 0;
-                
-                if (m_current_chunk == m_end_chunk) {
-                    m_chunk_index = static_cast<size_t>(-1); // Mark as end
-                }
-            }
-            return *this;
-        }
-        
-        // Postfix increment
-        Iterator operator++(int) {
-            Iterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-    private:
-        friend class SmartArray;
-        
-        using ChunkIterator = typename std::vector<ChunkNode*>::const_iterator;
-        
-        ChunkIterator m_current_chunk;
-        ChunkIterator m_end_chunk;
-        size_t m_chunk_index = 0;
-        size_t m_element_index = 0;
-        
-        Iterator(ChunkIterator current, ChunkIterator end, size_t chunk_idx, size_t elem_idx)
-            : m_current_chunk{current}, 
-              m_end_chunk{end}, 
-              m_chunk_index{chunk_idx}, 
-              m_element_index{elem_idx} {/*constructor body*/}
-    };
-
     // Constructor-only growth model
     explicit SmartArray(GrowthModel model = GrowthModel::S_CURVE,
                        size_t initial_capacity = 100,
@@ -196,45 +61,40 @@ public:
           m_growth_rate{growth_rate},
           m_inflection_point{max_expected_capacity / 4} 
     {
-        
         initializeFirstChunk(initial_capacity);
     }
 
-    // No copy/move for now (can implement later if needed)
-    SmartArray(const SmartArray&) = delete;
-    SmartArray& operator=(const SmartArray&) = delete;
-    SmartArray(SmartArray&&) = delete;
-    SmartArray& operator=(SmartArray&&) = delete;
+    //default copy/move operations (vector handles these automatically)
+    SmartArray(const SmartArray&) = default;
+    SmartArray& operator=(const SmartArray&) = default;
+    SmartArray(SmartArray&&) = default;
+    SmartArray& operator=(SmartArray&&) = default;
 
-    // Iterator support
-    Iterator begin() const {
-        if (empty()) return end();
-        return Iterator(m_chunk_ptrs.begin(), m_chunk_ptrs.end(), 0, 0);
-    }
-    
-    Iterator end() const {
-        return Iterator(m_chunk_ptrs.end(), m_chunk_ptrs.end(), 
-                       static_cast<size_t>(-1), 0);
-    }
-
+    //standard vector-like interface
     void push_back(const T& value) {
-        if (m_tail->chunk.is_full()) addNewChunk();
-        m_tail->chunk.push_back(value);
+        if (m_chunks.empty() || current_chunk_is_full()) {
+            addNewChunk();
+        }
+        m_chunks.back()->push_back(value);
         m_total_size++;
         updatePrefixSizes();
     }
 
     void push_back(T&& value) {
-        if (m_tail->chunk.is_full()) addNewChunk();
-        m_tail->chunk.push_back(std::move(value));
+        if (m_chunks.empty() || current_chunk_is_full()) {
+            addNewChunk();
+        }
+        m_chunks.back()->push_back(std::move(value));
         m_total_size++;
         updatePrefixSizes();
     }
 
     template<typename... Args>
     void emplace_back(Args&&... args) {
-        if (m_tail->chunk.is_full()) addNewChunk();
-        m_tail->chunk.emplace_back(std::forward<Args>(args)...);
+        if (m_chunks.empty() || current_chunk_is_full()) {
+            addNewChunk();
+        }
+        m_chunks.back()->emplace_back(std::forward<Args>(args)...);
         m_total_size++;
         updatePrefixSizes();
     }
@@ -246,7 +106,7 @@ public:
     GrowthModel getGrowthModel() const { return m_growth_model; }
 
     /**
-     * @brief O(log n) access via prefix sums + binary search. Read-only access.
+     * @brief O(log n) access via prefix sums + binary search
      */
     const T& operator[](size_t index) const {
         if (index >= m_total_size)
@@ -257,11 +117,22 @@ public:
         size_t chunk_idx = std::distance(m_prefix_sizes.begin(), it) - 1;
         size_t offset = index - m_prefix_sizes[chunk_idx];
 
-        return m_chunk_ptrs[chunk_idx]->chunk[offset];
+        return (*m_chunks[chunk_idx])[offset];
     }
 
-    // Non-const access is deleted to enforce read-only element access
-    T& operator[](size_t index) = delete;
+    /**
+     * @brief Non-const access for modification
+     */
+    T& operator[](size_t index) {
+        if (index >= m_total_size)
+            throw std::out_of_range("SmartArray index out of range");
+
+        auto it = std::upper_bound(m_prefix_sizes.begin(), m_prefix_sizes.end(), index);
+        size_t chunk_idx = std::distance(m_prefix_sizes.begin(), it) - 1;
+        size_t offset = index - m_prefix_sizes[chunk_idx];
+
+        return (*m_chunks[chunk_idx])[offset];
+    }
 
     /**
      * @brief Get element with bounds checking
@@ -272,58 +143,100 @@ public:
         return (*this)[index];
     }
 
+    T& at(size_t index) {
+        if (index >= m_total_size)
+            throw std::out_of_range("SmartArray index out of range");
+        return (*this)[index];
+    }
+
+    /**
+     * @brief Clear all data but keep growth model settings
+     */
+    void clear() {
+        m_chunks.clear();
+        m_prefix_sizes.clear();
+        m_total_size = 0;
+        initializeFirstChunk(100); // Reset with default initial capacity
+    }
+
+    /**
+     * @brief Reserve capacity by pre-allocating chunks
+     */
+    void reserve(size_t new_capacity) {
+        while (m_total_size < new_capacity) {
+            size_t remaining = new_capacity - m_total_size;
+            size_t chunk_size = predictNextChunkSize(m_total_size);
+            size_t actual_chunk_size = std::min(chunk_size, remaining);
+            
+            auto new_chunk = std::make_unique<std::vector<T>>();
+            new_chunk->reserve(actual_chunk_size);
+            m_chunks.push_back(std::move(new_chunk));
+            
+            // Update prefix sizes for the new empty chunk
+            m_prefix_sizes.push_back(m_total_size);
+        }
+    }
+
     /**
      * @brief Memory usage statistics
      */
     void getMemoryStats() const {
         size_t total_allocated = 0;
         size_t total_used = 0;
-        size_t chunk_num = 0;
 
-        ChunkNode* current = m_head.get();
-        while (current) {
-            total_allocated += current->chunk.capacity();
-            total_used += current->chunk.size();
-            std::cout << "Chunk " << chunk_num++
-                      << ": capacity=" << current->chunk.capacity()
-                      << ", size=" << current->chunk.size()
-                      << ", usage=" << (current->chunk.size() * 100.0 / current->chunk.capacity()) << "%\n";
-            current = current->next.get();
+        std::cout << "SmartArray Memory Stats:\n";
+        std::cout << "Growth Model: " << growthModelToString(m_growth_model) << "\n";
+        std::cout << "Total elements: " << m_total_size << "\n";
+        std::cout << "Number of chunks: " << m_chunks.size() << "\n\n";
+
+        for (size_t i = 0; i < m_chunks.size(); ++i) {
+            size_t chunk_capacity = m_chunks[i]->capacity();
+            size_t chunk_size = m_chunks[i]->size();
+            total_allocated += chunk_capacity;
+            total_used += chunk_size;
+
+            std::cout << "Chunk " << i 
+                      << ": capacity=" << chunk_capacity
+                      << ", size=" << chunk_size
+                      << ", usage=" << (chunk_size * 100.0 / chunk_capacity) << "%\n";
         }
 
-        std::cout << "Total: allocated=" << total_allocated
+        std::cout << "\nTotal: allocated=" << total_allocated
                   << ", used=" << total_used
                   << ", efficiency=" << (total_used * 100.0 / total_allocated) << "%\n";
-        std::cout << "Growth Model: " << growthModelToString(m_growth_model) << std::endl;
+    }
+
+    /**
+     * @brief Get chunk information for advanced usage
+     */
+    size_t chunk_count() const { return m_chunks.size(); }
+    
+    const std::vector<T>& get_chunk(size_t chunk_index) const {
+        if (chunk_index >= m_chunks.size())
+            throw std::out_of_range("Chunk index out of range");
+        return *m_chunks[chunk_index];
     }
 
 private:
-    struct ChunkNode {
-        ArrayChunk<T> chunk;
-        std::unique_ptr<ChunkNode> next;
-        explicit ChunkNode(size_t predicted_size) : chunk{predicted_size}, next{nullptr} {}
-    };
-
-    std::unique_ptr<ChunkNode> m_head;
-    ChunkNode* m_tail;
+    std::vector<std::unique_ptr<std::vector<T>>> m_chunks;
+    std::vector<size_t> m_prefix_sizes; // Cumulative sizes for binary search
     size_t m_total_size;
     size_t m_max_capacity;
     GrowthModel m_growth_model;
     double m_growth_rate;
     size_t m_inflection_point;
 
-    std::vector<size_t> m_prefix_sizes;
-    std::vector<ChunkNode*> m_chunk_ptrs;
+    bool current_chunk_is_full() const {
+        return !m_chunks.empty() && 
+               m_chunks.back()->size() >= m_chunks.back()->capacity();
+    }
 
     void initializeFirstChunk(size_t initial_capacity) {
         size_t first_chunk_size = predictNextChunkSize(0);
-        m_head = std::make_unique<ChunkNode>(first_chunk_size);
-        m_tail = m_head.get();
-
-        m_prefix_sizes.reserve(64);
-        m_chunk_ptrs.reserve(64);
+        auto first_chunk = std::make_unique<std::vector<T>>();
+        first_chunk->reserve(first_chunk_size);
+        m_chunks.push_back(std::move(first_chunk));
         m_prefix_sizes.push_back(0);
-        m_chunk_ptrs.push_back(m_tail);
     }
 
     size_t predictNextChunkSize(size_t current_total_size) {
@@ -341,7 +254,6 @@ private:
         }
     }
 
-    // Simplified growth models without Fibonacci
     size_t predictSCurve(size_t current_total_size) {
         double exponent = -m_growth_rate * (current_total_size - m_inflection_point);
         double s_curve_value = 1.0 / (1.0 + std::exp(exponent));
@@ -386,16 +298,14 @@ private:
 
     void addNewChunk() {
         size_t new_chunk_size = predictNextChunkSize(m_total_size);
-        auto new_chunk = std::make_unique<ChunkNode>(new_chunk_size);
-        m_tail->next = std::move(new_chunk);
-        m_tail = m_tail->next.get();
-
-        m_chunk_ptrs.push_back(m_tail);
-        m_prefix_sizes.push_back(m_total_size); // New chunk starts at current total size
+        auto new_chunk = std::make_unique<std::vector<T>>();
+        new_chunk->reserve(new_chunk_size);
+        m_chunks.push_back(std::move(new_chunk));
+        m_prefix_sizes.push_back(m_total_size);
     }
 
     void updatePrefixSizes() {
-        // Rebuild the last prefix size to reflect current total
+        // Update the last prefix size to reflect current total
         if (!m_prefix_sizes.empty()) {
             m_prefix_sizes.back() = m_total_size;
         }
@@ -412,28 +322,4 @@ private:
     }
 };
 
-}//vectordb namespace
-
-
-/*
-m_prefix_sizes = [0, 100, 230, 400, 640]
-                 |    |    |    |    |
- index           0   100  230  400  640
-
-Chunk 0 covers indices [0, 99]
-Chunk 1 covers [100, 229]
-Chunk 2 covers [230, 399]
-Chunk 3 covers [400, 639]
-
- upper_bound(250) -> points to 400
- position = 3
- chunk_idx = 3 - 1 = 2
-
- Usage:
- vectordb::SmartArray<int> arr;
-for (int i = 0; i < 5000; ++i) arr.push_back(i);
-arr.getMemoryStats();
-std::cout << "arr[1234] = " << arr[1234] << "\n";
-
-
-*/
+} // namespace vectordb

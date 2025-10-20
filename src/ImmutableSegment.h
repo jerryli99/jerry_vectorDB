@@ -11,6 +11,8 @@
 #include <faiss/IndexHNSW.h>
 #include <faiss/IndexFlat.h>
 #include <faiss/index_io.h>
+#include <faiss/Clustering.h>
+
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -64,6 +66,61 @@ public:
     const IdTracker& getIdTracker() const { 
         return m_id_tracker; 
     }
+
+    const std::unordered_map<VectorName, DenseVector>& getMetaIndex() const {
+        return m_meta_index;
+    }
+
+    // -------------------------------
+    // New: Write / read index files
+    std::future<void> asyncWriteIndex(const std::string& base_path) {
+        return std::async(std::launch::async, [this, base_path]() {
+            for (auto& [vec_name, index] : m_hnsw_indexes) {
+                std::filesystem::create_directories(base_path);
+                std::string path = base_path + "/" + vec_name + ".index";
+                faiss::write_index(index.get(), path.c_str());
+                std::cout << "[WRITE] Index written: " << path << "\n";
+            }
+        });
+    }
+
+    std::future<void> asyncLoadIndex(const std::string& base_path) {
+        return std::async(std::launch::async, [this, base_path]() {
+            for (auto& [vec_name, _] : m_info.vec_specs) {
+                std::string path = base_path + "/" + vec_name + ".index";
+                if (!std::filesystem::exists(path)) continue;
+
+                auto loaded_index = std::unique_ptr<faiss::IndexHNSW>(
+                    dynamic_cast<faiss::IndexHNSW*>(faiss::read_index(path.c_str()))
+                );
+                m_hnsw_indexes[vec_name] = std::move(loaded_index);
+                std::cout << "[READ] Index loaded: " << path << "\n";
+            }
+        });
+    }
+
+    // -------------------------------
+    // New: Compute k-means centroids for MetaIndex
+    void computeMetaIndex(size_t k) {
+        for (auto& [vec_name, index] : m_hnsw_indexes) {
+            size_t dim = m_vector_dims[vec_name];
+            size_t n = index->ntotal;
+
+            if (n == 0 || k == 0) continue;
+
+            std::vector<float> all_vectors(n * dim);
+            index->reconstruct_n(0, n, all_vectors.data());
+
+            faiss::Clustering clus(dim, k);
+            faiss::IndexFlatL2 quantizer(dim);
+            clus.train(n, all_vectors.data(), quantizer);
+
+            m_meta_index[vec_name] = clus.centroids;
+            std::cout << "[META] K-means centroids for '" << vec_name
+                      << "' computed: k=" << k << "\n";
+        }
+    }
+    //---------------------------------------
 
     QueryResult searchTopK(const std::string& vector_name,
                            const std::vector<DenseVector>& query_vectors,
@@ -260,6 +317,9 @@ private:
     CollectionInfo m_info;
     IndexSpec m_index_spec;
     IdTracker m_id_tracker;
+    
+    //MetaIndex centroids
+    std::unordered_map<VectorName, DenseVector> m_meta_index;
 };
 
 } // namespace vectordb

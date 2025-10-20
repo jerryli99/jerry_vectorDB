@@ -133,6 +133,8 @@ sudo apt-get install libblas-dev liblapack-dev
 
 sudo apt-get install swig
 
+sudo apt-get install uuid-dev
+
 git clone https://github.com/facebookresearch/faiss.git
 cd faiss
 cmake -B build -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF .
