@@ -50,35 +50,93 @@ public:
         return status;
     }
 
-    // Convert active to immutable when ready
     Status convertActiveToImmutable() {
+        size_t pending_writes = getPendingWriteCount();
+        if (pending_writes != 0) {
+            cleanupCompletedWrites();
+        }
+
         if (!m_active_segment.shouldIndex() && !m_active_segment.isFull()) {
-            // std::cout << "Hello From Segmentholder, converActiveToImmutable\n";
             return Status::OK();
         }
-        std::cout << "[******] convertActiveToImmutable called. shouldIndex=" << m_active_segment.shouldIndex()
-          << " isFull=" << m_active_segment.isFull() << "\n";
+
         auto immutable_segment = m_active_segment.convertToImmutable();
         if (!immutable_segment.ok()) {
             return immutable_segment.status();
         }
-        // m_immutable_segments.push_back(std::move(immutable_segment.value()));
-        // std::cout << "[OK???] immutableSeg Size ?" << m_immutable_segments.size();        
-        //the value() which is from StatusOr, could later add ValueOrDie() method in.
-        // std::cout << "on_disk = [" << m_collection_info.on_disk << "]\n";
-        if (!m_collection_info.on_disk) {
-            //fix: use a smartVector to manage this
-            // m_immutable_segments.push_back(std::move(immutable_segment.value()));
-            m_immutable_segments.push_back(std::move(immutable_segment.value()));
-            std::cout << "[OK???] immutableSeg Size ?" << m_immutable_segments.size();  
-        } else {
-            //add to disk stuff here..
-            //do add some cache array here to hold some in memory immutable segments?
-            //like immutable_segment.writeToDisk?
+
+        // Store in memory
+        m_immutable_segments.push_back(std::move(immutable_segment.value()));
+        auto& segment = m_immutable_segments.back();
+        
+        std::cout << "[CONVERT] Created segment: " << segment->getSegmentId() << "\n";
+
+        if (m_collection_info.on_disk) {
+            //launch write in background
+            auto write_future = std::async(std::launch::async, [&segment]() {
+                segment->writeIndex();
+            });
+            
+            //store future to prevent immediate destruction
+            m_pending_writes.push_back(std::move(write_future));
         }
 
         return Status::OK();
     }
+
+    void cleanupCompletedWrites() {
+        for (auto it = m_pending_writes.begin(); it != m_pending_writes.end(); ) {
+            // Check if future is ready (non-blocking check)
+            if (it->wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+                it = m_pending_writes.erase(it);  // Remove completed write
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    // Optional: Get status info
+    size_t getPendingWriteCount() const {
+        return m_pending_writes.size();
+    }
+
+    // // Convert active to immutable when ready
+    // Status convertActiveToImmutable() {
+    //     if (!m_active_segment.shouldIndex() && !m_active_segment.isFull()) {
+    //         // std::cout << "Hello From Segmentholder, converActiveToImmutable\n";
+    //         return Status::OK();
+    //     }
+    //     std::cout << "[******] convertActiveToImmutable called. shouldIndex=" << m_active_segment.shouldIndex()
+    //       << " isFull=" << m_active_segment.isFull() << "\n";
+    //     auto immutable_segment = m_active_segment.convertToImmutable();
+    //     if (!immutable_segment.ok()) {
+    //         return immutable_segment.status();
+    //     }
+    //     // m_immutable_segments.push_back(std::move(immutable_segment.value()));
+    //     // std::cout << "[OK???] immutableSeg Size ?" << m_immutable_segments.size();        
+    //     //the value() which is from StatusOr, could later add ValueOrDie() method in.
+    //     // std::cout << "on_disk = [" << m_collection_info.on_disk << "]\n";
+    //     if (!m_collection_info.on_disk) {
+    //         //fix: use a smartVector to manage this
+    //         // m_immutable_segments.push_back(std::move(immutable_segment.value()));
+    //         m_immutable_segments.push_back(std::move(immutable_segment.value()));
+    //         std::cout << "[OK???] immutableSeg Size ?" << m_immutable_segments.size();  
+    //     } else {
+    //         //add to disk stuff here...
+    //         //do add some cache array here to hold some in memory immutable segments?
+    //         // Store in memory and write to disk asynchronously
+    //         m_immutable_segments.push_back(std::move(immutable_segment.value()));
+    //         auto& segment = m_immutable_segments.back();
+            
+    //         // True async write
+    //         auto write_future = std::async(std::launch::async, [&segment]() {
+    //             segment->writeIndex();
+    //         });
+    //         m_pending_writes.push_back(std::move(write_future));
+    //     }
+
+    //     return Status::OK();
+    // }
 
     const ActiveSegment& getActiveSegment() const { 
         return m_active_segment; 
@@ -204,6 +262,7 @@ private:
     //might implement my own AI driven std::vector for capacity prediction expansion later. Cool stuff
     std::vector<std::unique_ptr<ImmutableSegment>> m_immutable_segments;
     // std::atomic<uint64_t> next_id_{0};//mayeb uuid is better for segment id?
+    std::vector<std::future<void>> m_pending_writes;
 };
 
 } // namespace vectordb

@@ -32,9 +32,11 @@ public:
     ImmutableSegment(const SegPointData& point_data, const CollectionInfo& info)
         : m_info{info}
         , m_index_spec{info.index_specs}
+        , m_segment_id{generateSegmentId()}
     {
-        std::cout << "Hello from Immutabe\n";
+        std::cout << "Hello from ImmutableSegment, ID: " << m_segment_id << "\n";
         buildHNSWIndexes(point_data);
+        //buildFilterMartix(point_data);??maybe 1 filtermatrix for 1 immutable_seg
     }
 
     ~ImmutableSegment() = default;
@@ -45,6 +47,10 @@ public:
 
     ImmutableSegment(ImmutableSegment&&) noexcept = default;
     ImmutableSegment& operator=(ImmutableSegment&&) noexcept = default;
+
+    const std::string& getSegmentId() const { 
+        return m_segment_id; 
+    }
 
     // Get statistics
     size_t getPointCount() const { 
@@ -71,36 +77,52 @@ public:
         return m_meta_index;
     }
 
-    // -------------------------------
-    // New: Write / read index files
-    std::future<void> asyncWriteIndex(const std::string& base_path) {
-        return std::async(std::launch::async, [this, base_path]() {
+    void writeIndex(const std::string& base_path = "./VectorDB") {
+        try {
+            // Create collection directory: ./VectorDB/{collection_name}
+            std::string collection_dir = base_path + "/" + m_info.name;
+            std::filesystem::create_directories(collection_dir);
+            
+            // Create segments directory: ./VectorDB/{collection_name}/segments
+            std::string segments_dir = collection_dir + "/segments";
+            std::filesystem::create_directories(segments_dir);
+            
+            // Create this specific segment directory: ./VectorDB/{collection_name}/segments/{segment_id}
+            std::string segment_dir = segments_dir + "/" + m_segment_id;
+            std::filesystem::create_directories(segment_dir);
+            
+            // Write each vector index
             for (auto& [vec_name, index] : m_hnsw_indexes) {
-                std::filesystem::create_directories(base_path);
-                std::string path = base_path + "/" + vec_name + ".index";
+                std::string path = segment_dir + "/" + vec_name + ".index";
                 faiss::write_index(index.get(), path.c_str());
                 std::cout << "[WRITE] Index written: " << path << "\n";
             }
-        });
+            
+            // Also write segment metadata
+            writeSegmentMetadata(segment_dir);
+            
+        } catch (const std::exception& e) {
+            std::cerr << "[WRITE ERROR] " << e.what() << "\n";
+            throw; // Re-throw to let caller handle
+        }
     }
 
-    std::future<void> asyncLoadIndex(const std::string& base_path) {
-        return std::async(std::launch::async, [this, base_path]() {
-            for (auto& [vec_name, _] : m_info.vec_specs) {
-                std::string path = base_path + "/" + vec_name + ".index";
-                if (!std::filesystem::exists(path)) continue;
+    // Synchronous load from disk
+    void loadIndex(const std::string& base_path) {
+        for (auto& [vec_name, _] : m_info.vec_specs) {
+            std::string path = base_path + "/" + vec_name + ".index";
+            if (!std::filesystem::exists(path)) continue;
 
-                auto loaded_index = std::unique_ptr<faiss::IndexHNSW>(
-                    dynamic_cast<faiss::IndexHNSW*>(faiss::read_index(path.c_str()))
-                );
-                m_hnsw_indexes[vec_name] = std::move(loaded_index);
-                std::cout << "[READ] Index loaded: " << path << "\n";
-            }
-        });
+            auto loaded_index = std::unique_ptr<faiss::IndexHNSW>(
+                dynamic_cast<faiss::IndexHNSW*>(faiss::read_index(path.c_str()))
+            );
+            m_hnsw_indexes[vec_name] = std::move(loaded_index);
+            std::cout << "[LOAD] Index loaded: " << path << "\n";
+        }
     }
 
     // -------------------------------
-    // New: Compute k-means centroids for MetaIndex
+    //Compute k-means centroids for MetaIndex
     void computeMetaIndex(size_t k) {
         for (auto& [vec_name, index] : m_hnsw_indexes) {
             size_t dim = m_vector_dims[vec_name];
@@ -209,6 +231,17 @@ public:
 
 
 private:
+    //generate UUID-based segment ID, not sure if i should make it static, but for now sure.
+    static std::string generateSegmentId() {
+        uuid_t uuid;
+        uuid_generate(uuid);
+        
+        char uuid_str[37]; // 36 chars + null terminator
+        uuid_unparse(uuid, uuid_str);
+        
+        return "Segment_" + std::string(uuid_str);
+    }
+
     void buildHNSWIndexes(const SegPointData& point_data) {
         m_point_ids.reserve(point_data.size());
         
@@ -309,8 +342,41 @@ private:
             std::cout << "  Vector space '" << name << "': " << count << " vectors" << std::endl;
         }
     }
+    
+    
+    void writeSegmentMetadata(const std::string& segment_dir) {
+        std::string metadata_path = segment_dir + "/metadata.json";
+        std::ofstream metadata_file(metadata_path);
+        
+        json metadata;
+        metadata["segment_id"] = m_segment_id;
+        metadata["collection_name"] = m_info.name;
+        metadata["point_count"] = m_point_ids.size();
+        metadata["created_at"] = getCurrentTimestamp();
+        metadata["vector_spaces"] = json::object();
+        
+        for (const auto& [vec_name, dim] : m_vector_dims) {
+            metadata["vector_spaces"][vec_name] = {
+                {"dimension", dim},
+                {"metric", to_string(m_info.vec_specs.at(vec_name).metric)}
+            };
+        }
+        
+        metadata_file << metadata.dump(4);
+        metadata_file.close();
+        std::cout << "[METADATA] Segment metadata written: " << metadata_path << "\n";
+    }
+    
+    static std::string getCurrentTimestamp() {
+        auto now = std::chrono::system_clock::now();
+        auto time_t = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&time_t), "%Y-%m-%d %H:%M:%S");
+        return ss.str();
+    }
 
 private:
+    SegmentIdType m_segment_id;
     std::vector<PointIdType> m_point_ids;
     std::unordered_map<VectorName, std::unique_ptr<faiss::IndexHNSW>> m_hnsw_indexes;
     std::unordered_map<VectorName, size_t> m_vector_dims;

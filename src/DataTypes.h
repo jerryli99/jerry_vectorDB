@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-// #include <Eigen/Dense> //ahh, this eigen thing is really annoying
+#include <uuid/uuid.h>
 #include <cstdint>
 #include <string>
 #include <optional>

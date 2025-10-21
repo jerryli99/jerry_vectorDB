@@ -59,7 +59,7 @@ public:
           m_max_capacity{max_expected_capacity}, 
           m_growth_model{model}, 
           m_growth_rate{growth_rate},
-          m_inflection_point{max_expected_capacity / 4} 
+          m_inflection_point{max_expected_capacity / 2} 
     {
         initializeFirstChunk(initial_capacity);
     }
@@ -109,6 +109,9 @@ public:
      * @brief O(log n) access via prefix sums + binary search
      */
     const T& operator[](size_t index) const {
+        if (m_total_size == 0) 
+            throw std::out_of_range("Accessing empty SmartArray");
+
         if (index >= m_total_size)
             throw std::out_of_range("SmartArray index out of range");
 
@@ -163,18 +166,26 @@ public:
      * @brief Reserve capacity by pre-allocating chunks
      */
     void reserve(size_t new_capacity) {
-        while (m_total_size < new_capacity) {
-            size_t remaining = new_capacity - m_total_size;
-            size_t chunk_size = predictNextChunkSize(m_total_size);
-            size_t actual_chunk_size = std::min(chunk_size, remaining);
-            
+        size_t reserved = capacity();
+        while (reserved < new_capacity) {
+            size_t chunk_size = predictNextChunkSize(reserved);
+            reserved += chunk_size;
             auto new_chunk = std::make_unique<std::vector<T>>();
-            new_chunk->reserve(actual_chunk_size);
+            new_chunk->reserve(chunk_size);
             m_chunks.push_back(std::move(new_chunk));
-            
-            // Update prefix sizes for the new empty chunk
-            m_prefix_sizes.push_back(m_total_size);
+            m_prefix_sizes.push_back(m_total_size); // starting offset stays the same
         }
+    }
+
+    /**
+     * @brief Total reserved capacity across all chunks
+     */
+    size_t capacity() const {
+        size_t c = 0;
+        for (const auto& ch : m_chunks) {
+            if (ch) c += ch->capacity();
+        }
+        return c;
     }
 
     /**
@@ -254,17 +265,19 @@ private:
         }
     }
 
+    //f(x) = 1 / (1 + e^(-k(x - x0)))
     size_t predictSCurve(size_t current_total_size) {
-        double exponent = -m_growth_rate * (current_total_size - m_inflection_point);
+        double exponent = -0.00005 * (current_total_size - 50000.0);
         double s_curve_value = 1.0 / (1.0 + std::exp(exponent));
 
-        double min_chunk_ratio = 0.05;
-        double max_chunk_ratio = 0.20;
+        double min_chunk_ratio = 0.02;
+        double max_chunk_ratio = 0.25;
         double chunk_ratio = min_chunk_ratio + s_curve_value * (max_chunk_ratio - min_chunk_ratio);
 
-        size_t predicted_size = static_cast<size_t>(m_max_capacity * chunk_ratio);
-        return std::clamp(predicted_size, size_t(100), size_t(1000));
+        size_t predicted_size = static_cast<size_t>(20000.0 * chunk_ratio); // 20000 = m_max_capacity example
+        return std::clamp(predicted_size, size_t(100), size_t(5000));
     }
+
 
     size_t predictExponential(size_t current_total_size) {
         double base_growth = 1.5;
@@ -277,7 +290,7 @@ private:
     }
 
     size_t predictLinear(size_t current_total_size) {
-        double base_size = 200.0;
+        double base_size = 100.0;
         double growth_per_chunk = 50.0;
         
         // Use current_total_size to determine growth
@@ -287,6 +300,7 @@ private:
         return std::clamp(predicted_size, size_t(100), size_t(2000));
     }
 
+    //f(x) = a * log(bx + 1)
     size_t predictLogarithmic(size_t current_total_size) {
         double base_size = 300.0;
         double log_factor = std::log1p(current_total_size);
@@ -305,9 +319,11 @@ private:
     }
 
     void updatePrefixSizes() {
-        // Update the last prefix size to reflect current total
-        if (!m_prefix_sizes.empty()) {
-            m_prefix_sizes.back() = m_total_size;
+        m_prefix_sizes.clear();
+        size_t cumulative = 0;
+        for (const auto& chunk : m_chunks) {
+            m_prefix_sizes.push_back(cumulative);
+            cumulative += chunk->size();
         }
     }
 
