@@ -14,3 +14,37 @@
  * The name MetaIndex is used because well, it is indexing the representations of vectors from each segment, 
  * so yeah. 
  */
+
+#pragma once
+
+#include "DataTypes.h"
+
+namespace vectordb {
+class MetaIndex {
+public:
+    using CentroidsType = std::map<VectorName, std::vector<DenseVector>>;
+
+    MetaIndex() = default;
+    ~MetaIndex() = default;
+
+    //add
+    void insertToMetaIndex(const SegmentIdType seg_id, CentroidsType centroids, size_t immutableSeg_index) {
+        m_meta_index[seg_id] = centroids;//??
+        m_immutableSeg_tracker[seg_id] = immutableSeg_index;
+    }
+
+    //search(important here, still thinking about making this class a shard layer?)
+
+
+    //perhaps write to disk to like preserve the MetaIndex state?
+
+
+private:
+    std::unordered_map<SegmentIdType, CentroidsType> m_meta_index;
+    //for in memory use case, maybe need to store the location about 
+    //where the immutableSeg is located? 
+    //So we need mapping of segment id and m_immutableSegment[?] index integer?
+    std::unordered_map<SegmentIdType, size_t> m_immutableSeg_tracker;
+};
+
+}

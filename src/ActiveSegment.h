@@ -3,6 +3,7 @@
 #include "DataTypes.h"
 #include "Status.h"
 #include "Point.h"
+#include "WAL.h"
 #include "PointMemoryPool.h"
 #include "CollectionInfo.h"
 #include "ImmutableSegment.h"
@@ -100,7 +101,8 @@ public:
         }
 
         try {
-            auto immutable_segment = std::make_unique<ImmutableSegment>(point_data, m_info);
+            SegmentIdType seg_id = generateSegmentId();
+            auto immutable_segment = std::make_unique<ImmutableSegment>(point_data, m_info, seg_id);
             
             //CLEAR THE POOL AFTER SUCCESSFUL CONVERSION
             m_pool->clearPool();
@@ -323,6 +325,17 @@ private:
     IndexSpec m_index_spec;
     size_t m_max_capacity;
     mutable std::mutex m_mutex;
+
+    //generate UUID-based segment ID, not sure if i should make it static, but for now sure.
+    static std::string generateSegmentId() {
+        uuid_t uuid;
+        uuid_generate(uuid);
+        
+        char uuid_str[37]; // 36 chars + null terminator
+        uuid_unparse(uuid, uuid_str);
+        
+        return "Segment_" + std::string(uuid_str);
+    }
 };
 
 } // namespace vectordb

@@ -30,6 +30,10 @@ int main() {
 vectordb::DB& vec_db = vectordb::DB::getInstance();
 
 httplib::Server svr;
+svr.Get("/", [&](const httplib::Request& req, httplib::Response& res){
+    res.set_content(R"({"Welcome": "Jerry's VectorDB", "status":"ok"})", "application/json");
+    return;
+});
 
 //So we only create one collection at a time. The concept of a collection is a collection of
 //segments containing points. So when I designed this, I was not expecting a lot of collections
@@ -296,7 +300,180 @@ svr.Post("/upsert", [&](const httplib::Request& req, httplib::Response& res) {
     }
 });
 
-std::cout << "Server listening on http://127.0.0.1:8989\n";
+//-------------------------------------------------------------------------
+// Graph Relationship Endpoints
+svr.Post(R"(/collections/(.+)/graph/relationships)", [&](const httplib::Request& req, httplib::Response& res) {
+    try {
+        if (req.matches.size() < 2) {
+            vectordb::api_send_error(res, 400, "Missing collection name", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        std::string collection_name = req.matches[1];
+        auto json_body = vectordb::json::parse(req.body);
+
+        // Validate required fields
+        if (!json_body.contains("from_id") || !json_body.contains("to_id") || !json_body.contains("relationship")) {
+            vectordb::api_send_error(res, 400, "Missing required fields: from_id, to_id, relationship", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        vectordb::PointIdType from_id = json_body["from_id"];
+        vectordb::PointIdType to_id = json_body["to_id"];
+        std::string relationship = json_body["relationship"];
+        
+        float weight = 1.0f;
+        if (json_body.contains("weight")) {
+            weight = json_body["weight"];
+        }
+
+        auto status = vec_db.addGraphRelationship(collection_name, from_id, to_id, relationship, weight);
+        if (!status.ok) {
+            vectordb::api_send_error(res, 400, status.message, vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        res.set_content(R"({"status":"ok"})", "application/json");
+
+    } catch (const vectordb::json::parse_error &e) {
+        vectordb::api_send_error(res, 400, std::string("Invalid JSON: ") + e.what(), vectordb::APIErrorType::UserInput);
+    } catch (const std::exception &e) {
+        vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+    }
+});
+
+// Get node relationships
+svr.Get(R"(/collections/(.+)/graph/nodes/(.+)/relationships)", [&](const httplib::Request& req, httplib::Response& res) {
+    try {
+        if (req.matches.size() < 3) {
+            vectordb::api_send_error(res, 400, "Missing collection name or node ID", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        std::string collection_name = req.matches[1];
+        vectordb::PointIdType node_id = req.matches[2];
+
+        auto result = vec_db.getNodeRelationships(collection_name, node_id);
+        res.set_content(result.dump(), "application/json");
+
+    } catch (const std::exception &e) {
+        vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+    }
+});
+
+// Graph traversal
+svr.Post(R"(/collections/(.+)/graph/traverse)", [&](const httplib::Request& req, httplib::Response& res) {
+    try {
+        if (req.matches.size() < 2) {
+            vectordb::api_send_error(res, 400, "Missing collection name", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        std::string collection_name = req.matches[1];
+        auto json_body = vectordb::json::parse(req.body);
+
+        if (!json_body.contains("start_id")) {
+            vectordb::api_send_error(res, 400, "Missing start_id", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        vectordb::PointIdType start_id = json_body["start_id"];
+        std::string direction = "outwards";
+        int max_hops = 2;
+        float min_weight = 0.0f;
+
+        if (json_body.contains("direction")) {
+            direction = json_body["direction"];
+        }
+        if (json_body.contains("max_hops")) {
+            max_hops = json_body["max_hops"];
+        }
+        if (json_body.contains("min_weight")) {
+            min_weight = json_body["min_weight"];
+        }
+
+        auto result = vec_db.graphTraversal(collection_name, start_id, direction, max_hops, min_weight);
+        res.set_content(result.dump(), "application/json");
+
+    } catch (const vectordb::json::parse_error &e) {
+        vectordb::api_send_error(res, 400, std::string("Invalid JSON: ") + e.what(), vectordb::APIErrorType::UserInput);
+    } catch (const std::exception &e) {
+        vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+    }
+});
+
+// Shortest path
+svr.Post(R"(/collections/(.+)/graph/shortest-path)", [&](const httplib::Request& req, httplib::Response& res) {
+    try {
+        if (req.matches.size() < 2) {
+            vectordb::api_send_error(res, 400, "Missing collection name", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        std::string collection_name = req.matches[1];
+        auto json_body = vectordb::json::parse(req.body);
+
+        if (!json_body.contains("start_id") || !json_body.contains("end_id")) {
+            vectordb::api_send_error(res, 400, "Missing start_id or end_id", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        vectordb::PointIdType start_id = json_body["start_id"];
+        vectordb::PointIdType end_id = json_body["end_id"];
+
+        auto result = vec_db.findShortestPath(collection_name, start_id, end_id);
+        res.set_content(result.dump(), "application/json");
+
+    } catch (const vectordb::json::parse_error &e) {
+        vectordb::api_send_error(res, 400, std::string("Invalid JSON: ") + e.what(), vectordb::APIErrorType::UserInput);
+    } catch (const std::exception &e) {
+        vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+    }
+});
+
+// Get strongly connected nodes by weight
+svr.Get(R"(/collections/(.+)/graph/nodes/(.+)/related)", [&](const httplib::Request& req, httplib::Response& res) {
+    try {
+        if (req.matches.size() < 3) {
+            vectordb::api_send_error(res, 400, "Missing collection name or node ID", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        std::string collection_name = req.matches[1];
+        vectordb::PointIdType node_id = req.matches[2];
+        
+        float min_weight = 0.7f;
+        if (req.has_param("min_weight")) {
+            min_weight = std::stof(req.get_param_value("min_weight"));
+        }
+
+        auto result = vec_db.findRelatedByWeight(collection_name, node_id, min_weight);
+        res.set_content(result.dump(), "application/json");
+
+    } catch (const std::exception &e) {
+        vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+    }
+});
+
+// Get complete graph data for visualization
+svr.Get(R"(/collections/(.+)/graph)", [&](const httplib::Request& req, httplib::Response& res) {
+    try {
+        if (req.matches.size() < 2) {
+            vectordb::api_send_error(res, 400, "Missing collection name", vectordb::APIErrorType::UserInput);
+            return;
+        }
+
+        std::string collection_name = req.matches[1];
+        auto result = vec_db.getGraphData(collection_name);
+        res.set_content(result.dump(), "application/json");
+
+    } catch (const std::exception &e) {
+        vectordb::api_send_error(res, 500, std::string("Internal server error: ") + e.what(), vectordb::APIErrorType::Server);
+    }
+});
+
+//---------------------------------------------------------
+std::cout << "Server listening on http://0.0.0.0:8989\n";
 if (!svr.listen("127.0.0.1", 8989)) {
     std::cerr << "[FATAL] Failed to start server on port 8989\n";
     return 1;

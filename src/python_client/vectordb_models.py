@@ -179,3 +179,123 @@ class QueryResponse:
             status=data.get("status", ""),
             time=data.get("time", 0.0)
         )
+
+#--------------------------------------
+# Add these to your existing vectordb_models.py
+
+@dataclass
+class GraphRelationship:
+    from_id: str
+    to_id: str
+    relationship: str
+    weight: float = 1.0
+    
+    def to_dict(self) -> dict:
+        return {
+            "from_id": self.from_id,
+            "to_id": self.to_id,
+            "relationship": self.relationship,
+            "weight": self.weight
+        }
+
+@dataclass
+class GraphEdge:
+    from_id: str
+    to_id: str
+    relationship: str
+    weight: float
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'GraphEdge':
+        return cls(
+            from_id=data["from_id"],
+            to_id=data["to_id"],
+            relationship=data["relationship"],
+            weight=data["weight"]
+        )
+
+@dataclass
+class GraphTraversalRequest:
+    start_id: str
+    direction: Literal["outwards", "inwards", "both"] = "outwards"  # "outwards", "inwards", "both"
+    max_hops: int = 2
+    min_weight: float = 0.0
+    relationship_filter: Optional[str] = None
+    
+    def to_dict(self) -> dict:
+        data = {
+            "start_id": self.start_id,
+            "direction": self.direction,
+            "max_hops": self.max_hops,
+            "min_weight": self.min_weight
+        }
+        if self.relationship_filter:
+            data["relationship_filter"] = self.relationship_filter
+        return data
+
+@dataclass
+class ShortestPathRequest:
+    start_id: str
+    end_id: str
+    
+    def to_dict(self) -> dict:
+        return {
+            "start_id": self.start_id,
+            "end_id": self.end_id
+        }
+
+@dataclass
+class GraphTraversalResponse:
+    status: str
+    start_id: str
+    direction: str
+    max_hops: int
+    min_weight: float
+    nodes: List[str]
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'GraphTraversalResponse':
+        return cls(
+            status=data.get("status", ""),
+            start_id=data.get("start_id", ""),
+            direction=data.get("direction", ""),
+            max_hops=data.get("max_hops", 0),
+            min_weight=data.get("min_weight", 0.0),
+            nodes=data.get("nodes", [])
+        )
+
+@dataclass
+class ShortestPathResponse:
+    status: str
+    start_id: str
+    end_id: str
+    path: List[str]
+    path_length: int
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'ShortestPathResponse':
+        return cls(
+            status=data.get("status", ""),
+            start_id=data.get("start_id", ""),
+            end_id=data.get("end_id", ""),
+            path=data.get("path", []),
+            path_length=data.get("path_length", 0)
+        )
+
+@dataclass
+class RelatedNodesResponse:
+    status: str
+    point_id: str
+    min_weight: float
+    related_nodes: List[str]
+    count: int
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'RelatedNodesResponse':
+        return cls(
+            status=data.get("status", ""),
+            point_id=data.get("point_id", ""),
+            min_weight=data.get("min_weight", 0.0),
+            related_nodes=data.get("related_nodes", []),
+            count=data.get("count", 0)
+        )

@@ -50,7 +50,7 @@ namespace vectordb {
     inline constexpr size_t CACHE_SIZE = 128;// 128MB cache, can be specified by user...
 
     //could be adjusted, uhm, yeah i am thinking about just to have a config file here..but whatever, get the job done first.
-    const std::filesystem::path PAYLOAD_DIR = "./VectorDB/Payload";
+    const std::filesystem::path PAYLOAD_DIR = "./vectordb/payload";
 
     //max tinymap entries
     inline constexpr size_t MAX_ENTRIES_TINYMAP = 8;

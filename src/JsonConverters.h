@@ -3,6 +3,8 @@
 #include "DataTypes.h"
 #include "QueryResult.h"
 
+//euhm, not sure if making this a seperate file is a good idea, but whatever,
+//i will just put it here for now...
 namespace vectordb {
 
 inline void to_json(json& j, const ScoredId& s) {

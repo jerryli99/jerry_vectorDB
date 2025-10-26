@@ -173,7 +173,159 @@ class VectorDBClient:
 
         return parsed
 
+    # Graph Methods+++++++++++++++++++++++++
+    def add_graph_relationship(
+        self, 
+        collection_name: str, 
+        from_id: str, 
+        to_id: str, 
+        relationship: str, 
+        weight: float = 1.0
+    ) -> Optional[dict]:
+        """
+        Add a relationship between two points in the graph
+        
+        Args:
+            collection_name: Name of the collection
+            from_id: Source point ID
+            to_id: Target point ID  
+            relationship: Type of relationship ("similar_to", "contains", etc.)
+            weight: Relationship strength (0.0 to 1.0)
+        """
+        url = f"{self.host}/collections/{collection_name}/graph/relationships"
+        payload = {
+            "from_id": from_id,
+            "to_id": to_id,
+            "relationship": relationship,
+            "weight": weight
+        }
+        return self._post(url, payload)
 
+    def get_node_relationships(
+        self, 
+        collection_name: str, 
+        node_id: str
+    ) -> Optional[List[GraphEdge]]:
+        """
+        Get all relationships for a specific node
+        """
+        url = f"{self.host}/collections/{collection_name}/graph/nodes/{node_id}/relationships"
+        
+        response = self._get(url)
+        if response and response.get("status") == "ok":
+            relationships_data = response.get("relationships", [])
+            return [GraphEdge.from_dict(edge_data) for edge_data in relationships_data]
+        return None
+
+    def graph_traversal(
+        self, 
+        collection_name: str, 
+        start_id: str,
+        direction: Literal["outwards", "inwards", "both"] = "outwards",
+        max_hops: int = 2,
+        min_weight: float = 0.0
+    ) -> Optional[GraphTraversalResponse]:
+        """
+        Traverse the graph from a starting node
+        
+        Args:
+            collection_name: Name of the collection
+            start_id: Starting point ID
+            direction: "outwards", "inwards", or "both"
+            max_hops: Maximum number of hops to traverse
+            min_weight: Minimum relationship weight to follow
+        """
+        url = f"{self.host}/collections/{collection_name}/graph/traverse"
+        payload = {
+            "start_id": start_id,
+            "direction": direction,
+            "max_hops": max_hops,
+            "min_weight": min_weight
+        }
+            
+        response = self._post(url, payload)
+        if response and response.get("status") == "ok":
+            return GraphTraversalResponse.from_dict(response)
+        return None
+
+    def find_shortest_path(
+        self, 
+        collection_name: str, 
+        start_id: str, 
+        end_id: str
+    ) -> Optional[ShortestPathResponse]:
+        """
+        Find the shortest path between two nodes
+        """
+        url = f"{self.host}/collections/{collection_name}/graph/shortest-path"
+        payload = {
+            "start_id": start_id,
+            "end_id": end_id
+        }
+        response = self._post(url, payload)
+        if response and response.get("status") == "ok":
+            return ShortestPathResponse.from_dict(response)
+        return None
+
+    def find_related_by_weight(
+        self, 
+        collection_name: str, 
+        point_id: str, 
+        min_weight: float = 0.7
+    ) -> Optional[RelatedNodesResponse]:
+        """
+        Find strongly connected nodes by weight threshold
+        """
+        url = f"{self.host}/collections/{collection_name}/graph/nodes/{point_id}/related"
+        params = {"min_weight": str(min_weight)}
+        
+        response = self._get(url, params=params)
+        if response and response.get("status") == "ok":
+            return RelatedNodesResponse.from_dict(response)
+        return None
+
+    def get_graph_data(
+        self, 
+        collection_name: str
+    ) -> Optional[dict]:
+        """
+        Get the complete graph data for a collection
+        """
+        url = f"{self.host}/collections/{collection_name}/graph"
+        return self._get(url)
+
+    def batch_add_relationships(
+        self,
+        collection_name: str,
+        relationships: List[GraphRelationship]
+    ) -> Optional[dict]:
+        """
+        Add multiple relationships in batch
+        """
+        # Note: You'll need to implement a batch endpoint on the server side
+        # For now, we'll do sequential requests
+        results = []
+        for rel in relationships:
+            result = self.add_graph_relationship(
+                collection_name, rel.from_id, rel.to_id, rel.relationship, rel.weight
+            )
+            results.append(result)
+        return results
+
+    # Add _get helper method if you don't have it
+    def _get(self, url: str, params: Optional[dict] = None) -> Optional[dict]:
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            return response.json()
+        except requests.HTTPError:
+            try:
+                return response.json()
+            except ValueError:
+                return {"status": "error", "message": response.text}
+        except requests.RequestException as e:
+            print(f"[ERROR] {e}")
+            return None
 
     # Some helpers-------------------------------------------------
     def _post(self, url: str, data: dict) -> Optional[dict]:

@@ -1,0 +1,157 @@
+🚀 MAXIMUM QPS PERFORMANCE TEST SUITE
+Setting up high-performance test environment...
+
+📊 Setting up 512D (Sentence Embeddings) with 10000 points...
+Inserting data...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+  Inserted 1000/10000 points...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+  Inserted 6000/10000 points...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+
+📊 Setting up 768D (BERT-base) with 10000 points...
+Inserting data...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+  Inserted 1000/10000 points...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+  Inserted 6000/10000 points...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+
+📊 Setting up 128D (Image/LLM Embeddings) with 10000 points...
+Inserting data...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+  Inserted 1000/10000 points...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+  Inserted 6000/10000 points...
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+[INFO] Upserting 1000 points in a single request
+[SUCCESS] Upsert completed
+
+================================================================================
+🎯 STARTING MAXIMUM QPS TESTS
+================================================================================
+Warming up with 20 queries...
+Warming up with 20 queries...
+Warming up with 20 queries...
+
+🔥 TEST DURATION: 15 seconds
+--------------------------------------------------
+Single-thread max QPS test for 512D (running 15s)...
+  512D (Sentence Embeddings) | QPS:   108.7 | Avg:    9.2ms | P95:   11.9ms | Total: 1631 queries
+Single-thread max QPS test for 768D (running 15s)...
+  768D (BERT-base)          | QPS:    85.4 | Avg:   11.7ms | P95:   13.8ms | Total: 1281 queries
+Single-thread max QPS test for 128D (running 15s)...
+  128D (Image/LLM Embeddings) | QPS:   213.3 | Avg:    4.7ms | P95:    5.9ms | Total: 3200 queries
+
+🔥 TEST DURATION: 30 seconds
+--------------------------------------------------
+Single-thread max QPS test for 512D (running 30s)...
+  512D (Sentence Embeddings) | QPS:   108.8 | Avg:    9.2ms | P95:   11.9ms | Total: 3264 queries
+Single-thread max QPS test for 768D (running 30s)...
+  768D (BERT-base)          | QPS:    86.2 | Avg:   11.6ms | P95:   14.5ms | Total: 2586 queries
+Single-thread max QPS test for 128D (running 30s)...
+  128D (Image/LLM Embeddings) | QPS:   208.5 | Avg:    4.8ms | P95:    6.0ms | Total: 6255 queries
+
+🔥 TEST DURATION: 60 seconds
+--------------------------------------------------
+Single-thread max QPS test for 512D (running 60s)...
+  512D (Sentence Embeddings) | QPS:   112.6 | Avg:    8.9ms | P95:   11.0ms | Total: 6756 queries
+Single-thread max QPS test for 768D (running 60s)...
+  768D (BERT-base)          | QPS:    85.5 | Avg:   11.7ms | P95:   14.6ms | Total: 5128 queries
+Single-thread max QPS test for 128D (running 60s)...
+  128D (Image/LLM Embeddings) | QPS:   206.2 | Avg:    4.8ms | P95:    6.1ms | Total: 12371 queries
+
+====================================================================================================
+🎯 FINAL MAXIMUM QPS RESULTS
+====================================================================================================
+Dimension                 Duration   QPS          Avg Latency  P95 Latency  Total Queries  
+----------------------------------------------------------------------------------------------------
+512D (Sentence Embeddings) 15         108.7        9.2          11.9         1631           
+512D (Sentence Embeddings) 30         108.8        9.2          11.9         3264           
+512D (Sentence Embeddings) 60         112.6        8.9          11.0         6756           
+----------------------------------------------------------------------------------------------------
+768D (BERT-base)          15         85.4         11.7         13.8         1281           
+768D (BERT-base)          30         86.2         11.6         14.5         2586           
+768D (BERT-base)          60         85.5         11.7         14.6         5128           
+----------------------------------------------------------------------------------------------------
+128D (Image/LLM Embeddings) 15         213.3        4.7          5.9          3200           
+128D (Image/LLM Embeddings) 30         208.5        4.8          6.0          6255           
+128D (Image/LLM Embeddings) 60         206.2        4.8          6.1          12371          
+----------------------------------------------------------------------------------------------------
+
+🏆 MAXIMUM ACHIEVED QPS: 213.3 queries/second
+🏆 Best Configuration: 128D with 15s test duration
+
+📈 PERFORMANCE SUMMARY BY DIMENSION:
+  512D (Sentence Embeddings) | Max QPS:   112.6 | Avg Latency:    8.9ms
+  768D (BERT-base)          | Max QPS:    86.2 | Avg Latency:   11.6ms
+  128D (Image/LLM Embeddings) | Max QPS:   213.3 | Avg Latency:    4.7ms
+
+🔍 TESTING DIFFERENT TOP_K VALUES (512D):
+Single-thread max QPS test for 512D (running 10s)...
+  top_k= 1:  118.2 QPS,    8.4ms avg latency
+Single-thread max QPS test for 512D (running 10s)...
+  top_k= 5:  108.3 QPS,    9.2ms avg latency
+Single-thread max QPS test for 512D (running 10s)...
+  top_k=10:  111.4 QPS,    9.0ms avg latency
+Single-thread max QPS test for 512D (running 10s)...
+  top_k=20:  116.9 QPS,    8.5ms avg latency
+Single-thread max QPS test for 512D (running 10s)...
+  top_k=50:  105.3 QPS,    9.5ms avg latency
+
+================================================================================
+💡 PERFORMANCE INSIGHTS:
+  • Single-threaded QPS shows raw database performance
+  • Lower dimensions generally allow higher QPS
+  • Longer test durations help identify performance consistency
+  • Smaller top_k values typically yield higher QPS
+================================================================================

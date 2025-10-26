@@ -52,9 +52,9 @@ class SmartArray {
 public:
     // Constructor-only growth model
     explicit SmartArray(GrowthModel model = GrowthModel::S_CURVE,
-                       size_t initial_capacity = 100,
-                       size_t max_expected_capacity = 40000,
-                       double growth_rate = 0.001)
+                       size_t initial_capacity = 32,
+                       size_t max_expected_capacity = 20000,
+                       double growth_rate = 0.014)
         : m_total_size{0}, 
           m_max_capacity{max_expected_capacity}, 
           m_growth_model{model}, 
@@ -283,14 +283,14 @@ private:
         double base_growth = 1.5;
         double exponent = m_growth_rate * current_total_size;
         
-        size_t base_size = 100;
+        size_t base_size = 32;
         size_t predicted_size = static_cast<size_t>(base_size * std::pow(base_growth, exponent));
         
         return std::clamp(predicted_size, size_t(100), size_t(5000));
     }
 
     size_t predictLinear(size_t current_total_size) {
-        double base_size = 100.0;
+        double base_size = 32.0;
         double growth_per_chunk = 50.0;
         
         // Use current_total_size to determine growth
@@ -302,7 +302,7 @@ private:
 
     //f(x) = a * log(bx + 1)
     size_t predictLogarithmic(size_t current_total_size) {
-        double base_size = 300.0;
+        double base_size = 32.0;
         double log_factor = std::log1p(current_total_size);
         
         size_t predicted_size = static_cast<size_t>(base_size + (50.0 * log_factor));

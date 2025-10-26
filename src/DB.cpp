@@ -197,8 +197,8 @@ Status DB::upsertPointsToCollection(const CollectionId& collection_name, const j
         }
 
         //add payload here
-        // auto& collection_point_payload = collection->m_point_payload;
-        // collection_point_payload.putPayload(point_id, payload);
+        auto& collection_point_payload = collection->getPayloadStore();
+        collection_point_payload.putPayload(point_id, payload);
 
     } //end of point adding for-loop
 
@@ -296,7 +296,7 @@ json DB::queryCollection(const std::string& collection_name,
     QueryResult qr;
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    std::cout << query_body.dump(4) << std::endl;
+    // std::cout << query_body.dump(4) << std::endl;
 
     if (query_body.contains("query_vectors")) 
     {
@@ -331,5 +331,124 @@ json DB::queryCollection(const std::string& collection_name,
     return response;
 
 }
+
+//------------------------------------------------------------------------
+// Graph operations implementation
+Status DB::addGraphRelationship(const std::string& collection_name, 
+                               PointIdType from_id, PointIdType to_id,
+                               const std::string& relationship, float weight) {
+    auto access_opt = container.getCollectionForWrite(collection_name);
+    if (!access_opt) {
+        return Status::Error("Collection '" + collection_name + "' does not exist");
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    return collection->addGraphRelationship(from_id, to_id, relationship, weight);
+}
+
+json DB::getNodeRelationships(const std::string& collection_name, PointIdType node_id) {
+    auto access_opt = container.getCollectionForRead(collection_name);
+    if (!access_opt) {
+        return {{"status", "error"}, {"message", "Collection not found"}};
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    
+    auto relationships = collection->getNodeRelationships(node_id);
+    json result = json::array();
+    
+    for (const auto& rel : relationships) {
+        result.push_back({
+            {"from_id", rel.from_id},
+            {"to_id", rel.to_id},
+            {"relationship", rel.relationship},
+            {"weight", rel.weight}
+        });
+    }
+    
+    return {{"status", "ok"}, {"relationships", result}};
+}
+
+json DB::graphTraversal(const std::string& collection_name, 
+                       PointIdType start_id,
+                       const std::string& direction,
+                       int max_hops,
+                       float min_weight) {
+    auto access_opt = container.getCollectionForRead(collection_name);
+    if (!access_opt) {
+        return {{"status", "error"}, {"message", "Collection not found"}};
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    
+    auto nodes = collection->graphTraversal(start_id, direction, max_hops, min_weight);
+    
+    return {
+        {"status", "ok"},
+        {"start_id", start_id},
+        {"direction", direction},
+        {"max_hops", max_hops},
+        {"min_weight", min_weight},
+        {"nodes", nodes}
+    };
+}
+
+json DB::findShortestPath(const std::string& collection_name, 
+                         PointIdType start_id, PointIdType end_id) {
+    auto access_opt = container.getCollectionForRead(collection_name);
+    if (!access_opt) {
+        return {{"status", "error"}, {"message", "Collection not found"}};
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    
+    auto path = collection->findShortestPath(start_id, end_id);
+    
+    return {
+        {"status", "ok"},
+        {"start_id", start_id},
+        {"end_id", end_id},
+        {"path", path},
+        {"path_length", path.size()}
+    };
+}
+
+json DB::findRelatedByWeight(const std::string& collection_name, 
+                            PointIdType point_id, float min_weight) {
+    auto access_opt = container.getCollectionForRead(collection_name);
+    if (!access_opt) {
+        return {{"status", "error"}, {"message", "Collection not found"}};
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    
+    auto related_nodes = collection->findRelatedByWeight(point_id, min_weight);
+    
+    return {
+        {"status", "ok"},
+        {"point_id", point_id},
+        {"min_weight", min_weight},
+        {"related_nodes", related_nodes},
+        {"count", related_nodes.size()}
+    };
+}
+
+json DB::getGraphData(const std::string& collection_name) {
+    auto access_opt = container.getCollectionForRead(collection_name);
+    if (!access_opt) {
+        return {{"status", "error"}, {"message", "Collection not found"}};
+    }
+    
+    auto& access = access_opt.value();
+    auto& collection = access.first->collection;
+    
+    return collection->getGraphData();
+}
+
 
 }// end of vectordb namespace

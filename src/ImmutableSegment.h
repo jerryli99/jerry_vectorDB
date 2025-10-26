@@ -29,13 +29,14 @@ namespace vectordb {
 class ImmutableSegment {
 public:
     // Constructor that takes copied data 
-    ImmutableSegment(const SegPointData& point_data, const CollectionInfo& info)
+    ImmutableSegment(const SegPointData& point_data, const CollectionInfo& info, const SegmentIdType seg_id)
         : m_info{info}
         , m_index_spec{info.index_specs}
-        , m_segment_id{generateSegmentId()}
+        , m_segment_id{seg_id}
     {
         std::cout << "Hello from ImmutableSegment, ID: " << m_segment_id << "\n";
         buildHNSWIndexes(point_data);
+        computeKMeansClusters(point_data);//could use macro to represent maxiterations, now just use default.
         //buildFilterMartix(point_data);??maybe 1 filtermatrix for 1 immutable_seg
     }
 
@@ -73,12 +74,22 @@ public:
         return m_id_tracker; 
     }
 
-    const std::unordered_map<VectorName, DenseVector>& getMetaIndex() const {
-        return m_meta_index;
+    const std::map<VectorName, std::vector<DenseVector>>& getCentroids() const {
+        return m_centroids;
     }
 
-    void writeIndex(const std::string& base_path = "./VectorDB") {
+    const std::vector<DenseVector>& getCentroids(const VectorName& name) const {
+        auto it = m_centroids.find(name);
+        if (it == m_centroids.end()) {
+            throw std::runtime_error("No centroids found for vector space: " + name);
+        }
+        return it->second;
+    }
+
+    //maybe change the path to std::filesystem::path?
+    void writeIndex(const std::string& base_path = "./vectordb") {
         try {
+            std::cout << "[Writing to disk...]\n";
             // Create collection directory: ./VectorDB/{collection_name}
             std::string collection_dir = base_path + "/" + m_info.name;
             std::filesystem::create_directories(collection_dir);
@@ -108,9 +119,10 @@ public:
     }
 
     // Synchronous load from disk
-    void loadIndex(const std::string& base_path) {
+    void loadIndex(const std::string& base_path = "./vectordb") {
+        //need try/catch here?
         for (auto& [vec_name, _] : m_info.vec_specs) {
-            std::string path = base_path + "/" + vec_name + ".index";
+            std::string path = base_path + "/" + vec_name + ".index";//fix this to match writeInedx(..)
             if (!std::filesystem::exists(path)) continue;
 
             auto loaded_index = std::unique_ptr<faiss::IndexHNSW>(
@@ -119,28 +131,86 @@ public:
             m_hnsw_indexes[vec_name] = std::move(loaded_index);
             std::cout << "[LOAD] Index loaded: " << path << "\n";
         }
+        //after loaded need to write searchTopK for this? 
     }
 
     // -------------------------------
-    //Compute k-means centroids for MetaIndex
-    void computeMetaIndex(size_t k) {
-        for (auto& [vec_name, index] : m_hnsw_indexes) {
-            size_t dim = m_vector_dims[vec_name];
-            size_t n = index->ntotal;
+    //ideally, i think i will make K be sqrt(n), where n is the num of points.
+    //not sure if this is the best function design, but I can optimize this later.
+    //call this method after the HNSW index build. I expect k to be like around 70 or 50 depends. I will just hard code it.
+    void computeKMeansClusters(const SegPointData& points, size_t max_iters = 20) {
+        std::map<VectorName, std::vector<DenseVector>> per_name_vectors;
 
-            if (n == 0 || k == 0) continue;
-
-            std::vector<float> all_vectors(n * dim);
-            index->reconstruct_n(0, n, all_vectors.data());
-
-            faiss::Clustering clus(dim, k);
-            faiss::IndexFlatL2 quantizer(dim);
-            clus.train(n, all_vectors.data(), quantizer);
-
-            m_meta_index[vec_name] = clus.centroids;
-            std::cout << "[META] K-means centroids for '" << vec_name
-                      << "' computed: k=" << k << "\n";
+        //collect all DenseVectors by VectorName
+        for (const auto& [id, vec_map] : points) {
+            for (const auto& [name, vec] : vec_map) {
+                per_name_vectors[name].push_back(vec);
+            }
         }
+
+        //run KMeans per VectorName using FAISS
+        for (auto& [name, vectors] : per_name_vectors) {
+            if (vectors.empty()) continue;
+
+            size_t dim = vectors[0].size();
+            size_t n = vectors.size();
+
+            size_t k = calculateOptimalK(n);
+
+            std::cout << "Running FAISS KMeans on '" << name
+                    << "' with " << n << " vectors of dim " << dim << "...\n";
+
+            if (n <= k) {
+                std::cout << "Warning: Not enough vectors for proper clustering. Using all vectors as centroids.\n";
+                m_centroids[name] = vectors;
+                continue;
+            }
+            //flatten to float*
+            std::vector<float> data_flat(n * dim);
+            for (size_t i = 0; i < n; ++i) {
+                std::copy(vectors[i].begin(), vectors[i].end(),
+                        data_flat.begin() + i * dim);
+            }
+
+            //fAISS clustering
+            faiss::ClusteringParameters cp;
+            cp.niter = max_iters;
+            cp.verbose = false;
+
+            faiss::Clustering clus(dim, k, cp);
+            faiss::IndexFlatL2 index(dim);
+            clus.train(n, data_flat.data(), index);
+
+            // Extract centroids
+            const float* centroids_flat = clus.centroids.data();
+            std::vector<DenseVector> cluster_centroids;
+            cluster_centroids.reserve(k);
+            for (size_t i = 0; i < k; ++i) {
+                DenseVector c(dim);
+                std::copy(centroids_flat + i * dim, centroids_flat + (i + 1) * dim, c.begin());
+                cluster_centroids.push_back(std::move(c));
+            }
+
+            m_centroids[name] = std::move(cluster_centroids);
+        }
+
+        // return centroids;
+    }
+
+    size_t calculateOptimalK(size_t n) const {
+        double k = std::sqrt(static_cast<double>(n));
+        
+        //i wish i can have a GPU so i can have faster compute time...Alas
+        const size_t MIN_CLUSTERS = 5;
+        const size_t MAX_CLUSTERS = 100;
+        
+        size_t optimal_k = static_cast<size_t>(std::round(k));
+        optimal_k = std::max(MIN_CLUSTERS, std::min(optimal_k, MAX_CLUSTERS));
+        
+        std::cout << "Calculated optimal k: sqrt(" << n << ") = " << k 
+                  << " -> rounded to " << optimal_k << std::endl;
+        
+        return optimal_k;
     }
     //---------------------------------------
 
@@ -149,7 +219,6 @@ public:
                            size_t k) const
     {
         QueryResult query_result;
-        // auto start = std::chrono::high_resolution_clock::now();
         std::cout << "In immutable searchTopK\n";
         auto it = m_hnsw_indexes.find(vector_name);
         if (it == m_hnsw_indexes.end()) {
@@ -223,25 +292,11 @@ public:
         } catch (const std::exception& e) {
             query_result.status = Status::Error(std::string("Search failed: ") + e.what());
         }
-
-        // auto end = std::chrono::high_resolution_clock::now();
-        // query_result.time_seconds = std::chrono::duration<double>(end - start).count();
         return query_result;//return a copy, which is fine.
     }//end of searchTopK here
 
 
 private:
-    //generate UUID-based segment ID, not sure if i should make it static, but for now sure.
-    static std::string generateSegmentId() {
-        uuid_t uuid;
-        uuid_generate(uuid);
-        
-        char uuid_str[37]; // 36 chars + null terminator
-        uuid_unparse(uuid, uuid_str);
-        
-        return "Segment_" + std::string(uuid_str);
-    }
-
     void buildHNSWIndexes(const SegPointData& point_data) {
         m_point_ids.reserve(point_data.size());
         
@@ -385,7 +440,7 @@ private:
     IdTracker m_id_tracker;
     
     //MetaIndex centroids
-    std::unordered_map<VectorName, DenseVector> m_meta_index;
+    std::map<VectorName, std::vector<DenseVector>> m_centroids;
 };
 
 } // namespace vectordb
