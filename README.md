@@ -6,6 +6,11 @@ This is my first time writing a DB, to be specific, a vector database that AI ag
 
 The current DB only supports Dense Vectors, so to be continued with Sparse Vectors...
 
+## VectorDB architechture
+I know it is not perfect, but hopefully I can improve it -.-
+
+![Architecture Diagram](jerry_vectordb_design.drawio.png)
+
 ## API Schema
 
 ### upsert an array of this:

@@ -95,7 +95,7 @@ public:
             return Status::OK();
         }
 
-        m_fd = ::open(m_current_wal_path.c_str(), O_RDWR | O_CREAT | O_APPEND, 0644);
+        m_fd = ::open(m_current_wal_path.c_str(), O_RDWR | O_CREAT | O_APPEND, 0644);//0644 permission code
         if (m_fd == -1) {
             return Status::Error("Failed to open WAL file: " + std::string(strerror(errno)));
         }

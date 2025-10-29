@@ -473,7 +473,7 @@ svr.Get(R"(/collections/(.+)/graph)", [&](const httplib::Request& req, httplib::
 });
 
 //---------------------------------------------------------
-std::cout << "Server listening on http://0.0.0.0:8989\n";
+std::cout << "Server listening on http://127.0.0.1:8989\n";
 if (!svr.listen("127.0.0.1", 8989)) {
     std::cerr << "[FATAL] Failed to start server on port 8989\n";
     return 1;
