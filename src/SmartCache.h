@@ -41,91 +41,7 @@ struct AttentionConfig {
 
 // Thread-safe Attention aware cache
 class AttentionAwareCache {
-private:
-    std::unordered_map<size_t, CacheEntry> cache_entries_;
-    std::map<std::tuple<VectorName, size_t>, size_t> key_mapping_;
-    size_t capacity_;
-    mutable std::mutex mutex_;
-    std::atomic<size_t> next_id_{0};
-    AttentionConfig config_;
-
-    // Thread-safe vector hash computation
-    size_t compute_vector_hash(const std::vector<float>& vec) const {
-        size_t hash = 0;
-        for (float value : vec) {
-            hash ^= std::hash<float>{}(value) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-        }
-        return hash;
-    }
-
-    // Thread-safe ID generation
-    size_t generate_id() {
-        return next_id_.fetch_add(1, std::memory_order_relaxed);
-    }
-
-    // Calculate attention score for an entry
-    double calculate_attention_score(const CacheEntry& entry) const {
-        auto now = std::chrono::steady_clock::now();
-        auto time_diff = std::chrono::duration_cast<std::chrono::seconds>(
-            now - entry.timestamp).count();
-        
-        double recency_weight = config_.recency_factor / (1.0 + time_diff / config_.time_scale);
-        double frequency_weight = config_.frequency_factor * std::log(1 + entry.access_count);
-        
-        return recency_weight * frequency_weight;
-    }
-
-    // Find entry with minimum attention score (assumes lock is held)
-    typename std::unordered_map<size_t, CacheEntry>::iterator find_min_attention_entry() {
-        auto min_it = cache_entries_.begin();
-        double min_score = calculate_attention_score(min_it->second);
-        
-        for (auto it = cache_entries_.begin(); it != cache_entries_.end(); ++it) {
-            double score = calculate_attention_score(it->second);
-            if (score < min_score) {
-                min_score = score;
-                min_it = it;
-            }
-        }
-        return min_it;
-    }
-
-    // Evict entry with minimum attention score (assumes lock is held)
-    void evict_by_attention_score() {
-        if (cache_entries_.empty()) return;
-
-        auto min_it = find_min_attention_entry();
-        
-        // Remove from key_mapping_
-        for (auto it = key_mapping_.begin(); it != key_mapping_.end(); ) {
-            if (it->second == min_it->first) {
-                it = key_mapping_.erase(it);
-                break;
-            } else {
-                ++it;
-            }
-        }
-        
-        cache_entries_.erase(min_it);
-    }
-
-    // Find existing entry (assumes lock is held)
-    typename std::unordered_map<size_t, CacheEntry>::iterator find_existing_entry(
-        const VectorName& vector_name, 
-        const std::vector<float>& query_vector) {
-        
-        auto hash_key = compute_vector_hash(query_vector);
-        auto key = std::make_tuple(vector_name, hash_key);
-        auto mapping_it = key_mapping_.find(key);
-        
-        if (mapping_it != key_mapping_.end()) {
-            return cache_entries_.find(mapping_it->second);
-        }
-        return cache_entries_.end();
-    }
-
 public:
-    // Constructor
     AttentionAwareCache(size_t capacity, AttentionConfig config = AttentionConfig{}) 
         : capacity_(capacity), config_(config) {
         if (capacity == 0) {
@@ -133,7 +49,6 @@ public:
         }
     }
 
-    // Destructor
     ~AttentionAwareCache() = default;
 
     // Delete copy constructor and assignment operator
@@ -284,6 +199,89 @@ public:
         
         stats.avg_attention_score /= cache_entries_.size();
         return stats;
+    }
+
+private:
+    std::unordered_map<size_t, CacheEntry> cache_entries_;
+    std::map<std::tuple<VectorName, size_t>, size_t> key_mapping_;
+    size_t capacity_;
+    mutable std::mutex mutex_;
+    std::atomic<size_t> next_id_{0};
+    AttentionConfig config_;
+
+    //thread-safe vector hash computation
+    size_t compute_vector_hash(const std::vector<float>& vec) const {
+        size_t hash = 0;
+        for (float value : vec) {
+            hash ^= std::hash<float>{}(value) + 0x9e3779b9 + (hash << 6) + (hash >> 2);//this is magic boy
+        }
+        return hash;
+    }
+
+    // Thread-safe ID generation
+    size_t generate_id() {
+        return next_id_.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    // Calculate attention score for an entry
+    double calculate_attention_score(const CacheEntry& entry) const {
+        auto now = std::chrono::steady_clock::now();
+        auto time_diff = std::chrono::duration_cast<std::chrono::seconds>(
+            now - entry.timestamp).count();
+        
+        double recency_weight = config_.recency_factor / (1.0 + time_diff / config_.time_scale);
+        double frequency_weight = config_.frequency_factor * std::log(1 + entry.access_count);
+        
+        return recency_weight * frequency_weight;
+    }
+
+    // Find entry with minimum attention score (assumes lock is held)
+    typename std::unordered_map<size_t, CacheEntry>::iterator find_min_attention_entry() {
+        auto min_it = cache_entries_.begin();
+        double min_score = calculate_attention_score(min_it->second);
+        
+        for (auto it = cache_entries_.begin(); it != cache_entries_.end(); ++it) {
+            double score = calculate_attention_score(it->second);
+            if (score < min_score) {
+                min_score = score;
+                min_it = it;
+            }
+        }
+        return min_it;
+    }
+
+    // Evict entry with minimum attention score (assumes lock is held)
+    void evict_by_attention_score() {
+        if (cache_entries_.empty()) return;
+
+        auto min_it = find_min_attention_entry();
+        
+        // Remove from key_mapping_
+        for (auto it = key_mapping_.begin(); it != key_mapping_.end(); ) {
+            if (it->second == min_it->first) {
+                it = key_mapping_.erase(it);
+                break;
+            } else {
+                ++it;
+            }
+        }
+        
+        cache_entries_.erase(min_it);
+    }
+
+    // Find existing entry (assumes lock is held)
+    typename std::unordered_map<size_t, CacheEntry>::iterator find_existing_entry(
+        const VectorName& vector_name, 
+        const std::vector<float>& query_vector) {
+        
+        auto hash_key = compute_vector_hash(query_vector);
+        auto key = std::make_tuple(vector_name, hash_key);
+        auto mapping_it = key_mapping_.find(key);
+        
+        if (mapping_it != key_mapping_.end()) {
+            return cache_entries_.find(mapping_it->second);
+        }
+        return cache_entries_.end();
     }
 };
 
