@@ -202,8 +202,8 @@ public:
     }
 
 private:
-    std::unordered_map<size_t, CacheEntry> cache_entries_;
-    std::map<std::tuple<VectorName, size_t>, size_t> key_mapping_;
+    std::unordered_map<size_t, CacheEntry> cache_entries_;//entry_id -> CacheEntry struct
+    std::map<std::tuple<VectorName, size_t>, size_t> key_mapping_;//(vector_name, hash_key)-> entry_id
     size_t capacity_;
     mutable std::mutex mutex_;
     std::atomic<size_t> next_id_{0};
