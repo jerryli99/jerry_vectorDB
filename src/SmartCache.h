@@ -1,3 +1,25 @@
+/*
+The idea is that i am tired of rigid data structures as they are predesigned to serve a specific use case, 
+and i think that all the data structures we created works because we kind of have to adapt to what the computer is capable of doing, 
+but now how about we turn the table and let the computer adapt to what we want to do?
+
+In order to make the computer adapt to what we want, in this case, cache the results and have the hit rate as much as possible so we don't waste 
+the time querying the same vector, we will need the computer to "figure out, make a decision" in the limited memory space to say "oh, it is likely
+the user of this vectordb collection accesses this xyz vector, i need to cache it longer and evict the least useful one for the user, etc". 
+
+LRU and LFU if i am correct are trying to solve this but seems like the "really hot data" always keeps the advantage and occupy precious memory space for blocking
+new data to come in and have a seat. 
+
+I learned in school that LLMs have self-attention mechanism. I reviewed some ideas from the paper "Attention is all you need" and was excited. 
+So what if we can do some calculations to see if this xyz cached data is worth paying attention to keep it in the cache or not?
+
+Haha, so maybe this is not a big deal to some people, but i also was reminded that using log() and multipliers can help 
+reduce the "hotness weight" and amplify the "significance weight" of data staying in the cache memory. 
+
+So, attention aware cache is thus created. 
+
+*/
+
 #pragma once
 #include "QueryResult.h"
 #include "Status.h"
@@ -43,7 +65,7 @@ struct AttentionConfig {
 class AttentionAwareCache {
 public:
     AttentionAwareCache(size_t capacity, AttentionConfig config = AttentionConfig{}) 
-        : capacity_(capacity), config_(config) {
+        : capacity_{capacity}, config_{config} {
         if (capacity == 0) {
             throw std::invalid_argument("Cache capacity must be greater than 0");
         }
