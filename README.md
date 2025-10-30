@@ -106,6 +106,13 @@ The using specifier here can make the user specify which named vector.
 ```
 
 ```
+## TODO:
+Need to write tests for each component. 
+Need to improve performance, possibly add GPU stuff.
+Add user interface such as Qt desktop.
+Might need to redesign the payload store and filtermatrix.
+Could try to deploy to cloud.
+
 
 
 Below is just some libs i used for this project.
