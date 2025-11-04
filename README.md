@@ -14,7 +14,7 @@ I know it is not perfect, but hopefully I can improve it -.-
 
 ![Architecture Diagram](jerry_vectordb_design.drawio.png)
 
-## API Schema
+## Vector DB API
 ### python client: (not a package yet)
 ```
 from vectordb_client import VectorDBClient
