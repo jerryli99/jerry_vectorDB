@@ -15,6 +15,84 @@ I know it is not perfect, but hopefully I can improve it -.-
 ![Architecture Diagram](jerry_vectordb_design.drawio.png)
 
 ## API Schema
+### python client: (not a package yet)
+```
+from vectordb_client import VectorDBClient
+import vectordb_models as models
+client = VectorDBClient()
+config = models.CreateCollectionRequest(
+        vectors=models.VectorParams(size=8, distance="L2"),
+        on_disk="true"  # Changed to true
+    )
+or you can try:
+config = models.CreateCollectionRequest(
+        vectors={
+            "image": models.VectorParams(size=3, distance="Dot"),
+            "text": models.VectorParams(size=3, distance="Cosine"),
+            "audio": models.VectorParams(size=3, distance="Cosine"),
+        },
+        on_disk="false"
+    ) # the limit for named vectors is 8, hard coded in my db.
+
+client.create_collection("my_collection", config)
+
+client.list_collections()
+    points_list = [
+        models.PointStruct(id="22s3", vector=[0.1, 0.2, 0.3, 0.4], payload={"label": "cat"}),
+        models.PointStruct(id="12wer", vector=[0.5, 0.6, 0.7, 0.8], payload={"label": "dog"}),
+        models.PointStruct(id="not-teder", vector=[0.12, 0.436, 0.7, 0.18], payload={"label": "wowow"}),
+    ]
+or you can do this:
+points = [
+        models.PointStruct(
+            id="img_1",
+            vector={
+                "image": [0.1, 0.2, 0.3],
+                "text": [0,  0.6, 0.7],
+            },
+            payload={"type": "image+text"}
+        ),
+        models.PointStruct(
+            id="img_q",
+            vector={
+                "image": [0.4, 0.13, 0.23],
+                "text": [0.35, 0.16, 0.7],
+            },
+            payload={"type": "image+text", "key": 43}
+        ),
+        models.PointStruct(
+            id="img_df",
+            vector={
+                "image": [0.1, 0.1, 0.3],
+                "text": [0.44, 0.5, 0.27],
+                "audio": [1, 21, 10],
+            },
+            payload={"type": "image+text+audio", "key": 33}
+        ),
+        models.PointStruct(
+            id="imqdfhhr",
+            vector={
+                "image": [0.12, 0.15, 0.27],
+                "text": [0.3, 0.1, 0.17],
+            },
+            payload={"type": "happy dog", "key": 23}
+        ),
+        models.PointStruct(
+            id="img_df",
+            vector={
+                "image": [0.1, 0.1, 0.3],
+                "text": [0.44, 0.5, 0.27],
+                "audio": [77, 20, 0],
+            },
+            payload={"type": "imwerweqttext", "key": 123}
+        ),
+    ]
+
+print(client.upsert("my_collection", points_list))
+
+client.delete_collection("my_collection") #not fully impl yet
+
+```
 
 ### upsert an array of this:
 ```
