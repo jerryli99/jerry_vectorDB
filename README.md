@@ -95,7 +95,7 @@ points = [
         ),
     ]
 
-print(client.upsert("my_collection", points_list))
+print(client.upsert("my_collection", points))
 
 client.delete_collection("my_collection") #not fully impl yet
 
