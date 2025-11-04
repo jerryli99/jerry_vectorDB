@@ -19,12 +19,16 @@ I know it is not perfect, but hopefully I can improve it -.-
 ```
 from vectordb_client import VectorDBClient
 import vectordb_models as models
+
 client = VectorDBClient()
+
 config = models.CreateCollectionRequest(
         vectors=models.VectorParams(size=8, distance="L2"),
         on_disk="true"  # Changed to true
     )
+
 or you can try:
+
 config = models.CreateCollectionRequest(
         vectors={
             "image": models.VectorParams(size=3, distance="Dot"),
@@ -37,12 +41,15 @@ config = models.CreateCollectionRequest(
 client.create_collection("my_collection", config)
 
 client.list_collections()
-    points_list = [
+
+points_list = [
         models.PointStruct(id="22s3", vector=[0.1, 0.2, 0.3, 0.4], payload={"label": "cat"}),
         models.PointStruct(id="12wer", vector=[0.5, 0.6, 0.7, 0.8], payload={"label": "dog"}),
         models.PointStruct(id="not-teder", vector=[0.12, 0.436, 0.7, 0.18], payload={"label": "wowow"}),
     ]
+
 or you can do this:
+
 points = [
         models.PointStruct(
             id="img_1",
