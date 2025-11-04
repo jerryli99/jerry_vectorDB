@@ -6,6 +6,9 @@ This is my first time writing a DB, to be specific, a vector database that AI ag
 
 The current DB only supports Dense Vectors, so to be continued with Sparse Vectors...
 
+## Note:
+This repo is in slow developing mode...well my focus is shifting towards something else, so yeah. But i do learned a lot now about vector databases :)
+
 ## VectorDB architechture
 I know it is not perfect, but hopefully I can improve it -.-
 
