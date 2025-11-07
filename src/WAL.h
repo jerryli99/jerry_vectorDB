@@ -152,7 +152,9 @@ public:
             buffer.insert(buffer.end(), collection_name.begin(), collection_name.end());
             
             // Point ID
-            appendToBuffer(buffer, point_id);
+            uint32_t point_id_len = point_id.size();
+            appendToBuffer(buffer, point_id_len);
+            buffer.insert(buffer.end(), point_id.begin(), point_id.end());
             
             // Number of vectors
             uint32_t num_vectors = vectors.size();
@@ -196,7 +198,9 @@ public:
             buffer.insert(buffer.end(), collection_name.begin(), collection_name.end());
             
             // Point ID
-            appendToBuffer(buffer, point_id);
+            uint32_t point_id_len = point_id.size();
+            appendToBuffer(buffer, point_id_len);
+            buffer.insert(buffer.end(), point_id.begin(), point_id.end());
             
             return writeEntry(WalEntryType::DELETE_POINT, buffer);
             
