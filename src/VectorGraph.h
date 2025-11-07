@@ -14,6 +14,9 @@ The graph will only store the vector id and the relationship like
 for prototyping.
 The graph is implemented using adjacency list.
 
+(11/7/2025) Intended to be in Collection level, and not tested for now. Just experimenting. Still learning
+more about graphs as well.
+
 That's all.
 */
 
