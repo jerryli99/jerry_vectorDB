@@ -23,7 +23,14 @@ public:
         , m_info{info}
         , m_index_spec{info.index_specs}
         , m_max_capacity{max_capacity}
-    {}
+    {
+        // // Initialize WAL
+        // m_wal = std::make_unique<WAL>(m_wal_base_path, generateSegmentId());
+        // auto status = m_wal->open();
+        // if (!status.ok()) {
+        //     std::cerr << "Warning: Failed to open WAL: " << status.message() << std::endl;
+        // }
+    }
 
     ~ActiveSegment() = default;
 
@@ -325,6 +332,7 @@ private:
     IndexSpec m_index_spec;
     size_t m_max_capacity;
     mutable std::mutex m_mutex;
+    std::unique_ptr<WAL> m_wal;
 
     //generate UUID-based segment ID, not sure if i should make it static, but for now sure.
     static std::string generateSegmentId() {

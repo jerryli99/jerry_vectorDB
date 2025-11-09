@@ -17,11 +17,11 @@ struct VectorSpec {
 //reference link https://milvus.io/docs/hnsw.md for hnsw index params
 struct IndexSpec {
     //need to add below fields in python client in Collection creation request, now just use default value.
-    size_t index_threshold{4000}; //the threshold value = (max_activeSeg_points - max_upload_points)
+    size_t index_threshold{INDEX_THRESHOLD}; //the threshold value = (max_activeSeg_points - max_upload_points)
     // bool wait_indexing{true}; //wait for the vectors to be indexed before returning, instead of searching buffers linearly.
     size_t m_edges{32};//Maximum number of connections (or edges) each node can have in the graph at each level.
-    size_t ef_construction{360}; //The number of candidates considered during index construction.
-    size_t ef_search{20}; //The number of neighbors evaluated during a search. Should be at least as large as Top K.
+    size_t ef_construction{250}; //The number of candidates considered during index construction.
+    size_t ef_search{16}; //The number of neighbors evaluated during a search. Should be at least as large as Top K.
 };
 
 //The name CollectionInfo is vague here for sure, like is it a schema or something metadata?

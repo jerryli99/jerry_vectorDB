@@ -1,0 +1,55 @@
+Testing VectorDB Graph Functionality
+==================================================
+=== Creating Test Collection ===
+Create collection: {'status': 'ok'}
+
+=== Adding Test Points ===
+[INFO] Upserting 5 points in a single request
+[SUCCESS] Upsert completed
+Upsert points: {'status': 'ok'}
+
+=== Testing Graph Relationships ===
+Add relationship point_1 -> point_2: ok
+Add relationship point_1 -> point_3: ok
+Add relationship point_2 -> point_4: ok
+Add relationship point_3 -> point_5: ok
+Add relationship point_4 -> point_5: ok
+
+=== Testing Node Relationships ===
+Relationships for point_1:
+  - point_1 -> point_2 (similar_to, weight: 0.8999999761581421)
+  - point_1 -> point_3 (similar_to, weight: 0.800000011920929)
+
+=== Testing Graph Traversal ===
+Traversal from point_1: ['point_2', 'point_3', 'point_4', 'point_5']
+
+=== Testing Shortest Path ===
+Shortest path from point_1 to point_5: ['point_1', 'point_3', 'point_5']
+Path length: 3
+
+=== Testing Related Nodes by Weight ===
+Nodes strongly related to point_1 (weight >= 0.8): ['point_2', 'point_3']
+Count: 2
+
+=== Testing Graph Data Retrieval ===
+Graph data keys: ['edges', 'nodes']
+Graph has 5 nodes and 5 edges
+
+=== Cleaning Up ===
+Delete collection: {'status': 'ok'}
+
+==================================================
+[INFO] Upserting 5 points in a single request
+[SUCCESS] Upsert completed
+=== Advanced Graph Scenarios ===
+
+1. Recommendation based on friend's purchases:
+Potential recommendations for user_1: ['user_2', 'product_1', 'product_2', 'category_1']
+
+2. Product categorization path:
+Path from user to category: ['user_1', 'product_1', 'category_1']
+
+3. Strongly connected products:
+Products strongly related to product_1: ['category_1', 'user_1']
+
+All tests completed successfully!

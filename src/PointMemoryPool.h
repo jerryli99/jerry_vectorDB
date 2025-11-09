@@ -12,7 +12,7 @@ namespace vectordb {
 
 class PointMemoryPool {
 public:
-    explicit PointMemoryPool(size_t max_points = 5000)
+    explicit PointMemoryPool(size_t max_points = MEMORY_POOL_CAPACITY)
         : m_max_points{max_points}
         , m_total_allocated{0}
         , m_buffer{std::make_unique<PointStorage[]>(max_points)}

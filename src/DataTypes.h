@@ -57,6 +57,10 @@ namespace vectordb {
 
     inline constexpr size_t MIN_ENTRIES_TINYMAP = 1;
 
+    inline constexpr size_t MEMORY_POOL_CAPACITY = 3000;
+
+    inline constexpr size_t INDEX_THRESHOLD = 2000; //just the number of points to hold in the buffer pool before flushable
+
     inline constexpr size_t PRE_RESERVE_NUM_SEGMENTS = 1024; //??? maybe uhm, well...
 
     // Configurable rate limits for every http request for upsert points
