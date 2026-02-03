@@ -1,0 +1,69 @@
+Server listening on http://127.0.0.1:8989
+Create collection: large_collection
+{
+    "on_disk": "true",
+    "vectors": {
+        "distance": "Cosine",
+        "size": 128
+    }
+}
+Upsert into collection: large_collection
+Upsert into collection: large_collection
+Hello from ImmutableSegment, ID: Segment_19cd61f7-d8a2-4004-9659-be0d5f0960ff
+Building HNSW index for vector space: default with 2000 vectors of dimension 128
+ImmutableSegment: built 1 HNSW indexes for 2000 points
+  Vector space 'default': 2000 vectors
+Calculated optimal k: sqrt(2000) = 44.7214 -> rounded to 45
+Running FAISS KMeans on 'default' with 2000 vectors of dim 128...
+[CONVERT] Created segment: Segment_19cd61f7-d8a2-4004-9659-be0d5f0960ff
+[Writing to disk...]
+[WRITE] Index written: ./vectordb/large_collection/segments/Segment_19cd61f7-d8a2-4004-9659-be0d5f0960ff/default.index
+[METADATA] Segment metadata written: ./vectordb/large_collection/segments/Segment_19cd61f7-d8a2-4004-9659-be0d5f0960ff/metadata.json
+Upsert into collection: large_collection
+Upsert into collection: large_collection
+Hello from ImmutableSegment, ID: Segment_2f03507c-a066-4aa6-ad0b-6c27d15ff932
+Building HNSW index for vector space: default with 2000 vectors of dimension 128
+ImmutableSegment: built 1 HNSW indexes for 2000 points
+  Vector space 'default': 2000 vectors
+Calculated optimal k: sqrt(2000) = 44.7214 -> rounded to 45
+Running FAISS KMeans on 'default' with 2000 vectors of dim 128...
+[CONVERT] Created segment: Segment_2f03507c-a066-4aa6-ad0b-6c27d15ff932
+[Writing to disk...]
+[WRITE] Index written: ./vectordb/large_collection/segments/Segment_2f03507c-a066-4aa6-ad0b-6c27d15ff932/default.index
+[METADATA] Segment metadata written: ./vectordb/large_collection/segments/Segment_2f03507c-a066-4aa6-ad0b-6c27d15ff932/metadata.json
+Upsert into collection: large_collection
+Upsert into collection: large_collection
+Hello from ImmutableSegment, ID: Segment_d05ab31c-ab2c-48e5-a7b1-18cf63d1795e
+Building HNSW index for vector space: default with 2000 vectors of dimension 128
+ImmutableSegment: built 1 HNSW indexes for 2000 points
+  Vector space 'default': 2000 vectors
+Calculated optimal k: sqrt(2000) = 44.7214 -> rounded to 45
+Running FAISS KMeans on 'default' with 2000 vectors of dim 128...
+[CONVERT] Created segment: Segment_d05ab31c-ab2c-48e5-a7b1-18cf63d1795e
+[Writing to disk...]
+[WRITE] Index written: ./vectordb/large_collection/segments/Segment_d05ab31c-ab2c-48e5-a7b1-18cf63d1795e/default.index
+[METADATA] Segment metadata written: ./vectordb/large_collection/segments/Segment_d05ab31c-ab2c-48e5-a7b1-18cf63d1795e/metadata.json
+Upsert into collection: large_collection
+Upsert into collection: large_collection
+Hello from ImmutableSegment, ID: Segment_f8ba56d1-f506-476d-a59d-30fc512bc3db
+Building HNSW index for vector space: default with 2000 vectors of dimension 128
+ImmutableSegment: built 1 HNSW indexes for 2000 points
+  Vector space 'default': 2000 vectors
+Calculated optimal k: sqrt(2000) = 44.7214 -> rounded to 45
+Running FAISS KMeans on 'default' with 2000 vectors of dim 128...
+[CONVERT] Created segment: Segment_f8ba56d1-f506-476d-a59d-30fc512bc3db
+[Writing to disk...]
+[WRITE] Index written: ./vectordb/large_collection/segments/Segment_f8ba56d1-f506-476d-a59d-30fc512bc3db/default.index
+[METADATA] Segment metadata written: ./vectordb/large_collection/segments/Segment_f8ba56d1-f506-476d-a59d-30fc512bc3db/metadata.json
+Upsert into collection: large_collection
+Upsert into collection: large_collection
+Hello from ImmutableSegment, ID: Segment_39210f07-213a-4872-99fb-c0e3e02c2508
+Building HNSW index for vector space: default with 2000 vectors of dimension 128
+ImmutableSegment: built 1 HNSW indexes for 2000 points
+  Vector space 'default': 2000 vectors
+Calculated optimal k: sqrt(2000) = 44.7214 -> rounded to 45
+Running FAISS KMeans on 'default' with 2000 vectors of dim 128...
+[CONVERT] Created segment: Segment_39210f07-213a-4872-99fb-c0e3e02c2508
+[Writing to disk...]
+[WRITE] Index written: ./vectordb/large_collection/segments/Segment_39210f07-213a-4872-99fb-c0e3e02c2508/default.index
+....

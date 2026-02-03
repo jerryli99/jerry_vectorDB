@@ -11,5 +11,13 @@ pool:
 
 steps:
 - script: |
-    make
-  displayName: 'make'
+    echo "===Setting up==="
+    sudo apt-get update
+    echo "C++ compiler: "
+    g++ --version
+  displayName: 'Setup environment'
+
+- script: |
+    cd test
+    make all
+  displayName: 'Build and test'
